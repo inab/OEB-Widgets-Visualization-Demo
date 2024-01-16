@@ -27,28 +27,29 @@
       </b-col>
 
       <!-- Bar plot -->
-      <b-col cols="12" sm="10" md="12">
+      <!-- <b-col cols="12" sm="10" md="12">
         <b-card class="pl-8 pr-8 pb-4 mt-4">
           <BarPlot/>
         </b-card>
-      </b-col>
+      </b-col> -->
 
       <!-- Box plot -->
-      <b-col cols="12" sm="10" md="12">
+      <!-- <b-col cols="12" sm="10" md="12">
         <b-card class="pl-8 pr-8 pb-4 mt-4">
           <BoxPlot/>
         </b-card>
-      </b-col>
+      </b-col> -->
 
 
       <!-- Scatter plot v2 -->
-      <b-col cols="12" sm="10" md="12">
+      <!-- <b-col cols="12" sm="10" md="12">
         <b-card class="pl-8 pr-8 pb-4 mt-4">
           <LineCharts/>
         </b-card>
-      </b-col>
+      </b-col> -->
 
     </b-row>
+    <br>
 
   </b-container>
 

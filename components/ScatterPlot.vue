@@ -47,21 +47,36 @@ onMounted(async () => {
     
     const paretoPoints = pf.getParetoFrontier(paretoData);
 
+    const globalParetoTrace = {
+        x: paretoPoints.map((point) => point[0]),
+        y: paretoPoints.map((point) => point[1]),
+        mode: 'lines',
+        type: 'scatter',
+        name: '<span style="color:black;">Global Pareto Frontier</span>',
+        line: {
+            dash: 'dot',
+            width: 1,
+            color: 'rgb(89, 89, 89)',
+        },
+    };
+
     const paretoTrace = {
         x: paretoPoints.map((point) => point[0]),
         y: paretoPoints.map((point) => point[1]),
         mode: 'lines',
         type: 'scatter',
-        name: 'Pareto Frontier',
+        name: 'Calculate Pareto Frontier',
         line: {
             dash: 'dot',
             width: 1,
-            color: 'rgb(89, 89, 89)',
+            // color: 'rgb(11, 87, 159)',
+            color: 'rgb(244, 124, 33)',
         }
     };
+    
 
     // Add the pareto trace to the trace array
-    traces.push(paretoTrace);
+    traces.push(globalParetoTrace, paretoTrace);
 
     // Go through each object in challenge participants
     for (let i = 0; i < data.challenge_participants.length; i++) {
@@ -120,15 +135,31 @@ onMounted(async () => {
         margin: {
             l: 50, 
             r: 50, 
-            t: 50, 
-            b: 50,
+            t: 30, 
+            b: 30,
         },
         paper_bgcolor: '#ffffff',
         legend: {
             orientation: 'h',
             x: 0.05,
             y: -0.3,
-        }
+            borderwidth: 1,
+        },
+        images: getImagePosition(visualization.optimization)
+        // [
+        //     {
+        //     x: 0.1,
+        //     y: 0.1,
+        //     sizex: 0.5,
+        //     sizey: 0.3,
+        //     source: "/2018.OpenEBench.logo.Manual_page2.png",
+        //     xref: "paper",
+        //     yref: "paper",
+        //     xanchor: "right",
+        //     yanchor: "bottom",
+        //     "opacity": 0.5,
+        //     }
+        // ],
 
     };
 
@@ -141,17 +172,14 @@ onMounted(async () => {
 
             // If Pareto was clicked (index 0) do nothing
             if (traceIndex === 0) {
-                // Prevent default behavior from running
-                Plotly.update('scatter-plot', { 'legend.itemclick': false });
+                return false;
+    
+            }else if (traceIndex === 1){
+                return true;
+            }
+            else{
                 // Adjust the index to exclude the Pareto (which is at index 0)
-                traceIndex = traceIndex - 1;
-                // Hide or show the tool based on its current state
-                const toolHidden = traces[traceIndex].hidden;
-                traces[traceIndex].hidden = !toolHidden;
-
-            }else{
-                // Adjust the index to exclude the Pareto (which is at index 0)
-                traceIndex = traceIndex - 1;
+                traceIndex = traceIndex - 2;
                 // Hide or show the tool based on its current state
                 const toolHidden = paretoData[traceIndex].hidden;
                 paretoData[traceIndex].hidden = !toolHidden;
@@ -161,7 +189,7 @@ onMounted(async () => {
                 // Calculate the new Pareto Frontier with the visible tools
                 const newParetoPoints = pf.getParetoFrontier(visibleTools);
                 // Update the trace of the Pareto frontier
-                Plotly.update('scatter-plot', { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }, {}, 0);
+                Plotly.update('scatter-plot', { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }, {}, 1);
             }
             
         });
@@ -169,6 +197,10 @@ onMounted(async () => {
 
 
 })
+
+// ----------------------------------------------------------------
+// Functions
+// ----------------------------------------------------------------
 
 const downloadChart = (format) => {
     const Plotly = require('plotly.js-dist');
@@ -205,10 +237,60 @@ const downloadChart = (format) => {
 
 // Function to get a random symbol
 function getRandomSymbol() {
-        const symbols = ['circle', 'square', 'diamond', 'cross', 'x', 'triangle-up', 'triangle-down', 'star', 'hexagram'];
-        const randomIndex = Math.floor(Math.random() * symbols.length);
-        return symbols[randomIndex];
+    const symbols = ['circle', 'square', 'diamond', 'cross', 'x', 'triangle-up', 'triangle-down', 'star', 'hexagram'];
+    const randomIndex = Math.floor(Math.random() * symbols.length);
+    return symbols[randomIndex];
+}
+
+// ----------------------------------------------------------------
+// Image Position
+function getImagePosition(optimization) {
+    const ImagePositions = [];
+
+    let positionX, positionY;
+    
+    // Posicion contraria
+    switch (optimization) {
+        case 'top-left':
+            positionX = 1
+            positionY = 0
+            break;
+        case 'top-right':
+            positionX = 0.1
+            positionY = 0
+            break;
+        case 'bottom-left':
+            positionX = 1
+            positionY = 0.9
+            break;
+        case 'bottom-right':
+            positionX = 0.1
+            positionY = 0.8
+            break;
+        default:
+            positionX = 0.1
+            positionY = 0
+            break;
     }
+
+    const imagesPosition = {
+        x: positionX,
+        y: positionY,
+        sizex: 0.1,
+        sizey: 0.3,
+        source: "/2018.OpenEBench.logo.Manual_page2.png",
+        xref: "paper",
+        yref: "paper",
+        xanchor: "right",
+        yanchor: "bottom",
+        "opacity": 0.5,
+    }
+
+    ImagePositions.push(imagesPosition)
+
+    return ImagePositions
+
+}
 
 // This function creates the annotations for the optimization arrow
 function getOptimizationArrow(optimization, paretoPoints) {
