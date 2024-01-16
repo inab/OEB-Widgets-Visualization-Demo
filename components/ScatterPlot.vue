@@ -16,6 +16,7 @@
         </div>
 
         <br>
+        <!-- Scatter Plot -->
         <div id="scatter-plot"></div>
     </div>
 </template>
@@ -55,7 +56,7 @@ onMounted(async () => {
         name: '<span style="color:black;">Global Pareto Frontier</span>',
         line: {
             dash: 'dot',
-            width: 1,
+            width: 2,
             color: 'rgb(89, 89, 89)',
         },
     };
@@ -68,7 +69,7 @@ onMounted(async () => {
         name: 'Calculate Pareto Frontier',
         line: {
             dash: 'dot',
-            width: 1,
+            width: 2,
             // color: 'rgb(11, 87, 159)',
             color: 'rgb(244, 124, 33)',
         }
@@ -88,7 +89,7 @@ onMounted(async () => {
             mode: 'markers',
             type: 'scatter',
             marker: {
-                size: 12,
+                size: 14,
                 symbol: getRandomSymbol()
             },
             name: participant.tool_id,
@@ -111,6 +112,9 @@ onMounted(async () => {
     // Create the chart layout
     const layout = {
         title: visualization.x_axis+' + '+visualization.y_axis,
+        autosize:false,
+        width: 1080,
+        height:600,
         annotations: getOptimizationArrow(visualization.optimization, paretoPoints),
         xaxis: {
             title: { text: visualization.x_axis,
@@ -132,34 +136,20 @@ onMounted(async () => {
                 },
             },
         },
-        margin: {
-            l: 50, 
-            r: 50, 
-            t: 30, 
-            b: 30,
-        },
+        
+        margin: {l: 60, r: 50, t: 30, b: 30,pad: 4 },
         paper_bgcolor: '#ffffff',
         legend: {
             orientation: 'h',
-            x: 0.05,
-            y: -0.3,
-            borderwidth: 1,
+            x: 0.1,
+            y: -0.2,
+            // borderwidth: 1,
+            font: {
+                size: 14,
+            }
         },
+        plot_bgcolor: '#F8F9F9',
         images: getImagePosition(visualization.optimization)
-        // [
-        //     {
-        //     x: 0.1,
-        //     y: 0.1,
-        //     sizex: 0.5,
-        //     sizey: 0.3,
-        //     source: "/2018.OpenEBench.logo.Manual_page2.png",
-        //     xref: "paper",
-        //     yref: "paper",
-        //     xanchor: "right",
-        //     yanchor: "bottom",
-        //     "opacity": 0.5,
-        //     }
-        // ],
 
     };
 
