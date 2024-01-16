@@ -3,12 +3,18 @@
         <h4>2D-Plot (scatter plot)</h4>
         <p>Dataset Id: {{ datasetId }} </p>
         <br>
-            <button @click="downloadChart('png')">Download as PNG</button>
-            <button @click="downloadChart('svg')">Download as SVG</button>
-            <!-- <button @click="downloadChart('pdf')">Download as PDF</button> -->
 
-            <button @click="downloadChart('json')">Download as JSON</button>
-        <!-- <button @click="downloadChartPNG">Download</button> -->
+        <!-- Button Dowloand -->
+        <div>
+            <b-dropdown id="dropdown-1" text=" Dowload " class="m-md-2" variant="primary" style="width: 170px;">
+                <b-dropdown-text class="font-weight-bold"><strong>Select a format:</strong></b-dropdown-text>
+                <b-dropdown-item @click="downloadChart('png')"> PNG </b-dropdown-item>
+                <b-dropdown-item @click="downloadChart('svg')"> SVG (only plot) </b-dropdown-item>
+                <b-dropdown-item @click="downloadChart('json')"> JSON </b-dropdown-item>
+                <b-dropdown-divider></b-dropdown-divider>
+            </b-dropdown>
+        </div>
+
         <br>
         <div id="scatter-plot"></div>
     </div>
@@ -20,7 +26,6 @@ import { onMounted, ref } from 'vue';
 
 const dataset = ref(null);
 const datasetId = ref(null);
-
 
 onMounted(async () => {
     const Plotly = require('plotly.js-dist');
@@ -138,19 +143,27 @@ onMounted(async () => {
             if (traceIndex === 0) {
                 // Prevent default behavior from running
                 Plotly.update('scatter-plot', { 'legend.itemclick': false });
-            }
-            // Adjust the index to exclude the Pareto (which is at index 0)
-            traceIndex = traceIndex - 1;
-            // Hide or show the tool based on its current state
-            const toolHidden = paretoData[traceIndex].hidden;
-            paretoData[traceIndex].hidden = !toolHidden;
+                // Adjust the index to exclude the Pareto (which is at index 0)
+                traceIndex = traceIndex - 1;
+                // Hide or show the tool based on its current state
+                const toolHidden = traces[traceIndex].hidden;
+                traces[traceIndex].hidden = !toolHidden;
 
-            // Filter visible tools
-            const visibleTools = paretoData.filter((tool) => !tool.hidden);
-            // Calculate the new Pareto Frontier with the visible tools
-            const newParetoPoints = pf.getParetoFrontier(visibleTools);
-            // Update the trace of the Pareto frontier
-            Plotly.update('scatter-plot', { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }, {}, 0);
+            }else{
+                // Adjust the index to exclude the Pareto (which is at index 0)
+                traceIndex = traceIndex - 1;
+                // Hide or show the tool based on its current state
+                const toolHidden = paretoData[traceIndex].hidden;
+                paretoData[traceIndex].hidden = !toolHidden;
+
+                // Filter visible tools
+                const visibleTools = paretoData.filter((tool) => !tool.hidden);
+                // Calculate the new Pareto Frontier with the visible tools
+                const newParetoPoints = pf.getParetoFrontier(visibleTools);
+                // Update the trace of the Pareto frontier
+                Plotly.update('scatter-plot', { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }, {}, 0);
+            }
+            
         });
     });
 
