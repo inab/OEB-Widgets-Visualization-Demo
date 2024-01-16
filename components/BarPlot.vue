@@ -1,33 +1,49 @@
 <template>
   <div>
     <h4>Bar Plot</h4>
-    <p>Dataset Id: {{ datasetId }}</p>
-    <p>Last update: {{ formattedDate }}</p>
+
+    <!-- <p>Dataset Id: {{ datasetId }}</p>
+    <p>Last update: {{ formattedDate }}</p> -->
     <!-- Button Dowloand -->
-    <div>
-      <b-dropdown id="dropdown-divider" text="Download" class="m-2">
+    <div class="button-container"  ref="buttonContainerRef">
+      <b-button>Sort & Classify Results</b-button>
+      <b-dropdown right text="Download" class="download-dropdown">
         <b-dropdown-header id="dropdown-header-label">
           Select a format
         </b-dropdown-header>
-        <b-dropdown-item-button @click="downloadChart('png')">PNG</b-dropdown-item-button>
-        <b-dropdown-item-button @click="downloadChart('svg')">SVG</b-dropdown-item-button>
+        <b-dropdown-item @click="downloadChart('png')">PNG</b-dropdown-item>
+        <b-dropdown-item @click="downloadChart('svg')">SVG</b-dropdown-item>
         <b-dropdown-divider></b-dropdown-divider>
-        <b-dropdown-item-button @click="downloadChart('pdf')">PDF</b-dropdown-item-button>
+        <b-dropdown-item @click="downloadChart('pdf')">PDF</b-dropdown-item>
       </b-dropdown>
     </div>
     <div id="barPlot"></div>
+    <br>
+    <b-table-simple bordered small caption-top responsive>
+      <b-tbody>
+        <b-tr>
+          <b-th variant="secondary" class="text-center">Dataset ID</b-th>
+          <b-td class="text-center">{{ datasetId }}</b-td>
+          <b-th variant="secondary" class="text-center">Last Update</b-th>
+          <b-td class="text-center">{{ formattedDate }}</b-td>
+        </b-tr>
+      </b-tbody>
+    </b-table-simple>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, nextTick  } from 'vue';
+const { jsPDF } = require('jspdf');
+const html2canvas = require('html2canvas');
+
 
 
 const dataset = ref(null);
 const datasetId = ref(null);
 const datasetDate = ref(null);
 const formattedDate = ref(null);
-
+const buttonContainerRef = ref(null);
 
 onMounted(async () => {
   const Plotly = require('plotly.js-dist');
@@ -68,6 +84,9 @@ onMounted(async () => {
       fixedrange: true,
       range: [0, Math.max(...data.challenge_participants.map(entry => entry.metric_value)) + 1]
     },
+    margin: {
+      t: 50,
+    }
 
   };
 
@@ -77,6 +96,15 @@ onMounted(async () => {
 
   // Create the bar chart with the initial trace and layout
   Plotly.newPlot('barPlot', [initialTrace], layout, config);
+
+  // Use $nextTick to ensure DOM elements are fully rendered
+  await nextTick();
+
+  // Access the width of the button container and set the margin dynamically
+  const chartWidth = document.getElementById('barPlot').offsetWidth;
+  const marginRight = chartWidth * 0.1; // Adjust the percentage as needed
+  buttonContainerRef.value.style.marginRight = `${marginRight}px`;
+
 
   const myPlot = document.getElementById('barPlot');
 
@@ -116,8 +144,6 @@ onMounted(async () => {
 
 
 })
-const html2canvas = process.browser ? require('html2canvas') : null;
-const { jsPDF } = process.browser ? require('jspdf') : null;
 
 function downloadChart(format) {
   const Plotly = require('plotly.js-dist');
@@ -137,7 +163,7 @@ function downloadChart(format) {
       .catch((error) => {
         console.error(`Error downloading as ${format}`, error);
       });
-  }else if (format === 'pdf' && html2canvas && jsPDF) {
+  } else if (format === 'pdf') {
     // Download as PDF using jspdf and html2canvas
     const pdfOptions = {
       filename: `benchmarking_chart_${datasetId.value}.pdf`,
@@ -187,3 +213,24 @@ function formatDateString(dateString) {
 }
 
 </script>
+<style scoped>
+.button-container {
+  display: flex;
+  justify-content: right;
+}
+
+.button-container b-button {
+  margin-right: 10px;
+  /* Adjust the margin as needed */
+}
+
+.download-dropdown {
+  margin-left: 10px;
+  /* Adjust the margin as needed */
+}
+
+b-th,
+b-td {
+  border-radius: 10px;
+}
+</style>
