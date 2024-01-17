@@ -26,6 +26,7 @@
         </b-card>
       </b-col>
 
+
       <!-- Bar plot -->
       <!-- <b-col cols="12" sm="10" md="12">
         <b-card class="pl-8 pr-8 pb-4 mt-4">
@@ -58,6 +59,15 @@
 </template>
 
 <script>
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+import Vue from 'vue'
+import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+
+// Instala BootstrapVue y los iconos
+Vue.use(BootstrapVue)
+Vue.use(IconsPlugin)
+
 import LineCharts from '~/components/LineCharts.vue';
 import BarPlot from '~/components/BarPlot.vue';
 import BoxPlot from '~/components/BoxPlot.vue';
