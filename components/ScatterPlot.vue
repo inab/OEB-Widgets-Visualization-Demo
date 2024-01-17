@@ -1,18 +1,34 @@
 <template>
     <div>
-        <h4>2D-Plot (scatter plot)</h4>
+        <h4>Scatter plot</h4>
         <p>Dataset Id: {{ datasetId }} </p>
+        <p>Modification Date: {{ modificationDate }}</p>
         <br>
 
-        <!-- Button Dowloand -->
-        <div>
-            <b-dropdown id="dropdown-1" text=" Dowload " class="m-md-2" variant="primary" style="width: 170px;">
-                <b-dropdown-text class="font-weight-bold"><strong>Select a format:</strong></b-dropdown-text>
+        <!-- Button Row -->
+        <div class="row justify-content-end mr-4">
+            <!-- Classification -->
+            <b-dropdown text="Classification" size="sm" variant="primary" class="m-md-2 button-classification" >
+                <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification method:</strong></b-dropdown-text>
+                <b-dropdown-item > No Classification </b-dropdown-item>
+            </b-dropdown>
+
+            <!-- Button Dowloand -->
+            <b-dropdown text="Download" size="sm" variant="primary" class="m-md-2 button-download">
+                <b-dropdown-text class="font-weight-bold text-download"><strong>Select a format:</strong></b-dropdown-text>
                 <b-dropdown-item @click="downloadChart('png')"> PNG </b-dropdown-item>
                 <b-dropdown-item @click="downloadChart('svg')"> SVG (only plot) </b-dropdown-item>
                 <b-dropdown-item @click="downloadChart('json')"> JSON </b-dropdown-item>
-                <b-dropdown-divider></b-dropdown-divider>
+                <!-- <b-dropdown-divider></b-dropdown-divider> -->
             </b-dropdown>
+
+            <!-- Download PDF -->
+            <!-- <b-button-group size="sm" class="aling-right mt-2 mb-2">
+                <b-button variant="primary">PDF <b-icon icon="download"></b-icon></b-button>
+                <b-button variant="primary">PNG <b-icon icon="download"></b-icon></b-button>
+                <b-button variant="primary">JSON <b-icon icon="download"></b-icon></b-button>
+            </b-button-group> -->
+            
         </div>
 
         <br>
@@ -27,12 +43,15 @@ import { onMounted, ref } from 'vue';
 
 const dataset = ref(null);
 const datasetId = ref(null);
+const modificationDate = ref(null);
+
 
 onMounted(async () => {
     const Plotly = require('plotly.js-dist');
     const response = await fetch('/raw_data_OEBD00200002UK0.json');
     dataset.value = await response.json();
     datasetId.value = dataset.value._id
+    modificationDate.value = new Date(dataset.value.dates.modification).toUTCString()
     const data = dataset.value.datalink.inline_data
     const visualization = data.visualization
 
@@ -227,7 +246,7 @@ const downloadChart = (format) => {
 
 // Function to get a random symbol
 function getRandomSymbol() {
-    const symbols = ['circle', 'square', 'diamond', 'cross', 'x', 'triangle-up', 'triangle-down', 'star', 'hexagram'];
+    const symbols = ['circle', 'square', 'diamond', 'cross', 'x', 'triangle-up', 'star', 'star-diamond'];
     const randomIndex = Math.floor(Math.random() * symbols.length);
     return symbols[randomIndex];
 }
@@ -353,3 +372,31 @@ function getOptimizationArrow(optimization, paretoPoints) {
 
 
 </script>
+
+
+<style>
+
+.button-download .btn-primary{
+    width: 150px;
+    font-size: small;
+    background-color: #0b579f;
+    color: #ffffff; 
+}
+
+.text-download {
+    padding: auto;
+    font-size: small;
+}
+
+.button-classification .btn-primary{
+    width: 200px;
+    background-color: #0b579f;
+    color: #ffffff; 
+}
+
+.text-classifi {
+    padding: auto;
+    font-size: small;
+}
+
+</style>
