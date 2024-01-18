@@ -3,14 +3,15 @@
         <h4>Scatter plot</h4>
         <p>Dataset Id: {{ datasetId }} </p>
         <p>Modification Date: {{ modificationDate }}</p>
-        <br>
-
         <!-- Button Row -->
         <div class="row justify-content-end mr-4">
             <!-- Classification -->
-            <b-dropdown text="Classification" size="sm" variant="primary" class="m-md-2 button-classification" >
-                <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification method:</strong></b-dropdown-text>
-                <b-dropdown-item > No Classification </b-dropdown-item>
+            <b-dropdown text="Classification" size="sm" variant="primary" class="m-md-2 button-classification">
+                <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
+                        method:</strong></b-dropdown-text>
+                <b-dropdown-item> No Classification </b-dropdown-item>
+                <b-dropdown-item @click="toggleShapesVisibility"> K-Means Clustering </b-dropdown-item>
+
             </b-dropdown>
 
             <!-- Button Dowloand -->
@@ -28,7 +29,7 @@
                 <b-button variant="primary">PNG <b-icon icon="download"></b-icon></b-button>
                 <b-button variant="primary">JSON <b-icon icon="download"></b-icon></b-button>
             </b-button-group> -->
-            
+
         </div>
 
         <br>
@@ -39,12 +40,14 @@
 
 <script setup>
 const pf = require('pareto-frontier');
+const clustering = require('density-clustering');
 import { onMounted, ref } from 'vue';
 
 const dataset = ref(null);
 const datasetId = ref(null);
 const modificationDate = ref(null);
-
+const showShapes = ref(false);
+let shapes = [];
 
 onMounted(async () => {
     const Plotly = require('plotly.js-dist');
@@ -55,17 +58,43 @@ onMounted(async () => {
     const data = dataset.value.datalink.inline_data
     const visualization = data.visualization
 
-    
+
     // Data structures for Plotly
     const traces = [];
 
     // Data for the Pareto frontier
-    const paretoData = data.challenge_participants.map((participant) => ([
+    const dataPoints = data.challenge_participants.map((participant) => ([
         participant.metric_x,
         participant.metric_y,
     ]));
-    
-    const paretoPoints = pf.getParetoFrontier(paretoData);
+    // console.log(dataPoints);
+
+    // ----------------------------------------------------------------
+    // K-Means Clustering
+    const kmeans = new clustering.KMEANS();
+    const clusters = kmeans.run(dataPoints, 4);
+    // console.log(clusters);
+
+    // Create shapes based on clusters
+    shapes = clusters.map((cluster) => {
+        const xValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][0]);
+        const yValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][1]);
+
+        return {
+            type: 'rect',
+            xref: 'x',
+            yref: 'y',
+            x0: Math.min(...xValues), y0: Math.min(...yValues),
+            x1: Math.max(...xValues), y1: Math.max(...yValues),
+            opacity: 0.2,
+            fillcolor: 'rgba(0, 72, 129, 183)',
+            line: {
+                color: '#2A6CAB',
+            },
+        };
+    });
+
+    const paretoPoints = pf.getParetoFrontier(dataPoints);
 
     const globalParetoTrace = {
         x: paretoPoints.map((point) => point[0]),
@@ -93,7 +122,6 @@ onMounted(async () => {
             color: 'rgb(244, 124, 33)',
         }
     };
-    
 
     // Add the pareto trace to the trace array
     traces.push(globalParetoTrace, paretoTrace);
@@ -109,7 +137,8 @@ onMounted(async () => {
             type: 'scatter',
             marker: {
                 size: 14,
-                symbol: getRandomSymbol()
+                symbol: getSymbol(),
+                color: getColor()
             },
             name: participant.tool_id,
             // error_x: {
@@ -130,33 +159,35 @@ onMounted(async () => {
 
     // Create the chart layout
     const layout = {
-        title: visualization.x_axis+' + '+visualization.y_axis,
-        autosize:false,
+        title: visualization.x_axis + ' + ' + visualization.y_axis,
+        autosize: false,
         width: 1080,
-        height:600,
+        height: 600,
         annotations: getOptimizationArrow(visualization.optimization, paretoPoints),
         xaxis: {
-            title: { text: visualization.x_axis,
+            title: {
+                text: visualization.x_axis,
                 font: {
-                    family: 'Arial, sans-serif', 
-                    size: 14, 
-                    color: 'black', 
+                    family: 'Arial, sans-serif',
+                    size: 14,
+                    color: 'black',
                     weight: 'bold',
                 },
             }
         },
         yaxis: {
-            title: { text: visualization.y_axis,
+            title: {
+                text: visualization.y_axis,
                 font: {
-                    family: 'Arial, sans-serif', 
-                    size: 14, 
-                    color: 'black', 
-                    weight: 'bold', 
+                    family: 'Arial, sans-serif',
+                    size: 14,
+                    color: 'black',
+                    weight: 'bold',
                 },
             },
         },
-        
-        margin: {l: 60, r: 50, t: 30, b: 30,pad: 4 },
+
+        margin: { l: 60, r: 50, t: 30, b: 30, pad: 4 },
         paper_bgcolor: '#ffffff',
         legend: {
             orientation: 'h',
@@ -168,7 +199,7 @@ onMounted(async () => {
             }
         },
         plot_bgcolor: '#F8F9F9',
-        images: getImagePosition(visualization.optimization)
+        images: getImagePosition(visualization.optimization),
 
     };
 
@@ -182,28 +213,27 @@ onMounted(async () => {
             // If Pareto was clicked (index 0) do nothing
             if (traceIndex === 0) {
                 return false;
-    
-            }else if (traceIndex === 1){
+
+            } else if (traceIndex === 1) {
                 return true;
             }
-            else{
+            else {
                 // Adjust the index to exclude the Pareto (which is at index 0)
                 traceIndex = traceIndex - 2;
                 // Hide or show the tool based on its current state
-                const toolHidden = paretoData[traceIndex].hidden;
-                paretoData[traceIndex].hidden = !toolHidden;
+                const toolHidden = dataPoints[traceIndex].hidden;
+                dataPoints[traceIndex].hidden = !toolHidden;
 
                 // Filter visible tools
-                const visibleTools = paretoData.filter((tool) => !tool.hidden);
+                const visibleTools = dataPoints.filter((tool) => !tool.hidden);
                 // Calculate the new Pareto Frontier with the visible tools
                 const newParetoPoints = pf.getParetoFrontier(visibleTools);
                 // Update the trace of the Pareto frontier
                 Plotly.update('scatter-plot', { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }, {}, 1);
             }
-            
+
         });
     });
-
 
 })
 
@@ -211,6 +241,24 @@ onMounted(async () => {
 // Functions
 // ----------------------------------------------------------------
 
+// ----------------------------------------------------------------
+// Función para alternar la visibilidad de los shapes
+const toggleShapesVisibility = () => {
+    showShapes.value = !showShapes.value;
+    updatePlotVisibility();
+};
+
+// Función para actualizar la visibilidad del gráfico y shapes
+const updatePlotVisibility = () => {
+    const Plotly = require('plotly.js-dist');
+    const layout = {
+        shapes: showShapes.value ? shapes : [], // Mostrar u ocultar shapes según el estado de la variable
+        // ... (resto de tu configuración de layout)
+    };
+    Plotly.update('scatter-plot', {}, layout);
+};
+
+// ----------------------------------------------------------------
 const downloadChart = (format) => {
     const Plotly = require('plotly.js-dist');
 
@@ -221,15 +269,15 @@ const downloadChart = (format) => {
         const options = { format, height: 500, width: 700 };
 
         Plotly.toImage(chart, options)
-        .then((url) => {
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${datasetId.value}.${format}`;
-            link.click();
-        })
-        .catch((error) => {
-            console.error(`Error al descargar el gráfico como ${format}`, error);
-        });
+            .then((url) => {
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${datasetId.value}.${format}`;
+                link.click();
+            })
+            .catch((error) => {
+                console.error(`Error al descargar el gráfico como ${format}`, error);
+            });
     } else if (format === 'json') {
         // Descargar como JSON
         const chartData = chart.data // Obtener datos del gráfico
@@ -243,13 +291,26 @@ const downloadChart = (format) => {
     }
 };
 
-
-// Function to get a random symbol
-function getRandomSymbol() {
-    const symbols = ['circle', 'square', 'diamond', 'cross', 'x', 'triangle-up', 'star', 'star-diamond'];
-    const randomIndex = Math.floor(Math.random() * symbols.length);
-    return symbols[randomIndex];
+// Get Color
+// ----------------------------------------------------------------
+const markerColors = ['#D62728', '#FF7F0E', '#8C564B', '#E377C2', '#4981B6', '#BCBD22', '#9467BD', '#0C9E7B', '#7F7F7F','#31B8BD','#FB8072','#62D353'];
+let colorIndex = 0;
+function getColor() {
+    const currentColor = markerColors[colorIndex];
+    colorIndex = (colorIndex + 1) % markerColors.length;
+    return currentColor;
 }
+
+// ----------------------------------------------------------------
+const symbols = ['circle','triangle-up', 'pentagon', 'cross',  'x', 'star', 'star-diamond','square',  'diamond-tall'];
+let currentIndex = 0;
+function getSymbol() {
+    const currentSymbol = symbols[currentIndex];
+    currentIndex = (currentIndex + 1) % symbols.length;
+
+    return currentSymbol;
+}
+
 
 // ----------------------------------------------------------------
 // Image Position
@@ -257,7 +318,7 @@ function getImagePosition(optimization) {
     const ImagePositions = [];
 
     let positionX, positionY;
-    
+
     // Posicion contraria
     switch (optimization) {
         case 'top-left':
@@ -303,71 +364,71 @@ function getImagePosition(optimization) {
 
 // This function creates the annotations for the optimization arrow
 function getOptimizationArrow(optimization, paretoPoints) {
-  const arrowAnnotations = [];
+    const arrowAnnotations = [];
 
-  let arrowX, arrowY;
-  let axAdjustment = 0;
-  let ayAdjustment = 0;
+    let arrowX, arrowY;
+    let axAdjustment = 0;
+    let ayAdjustment = 0;
 
-  // Determine arrow position based on optimization
-  switch (optimization) {
-    case 'top-left':
-      arrowX = Math.min(...paretoPoints.map(point => point[0]));
-      arrowY = Math.max(...paretoPoints.map(point => point[1]));
-      arrowY = arrowY + 0.01  // margin
-      axAdjustment = 20;
-      ayAdjustment = 20;
-      break;
-    case 'top-right':
-      arrowX = Math.max(...paretoPoints.map(point => point[0]));
-      arrowY = Math.max(...paretoPoints.map(point => point[1]));
-      arrowX = arrowX + 0.009
-      arrowY = arrowY + 0.009
+    // Determine arrow position based on optimization
+    switch (optimization) {
+        case 'top-left':
+            arrowX = Math.min(...paretoPoints.map(point => point[0]));
+            arrowY = Math.max(...paretoPoints.map(point => point[1]));
+            arrowY = arrowY + 0.01  // margin
+            axAdjustment = 20;
+            ayAdjustment = 20;
+            break;
+        case 'top-right':
+            arrowX = Math.max(...paretoPoints.map(point => point[0]));
+            arrowY = Math.max(...paretoPoints.map(point => point[1]));
+            arrowX = arrowX + 0.009
+            arrowY = arrowY + 0.009
 
-      axAdjustment = -20;
-      ayAdjustment = 20;
-      break;
-    case 'bottom-left':
-      arrowX = Math.min(...paretoPoints.map(point => point[0]));
-      arrowY = Math.min(...paretoPoints.map(point => point[1]));
-      arrowY = arrowY - 0.03
+            axAdjustment = -20;
+            ayAdjustment = 20;
+            break;
+        case 'bottom-left':
+            arrowX = Math.min(...paretoPoints.map(point => point[0]));
+            arrowY = Math.min(...paretoPoints.map(point => point[1]));
+            arrowY = arrowY - 0.03
 
-      axAdjustment = 20;
-      ayAdjustment = -20;
-      break;
-    case 'bottom-right':
-      arrowX = Math.max(...paretoPoints.map(point => point[0]));
-      arrowY = Math.min(...paretoPoints.map(point => point[1]));
-      arrowX = arrowX + 0.03;
-      arrowY = arrowY - 0.03
+            axAdjustment = 20;
+            ayAdjustment = -20;
+            break;
+        case 'bottom-right':
+            arrowX = Math.max(...paretoPoints.map(point => point[0]));
+            arrowY = Math.min(...paretoPoints.map(point => point[1]));
+            arrowX = arrowX + 0.03;
+            arrowY = arrowY - 0.03
 
-      axAdjustment = -20;
-      ayAdjustment = -20;
-      break;
-    default:
-      // By default, place the arrow in the upper left corner
-      arrowX = Math.min(...paretoPoints.map(point => point[0]));
-      arrowY = Math.max(...paretoPoints.map(point => point[1]));
-      arrowY = arrowY + 0.01  // margin
+            axAdjustment = -20;
+            ayAdjustment = -20;
+            break;
+        default:
+            // By default, place the arrow in the upper left corner
+            arrowX = Math.min(...paretoPoints.map(point => point[0]));
+            arrowY = Math.max(...paretoPoints.map(point => point[1]));
+            arrowY = arrowY + 0.01  // margin
 
-  }
+    }
 
-  // Crear la anotación para la flecha
-  const arrowAnnotation = {
-    x: arrowX,
-    y: arrowY,
-    xref: 'x',
-    yref: 'y',
-    text: 'Optimal corner',
-    showarrow: true,
-    arrowhead: 3,
-    ax: axAdjustment,
-    ay: ayAdjustment,
-  };
+    // Crear la anotación para la flecha
+    const arrowAnnotation = {
+        x: arrowX,
+        y: arrowY,
+        xref: 'x',
+        yref: 'y',
+        text: 'Optimal corner',
+        showarrow: true,
+        arrowhead: 3,
+        ax: axAdjustment,
+        ay: ayAdjustment,
+    };
 
-  arrowAnnotations.push(arrowAnnotation);
+    arrowAnnotations.push(arrowAnnotation);
 
-  return arrowAnnotations;
+    return arrowAnnotations;
 }
 
 
@@ -375,12 +436,11 @@ function getOptimizationArrow(optimization, paretoPoints) {
 
 
 <style>
-
-.button-download .btn-primary{
+.button-download .btn-primary {
     width: 150px;
     font-size: small;
     background-color: #0b579f;
-    color: #ffffff; 
+    color: #ffffff;
 }
 
 .text-download {
@@ -388,15 +448,14 @@ function getOptimizationArrow(optimization, paretoPoints) {
     font-size: small;
 }
 
-.button-classification .btn-primary{
+.button-classification .btn-primary {
     width: 200px;
     background-color: #0b579f;
-    color: #ffffff; 
+    color: #ffffff;
 }
 
 .text-classifi {
     padding: auto;
     font-size: small;
 }
-
 </style>
