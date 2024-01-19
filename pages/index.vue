@@ -14,7 +14,7 @@
 
     <b-row>
       <b-col cols="12" sm="10" md="12">
-        <h3>Component Visualization</h3>
+        <h3>Component Visualization ➜ BAR PLOT</h3>
       </b-col>
 
       <!-- Componentes -->
