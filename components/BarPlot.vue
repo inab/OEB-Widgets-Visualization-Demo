@@ -53,7 +53,7 @@
           <b-col>
             <b-card title="Quartile Data" class="mt-3">
               <div class="table-responsive">
-                <table class="table table-bordered table-hover">
+                <table class="table table-bordered">
                   <thead>
                     <tr>
                       <th scope="col" class="table-secondary">Tool</th>
@@ -69,6 +69,12 @@
                 </table>
               </div>
             </b-card>
+            <!-- Annotation -->
+            <div class="annotation">
+              <p>* To calculate the quartiles, the values are first ordered from lowest to highest. Thus, the first
+                quartile is the grouping of the minimum values, and the last quartile, the fourth, is the grouping of the
+                maximum values.</p>
+            </div>
           </b-col>
         </b-row>
       </b-container>
@@ -413,16 +419,23 @@ b-td {
   transform: translateY(100%);
 }
 
-/* Add this style for full-width table */
 .table {
   width: 100%;
 }
 
-/* Add this style for secondary color in th */
 .table-secondary {
   background-color: #6c757d;
-  /* Set your desired secondary color */
   color: white;
-  /* Set text color for visibility */
 }
+
+.annotation {
+  background-color: #f0f0f0;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 5px;
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+}
+
 </style>
