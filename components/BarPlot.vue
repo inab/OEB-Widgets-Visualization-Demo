@@ -3,22 +3,21 @@
 
     <div class="butns">
       <!-- Buttons -->
-
       <b-button-group class="ml-auto">
         <!-- Button Sort -->
-        <b-button variant="outline-secondary" v-if="sortOrder === 'raw'" @click="toggleSortOrder">
+        <b-button variant="outline-secondary" v-if="sortOrder === 'raw'" @click="toggleSortOrder" :disabled="loading">
           Sort & Classify Data
         </b-button>
-        <b-button variant="outline-secondary" v-else @click="toggleSortOrder">
+        <b-button variant="outline-secondary" v-else @click="toggleSortOrder" :disabled="loading">
           Return To Raw Results
         </b-button>
         <!-- Button Optimal -->
-        <b-button variant="outline-secondary">Optimal View</b-button>
-        <!-- Button Downland -->
-        <b-dropdown variant="outline-secondary" right text="Download">
-          <b-dropdown-header id="dropdown-header-label">
-            Select a format
-          </b-dropdown-header>
+        <b-button variant="outline-secondary" :disabled="loading">
+          Optimal View
+        </b-button>
+        <!-- Button Download -->
+        <b-dropdown variant="outline-secondary" right text="Download" :disabled="loading">
+          <b-dropdown-header id="dropdown-header-label">Select a format</b-dropdown-header>
           <b-dropdown-item @click="downloadChart('png')">PNG</b-dropdown-item>
           <b-dropdown-item @click="downloadChart('svg')">SVG</b-dropdown-item>
           <b-dropdown-divider></b-dropdown-divider>
@@ -27,58 +26,67 @@
       </b-button-group>
 
     </div>
-
+    <br>
     <!-- Chart -->
     <div id="barPlot"></div>
     <br>
     <!-- ID AND DATE TABLE -->
-    <b-table-simple bordered small caption-top responsive>
-      <b-tbody>
-        <b-tr>
-          <b-th variant="secondary" class="text-center">Dataset ID</b-th>
-          <b-td class="text-center">{{ datasetId }}</b-td>
-          <b-th variant="secondary" class="text-center">Last Update</b-th>
-          <b-td class="text-center">{{ formattedDate }}</b-td>
-        </b-tr>
-      </b-tbody>
-    </b-table-simple>
+    <div v-if="datasetId && formattedDate">
+      <b-table-simple bordered small caption-top responsive>
+        <b-tbody>
+          <b-tr>
+            <b-th variant="secondary" class="text-center">Dataset ID</b-th>
+            <b-td class="text-center">{{ datasetId }}</b-td>
+            <b-th variant="secondary" class="text-center">Last Update</b-th>
+            <b-td class="text-center">{{ formattedDate }}</b-td>
+          </b-tr>
+        </b-tbody>
+      </b-table-simple>
+    </div>
+
+
     <br>
     <!-- Quartile Table -->
-    <b-container v-if="sortOrder === 'sorted'">
-      <b-row>
-        <b-col>
-          <b-card title="Quartile Data" class="mt-3">
-            <b-table :items="quartileDataArray" bordered small caption-top responsive>
-              <b-thead>
-                <b-tr>
-                  <b-th>Tool</b-th>
-                  <b-th>Quartile</b-th>
-                </b-tr>
-              </b-thead>
-              <b-tbody>
-                <b-tr v-for="(quartile, tool) in quartileDataArray" :key="tool">
-                  <b-td>{{ tool }}</b-td>
-                  <b-td>{{ quartile }}</b-td>
-                </b-tr>
-              </b-tbody>
-            </b-table>
-          </b-card>
-        </b-col>
-      </b-row>
-    </b-container>
+    <transition name="slide" mode="out-in">
+      <b-container v-if="sortOrder === 'sorted'">
+        <b-row>
+          <b-col>
+            <b-card title="Quartile Data" class="mt-3">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <th scope="col" class="table-secondary">Tool</th>
+                      <th scope="col" class="table-secondary">Quartile</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(quartile, index) in quartileDataArray" :key="index">
+                      <td>{{ quartile.tool }}</td>
+                      <td :style="{ backgroundColor: quartile.quartile.bgColor }">{{ quartile.quartile.quartile }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </b-card>
+          </b-col>
+        </b-row>
+      </b-container>
+    </transition>
+
 
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { computed } from 'vue';
 import { sortBy } from 'lodash';
 const { jsPDF } = require('jspdf');
 const html2canvas = require('html2canvas');
 
 
-
+const loading = ref(false); // Loading state
 const dataset = ref(null);
 const originalData = ref(null);
 const datasetId = ref(null);
@@ -94,8 +102,9 @@ const quartileDataArray = computed(() => {
 });
 
 
-onMounted(async () => {
+onBeforeMount(async () => {
   const Plotly = require('plotly.js-dist');
+  loading.value = true;
   const response = await fetch('/OEBD00700000NI.json');
   dataset.value = await response.json();
   datasetId.value = dataset.value._id;
@@ -104,6 +113,7 @@ onMounted(async () => {
   const data = dataset.value.datalink.inline_data;
   // Save original data for future use
   originalData.value = data;
+
 
   const x = data.challenge_participants.map(entry => entry.tool_id);
   const y = data.challenge_participants.map(() => 0);
@@ -149,6 +159,7 @@ onMounted(async () => {
   // Create the bar chart with the initial trace and layout
   Plotly.newPlot('barPlot', [initialTrace], layout, config);
 
+
   const myPlot = document.getElementById('barPlot');
 
 
@@ -183,16 +194,45 @@ onMounted(async () => {
         easing: 'ease-in-out',
       },
     });
-  }, 1000);
+    loading.value = false;
+  }, 500);
 
 
 })
+function animateBars(data) {
+  const Plotly = require('plotly.js-dist');
+  const x = data.map(entry => entry.tool_id);
+  const y = data.map(() => 0); // Start with all bars at 0
+
+  const update = {
+    x: [x],
+    y: [y],
+  };
+
+  Plotly.update('barPlot', update);
+
+  const actualTrace = {
+    y: data.map(entry => entry.metric_value),
+  };
+
+  // Animate the transition from 0 to actual values
+  Plotly.animate('barPlot', {
+    data: [actualTrace],
+    traces: [0],
+    transition: {
+      duration: 1000,
+      easing: 'ease-in-out',
+    },
+  });
+}
 function toggleSortOrder() {
   try {
     if (sortOrder.value === 'raw') {
       // Sort logic (descending order)
       const sortedData = sortBy(originalData.value.challenge_participants, entry => entry.metric_value).reverse();
       updateChart(sortedData);
+      // Call the animateBars function after updating the chart
+      animateBars(sortedData);
       // Calculate quartiles and update the table data
       quartileData.value = calculateQuartiles(sortedData);
 
@@ -200,8 +240,9 @@ function toggleSortOrder() {
 
       // Return to raw data
       updateChart(originalData.value.challenge_participants);
+      // Call the animateBars function after updating the chart
+      animateBars(originalData.value.challenge_participants);
       quartileData.value = {}
-
     }
 
     // Toggle sortOrder
@@ -241,7 +282,7 @@ function calculateMedians(inputArray) {
     return sortedArray[middleIndex];
   }
 }
-const quartileGroupColors = ['#00ff00', '#0000ff', '#800080', '#ffa500'];
+
 function calculateQuartiles(data) {
   const sortedValues = data.map(entry => entry.metric_value).sort((a, b) => a - b);
   const middleIndex = Math.floor(data.length / 2);
@@ -271,16 +312,15 @@ function calculateQuartiles(data) {
     const metricValue = entry.metric_value;
 
     if (metricValue <= q1) {
-      metricPositions[entry.tool_id] = 1;
+      metricPositions[entry.tool_id] = { quartile: 1, bgColor: 'rgb(237, 248, 233)' };
     } else if (metricValue > q1 && metricValue <= q2) {
-      metricPositions[entry.tool_id] = 2;
+      metricPositions[entry.tool_id] = { quartile: 2, bgColor: 'rgb(186, 228, 179)' };
     } else if (metricValue > q2 && metricValue < q3) {
-      metricPositions[entry.tool_id] = 3;
+      metricPositions[entry.tool_id] = { quartile: 3, bgColor: 'rgb(116, 196, 118)' };
     } else if (metricValue >= q3) {
-      metricPositions[entry.tool_id] = 4;
+      metricPositions[entry.tool_id] = { quartile: 4, bgColor: 'rgb(35, 139, 69)' };
     }
   });
-  console.info(metricPositions)
 
   return metricPositions;
 }
@@ -361,5 +401,28 @@ b-td {
 .butns {
   display: flex;
   justify-content: flex-end;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.5s ease;
+}
+
+.slide-enter,
+.slide-leave-to {
+  transform: translateY(100%);
+}
+
+/* Add this style for full-width table */
+.table {
+  width: 100%;
+}
+
+/* Add this style for secondary color in th */
+.table-secondary {
+  background-color: #6c757d;
+  /* Set your desired secondary color */
+  color: white;
+  /* Set text color for visibility */
 }
 </style>
