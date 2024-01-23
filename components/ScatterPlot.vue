@@ -3,6 +3,7 @@
         <h4>Scatter plot</h4>
         <p>Dataset Id: {{ datasetId }} </p>
         <p>Modification Date: {{ modificationDate }}</p>
+        
         <!-- Button Row -->
         <div class="row justify-content-end mr-4">
             <!-- Classification -->
@@ -23,13 +24,6 @@
                 <!-- <b-dropdown-divider></b-dropdown-divider> -->
             </b-dropdown>
 
-            <!-- Download PDF -->
-            <!-- <b-button-group size="sm" class="aling-right mt-2 mb-2">
-                <b-button variant="primary">PDF <b-icon icon="download"></b-icon></b-button>
-                <b-button variant="primary">PNG <b-icon icon="download"></b-icon></b-button>
-                <b-button variant="primary">JSON <b-icon icon="download"></b-icon></b-button>
-            </b-button-group> -->
-
         </div>
 
         <br>
@@ -42,6 +36,8 @@
 const pf = require('pareto-frontier');
 const clustering = require('density-clustering');
 import { onMounted, ref } from 'vue';
+import * as statistics from 'simple-statistics';
+
 
 const dataset = ref(null);
 const datasetId = ref(null);
@@ -63,11 +59,43 @@ onMounted(async () => {
     const traces = [];
 
     // Data for the Pareto frontier
+    // ----------------------------------------------------------------
     const dataPoints = data.challenge_participants.map((participant) => ([
         participant.metric_x,
         participant.metric_y,
     ]));
     // console.log(dataPoints);
+
+
+    // ----------------------------------------------------------------
+    // QUARTILES CUADRADOS
+    const dataTools = data.challenge_participants.map((participant) => (
+        {
+            tool: participant.tool_id,
+            x: participant.metric_x,
+            y: participant.metric_y,
+        }
+    ));
+
+    // Separa las coordenadas X e Y en dos arrays distintos
+    const coordenadasX = dataTools.map(herramienta => herramienta.x);
+    const coordenadasY = dataTools.map(herramienta => herramienta.y);
+
+    // Calcula los cuartiles para las coordenadas X e Y
+    const cuartilesX = [
+        statistics.quantile(coordenadasX, 0.25),
+        statistics.quantile(coordenadasX, 0.5),
+        statistics.quantile(coordenadasX, 0.75),
+    ];
+
+    const cuartilesY = [
+        statistics.quantile(coordenadasY, 0.25),
+        statistics.quantile(coordenadasY, 0.5),
+        statistics.quantile(coordenadasY, 0.75),
+    ];
+
+
+
 
     // ----------------------------------------------------------------
     // K-Means Clustering
@@ -105,7 +133,7 @@ onMounted(async () => {
         line: {
             dash: 'dot',
             width: 2,
-            color: 'rgb(89, 89, 89)',
+            color: 'rgb(152, 152, 152)',
         },
     };
 
@@ -156,6 +184,26 @@ onMounted(async () => {
         traces.push(trace);
     }
 
+    // Crea trazos adicionales para las líneas de cuartiles
+    const cuartilTraceX = {
+        x: cuartilesX.map(cuartil => cuartil),
+        y: cuartilesX.map(() => statistics.mean(coordenadasY)), // Línea horizontal a la altura del promedio de Y
+        mode: 'lines',
+        type: 'scatter',
+        line: { color: 'black', width: 2, dash: 'dash' },
+        name: 'Cuartiles X',
+    };
+
+    const cuartilTraceY = {
+        x: cuartilesY.map(() => statistics.mean(coordenadasX)), // Línea vertical a la altura del promedio de X
+        y: cuartilesY.map(cuartil => cuartil),
+        mode: 'lines',
+        type: 'scatter',
+        line: { color: 'black', width: 2, dash: 'dash' },
+        name: 'Cuartiles Y',
+    };
+
+    traces.push(cuartilTraceX, cuartilTraceY);
 
     // Create the chart layout
     const layout = {
@@ -241,13 +289,29 @@ onMounted(async () => {
 // Functions
 // ----------------------------------------------------------------
 
+// Get Color and Symbols
+// ----------------------------------------------------------------
+const markerColors = ['#D62728', '#FF7F0E', '#8C564B', '#E377C2', '#4981B6', '#BCBD22', '#9467BD', '#0C9E7B', '#7F7F7F', '#31B8BD', '#FB8072', '#62D353'];
+let colorIndex = 0;
+function getColor() {
+    const currentColor = markerColors[colorIndex];
+    colorIndex = (colorIndex + 1) % markerColors.length;
+    return currentColor;
+}
+const symbols = ['circle', 'triangle-up', 'pentagon', 'cross', 'x', 'star', 'star-diamond', 'square', 'diamond-tall'];
+let currentIndex = 0;
+function getSymbol() {
+    const currentSymbol = symbols[currentIndex];
+    currentIndex = (currentIndex + 1) % symbols.length;
+    return currentSymbol;
+}
+
 // ----------------------------------------------------------------
 // Función para alternar la visibilidad de los shapes
 const toggleShapesVisibility = () => {
     showShapes.value = !showShapes.value;
     updatePlotVisibility();
 };
-
 // Función para actualizar la visibilidad del gráfico y shapes
 const updatePlotVisibility = () => {
     const Plotly = require('plotly.js-dist');
@@ -259,6 +323,7 @@ const updatePlotVisibility = () => {
 };
 
 // ----------------------------------------------------------------
+// Download
 const downloadChart = (format) => {
     const Plotly = require('plotly.js-dist');
 
@@ -291,28 +356,6 @@ const downloadChart = (format) => {
     }
 };
 
-// Get Color
-// ----------------------------------------------------------------
-const markerColors = ['#D62728', '#FF7F0E', '#8C564B', '#E377C2', '#4981B6', '#BCBD22', '#9467BD', '#0C9E7B', '#7F7F7F','#31B8BD','#FB8072','#62D353'];
-let colorIndex = 0;
-function getColor() {
-    const currentColor = markerColors[colorIndex];
-    colorIndex = (colorIndex + 1) % markerColors.length;
-    return currentColor;
-}
-
-// ----------------------------------------------------------------
-const symbols = ['circle','triangle-up', 'pentagon', 'cross',  'x', 'star', 'star-diamond','square',  'diamond-tall'];
-let currentIndex = 0;
-function getSymbol() {
-    const currentSymbol = symbols[currentIndex];
-    currentIndex = (currentIndex + 1) % symbols.length;
-
-    return currentSymbol;
-}
-
-
-// ----------------------------------------------------------------
 // Image Position
 function getImagePosition(optimization) {
     const ImagePositions = [];
@@ -430,7 +473,6 @@ function getOptimizationArrow(optimization, paretoPoints) {
 
     return arrowAnnotations;
 }
-
 
 </script>
 
