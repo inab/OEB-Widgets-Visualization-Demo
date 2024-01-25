@@ -3,15 +3,16 @@
         <h4>Scatter plot</h4>
         <p>Dataset Id: {{ datasetId }} </p>
         <p>Modification Date: {{ modificationDate }}</p>
-        
+
         <!-- Button Row -->
         <div class="row justify-content-end mr-4">
             <!-- Classification -->
             <b-dropdown text="Classification" size="sm" variant="primary" class="m-md-2 button-classification">
                 <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
                         method:</strong></b-dropdown-text>
-                <b-dropdown-item> No Classification </b-dropdown-item>
-                <b-dropdown-item @click="toggleShapesVisibility"> K-Means Clustering </b-dropdown-item>
+                <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
+                <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item>
+                <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
 
             </b-dropdown>
 
@@ -29,6 +30,22 @@
         <br>
         <!-- Scatter Plot -->
         <div id="scatter-plot"></div>
+
+        <!-- Table -->
+        <div id="tableSQ" class="">
+            <table class="cuartiles-table" v-if="cuartilesData.length > 0" >
+                <tr>
+                    <th>Tool</th>
+                    <th>Quartil</th>
+                </tr>
+                <tr v-for="item in cuartilesData" :key="item.tool_id">
+                    <td>{{ item.tool_id }}</td>
+                    <td :class="'quartil-' + item.cuartil">{{ item.cuartil }}</td>
+                </tr>
+            </table>
+        </div>
+
+        
     </div>
 </template>
 
@@ -38,12 +55,20 @@ const clustering = require('density-clustering');
 import { onMounted, ref } from 'vue';
 import * as statistics from 'simple-statistics';
 
-
 const dataset = ref(null);
 const datasetId = ref(null);
 const modificationDate = ref(null);
-const showShapes = ref(false);
+
+
+// K-means Clustering
+const showShapesKmeans = ref(false);
 let shapes = [];
+// Square Quartiles
+const showShapesSquare = ref(false);
+const cuartilesData = ref([]);
+const toolID = ref([]);
+const coordenadasX = ref([]);
+const coordenadasY = ref([]);
 
 onMounted(async () => {
     const Plotly = require('plotly.js-dist');
@@ -60,48 +85,18 @@ onMounted(async () => {
 
     // Data for the Pareto frontier
     // ----------------------------------------------------------------
+    coordenadasX.value = data.challenge_participants.map((participant) => participant.metric_x);
+    coordenadasY.value = data.challenge_participants.map((participant) => participant.metric_y);
+    toolID.value = data.challenge_participants.map((participant) => participant.tool_id);
     const dataPoints = data.challenge_participants.map((participant) => ([
         participant.metric_x,
         participant.metric_y,
     ]));
-    // console.log(dataPoints);
-
-
-    // ----------------------------------------------------------------
-    // QUARTILES CUADRADOS
-    const dataTools = data.challenge_participants.map((participant) => (
-        {
-            tool: participant.tool_id,
-            x: participant.metric_x,
-            y: participant.metric_y,
-        }
-    ));
-
-    // Separa las coordenadas X e Y en dos arrays distintos
-    const coordenadasX = dataTools.map(herramienta => herramienta.x);
-    const coordenadasY = dataTools.map(herramienta => herramienta.y);
-
-    // Calcula los cuartiles para las coordenadas X e Y
-    const cuartilesX = [
-        statistics.quantile(coordenadasX, 0.25),
-        statistics.quantile(coordenadasX, 0.5),
-        statistics.quantile(coordenadasX, 0.75),
-    ];
-
-    const cuartilesY = [
-        statistics.quantile(coordenadasY, 0.25),
-        statistics.quantile(coordenadasY, 0.5),
-        statistics.quantile(coordenadasY, 0.75),
-    ];
-
-
-
 
     // ----------------------------------------------------------------
     // K-Means Clustering
     const kmeans = new clustering.KMEANS();
     const clusters = kmeans.run(dataPoints, 4);
-    // console.log(clusters);
 
     // Create shapes based on clusters
     shapes = clusters.map((cluster) => {
@@ -184,26 +179,6 @@ onMounted(async () => {
         traces.push(trace);
     }
 
-    // Crea trazos adicionales para las líneas de cuartiles
-    const cuartilTraceX = {
-        x: cuartilesX.map(cuartil => cuartil),
-        y: cuartilesX.map(() => statistics.mean(coordenadasY)), // Línea horizontal a la altura del promedio de Y
-        mode: 'lines',
-        type: 'scatter',
-        line: { color: 'black', width: 2, dash: 'dash' },
-        name: 'Cuartiles X',
-    };
-
-    const cuartilTraceY = {
-        x: cuartilesY.map(() => statistics.mean(coordenadasX)), // Línea vertical a la altura del promedio de X
-        y: cuartilesY.map(cuartil => cuartil),
-        mode: 'lines',
-        type: 'scatter',
-        line: { color: 'black', width: 2, dash: 'dash' },
-        name: 'Cuartiles Y',
-    };
-
-    traces.push(cuartilTraceX, cuartilTraceY);
 
     // Create the chart layout
     const layout = {
@@ -289,38 +264,118 @@ onMounted(async () => {
 // Functions
 // ----------------------------------------------------------------
 
-// Get Color and Symbols
-// ----------------------------------------------------------------
-const markerColors = ['#D62728', '#FF7F0E', '#8C564B', '#E377C2', '#4981B6', '#BCBD22', '#9467BD', '#0C9E7B', '#7F7F7F', '#31B8BD', '#FB8072', '#62D353'];
-let colorIndex = 0;
-function getColor() {
-    const currentColor = markerColors[colorIndex];
-    colorIndex = (colorIndex + 1) % markerColors.length;
-    return currentColor;
-}
-const symbols = ['circle', 'triangle-up', 'pentagon', 'cross', 'x', 'star', 'star-diamond', 'square', 'diamond-tall'];
-let currentIndex = 0;
-function getSymbol() {
-    const currentSymbol = symbols[currentIndex];
-    currentIndex = (currentIndex + 1) % symbols.length;
-    return currentSymbol;
-}
-
-// ----------------------------------------------------------------
-// Función para alternar la visibilidad de los shapes
-const toggleShapesVisibility = () => {
-    showShapes.value = !showShapes.value;
-    updatePlotVisibility();
-};
-// Función para actualizar la visibilidad del gráfico y shapes
-const updatePlotVisibility = () => {
+// NO CLASSIFICATION
+const noClassification = () => {
+    cuartilesData.value = [];
+    showShapesKmeans.value = false;
+    showShapesSquare.value = false;
     const Plotly = require('plotly.js-dist');
     const layout = {
-        shapes: showShapes.value ? shapes : [], // Mostrar u ocultar shapes según el estado de la variable
-        // ... (resto de tu configuración de layout)
+        shapes: false ? shapes : [],
     };
     Plotly.update('scatter-plot', {}, layout);
 };
+
+
+// AQUARE QUARTILES
+// ----------------------------------------------------------------
+// Function to toggle the visibility of the Square Quartiles
+const toggleQuartilesVisibility = () => {
+    showShapesSquare.value = !showShapesSquare.value;
+    calculateQuartiles();
+    if (showShapesSquare.value == false){
+        cuartilesData.value = [];
+    }
+};
+
+const calculateQuartiles = () => {
+
+    const cuartilesX = [
+        statistics.quantile(coordenadasX.value, 0.25),
+        statistics.quantile(coordenadasX.value, 0.5),
+        statistics.quantile(coordenadasX.value, 0.75),
+    ];
+    const cuartilesY = [
+        statistics.quantile(coordenadasY.value, 0.25),
+        statistics.quantile(coordenadasY.value, 0.5),
+        statistics.quantile(coordenadasY.value, 0.75),
+    ];
+
+    cuartilesData.value = [];
+    toolID.value.forEach((toolId, index) => {
+        const x = coordenadasX.value[index];
+        const y = coordenadasY.value[index];
+        let cuartil;
+
+        if (x <= cuartilesX[1] && y <= cuartilesY[1]) {
+            cuartil = '1';
+            // cuartil = '4';
+        } else if (x > cuartilesX[1] && y <= cuartilesY[2] && y > cuartilesY[1]) {
+            cuartil = '2';
+            // cuartil = '1';
+        } else if (x <= cuartilesX[1] && y > cuartilesY[1]) {
+            cuartil = '3';
+            // cuartil = '2';
+        } else {
+            cuartil = '4';
+            // cuartil = '3';
+        }
+        cuartilesData.value.push({ tool_id: toolId, cuartil });
+    });
+
+    // Add quartile lines to the layout
+    const shapes = [
+        {
+            type: 'line',
+            x0: cuartilesX[1],
+            x1: cuartilesX[1],
+            y0: Math.min(...cuartilesY)-10,
+            y1: Math.max(...cuartilesY)+10,
+            line: {
+                color: '#C0D4E8',
+                width: 2,
+                dash: 'dash'
+            }
+        },
+        {
+            type: 'line',
+            y0: cuartilesY[1],
+            y1: cuartilesY[1],
+            x0: Math.min(...cuartilesX)-1000000,
+            x1: Math.max(...cuartilesX)+1500000,
+            line: {
+                color: '#C0D4E8',
+                width: 2,
+                dash: 'dash'
+            }
+        },
+    ];
+    // Update the layout
+    const Plotly = require('plotly.js-dist');
+    const layout = {
+        shapes: showShapesSquare.value ? shapes : [],
+    };
+    Plotly.update('scatter-plot', {}, layout);
+
+};
+
+
+// K-MEANS CLUSTERING
+// ----------------------------------------------------------------
+// Function to toggle the visibility of the Kmeans Clustering
+const toggleKmeansVisibility = () => {
+    showShapesKmeans.value = !showShapesKmeans.value;
+    updatePlotVisibility();
+};
+// Visibility of the graph with K-means Clustering classification
+const updatePlotVisibility = () => {
+    const Plotly = require('plotly.js-dist');
+    const layout = {
+        shapes: showShapesKmeans.value ? shapes : []
+    };
+    Plotly.update('scatter-plot', {}, layout);
+};
+
 
 // ----------------------------------------------------------------
 // Download
@@ -474,10 +529,27 @@ function getOptimizationArrow(optimization, paretoPoints) {
     return arrowAnnotations;
 }
 
+// Get Color and Symbols
+// ----------------------------------------------------------------
+const markerColors = ['#D62728', '#FF7F0E', '#8C564B', '#E377C2', '#4981B6', '#BCBD22', '#9467BD', '#0C9E7B', '#7F7F7F', '#31B8BD', '#FB8072', '#62D353'];
+let colorIndex = 0;
+function getColor() {
+    const currentColor = markerColors[colorIndex];
+    colorIndex = (colorIndex + 1) % markerColors.length;
+    return currentColor;
+}
+const symbols = ['circle', 'triangle-up', 'pentagon', 'cross', 'x', 'star', 'star-diamond', 'square', 'diamond-tall'];
+let currentIndex = 0;
+function getSymbol() {
+    const currentSymbol = symbols[currentIndex];
+    currentIndex = (currentIndex + 1) % symbols.length;
+    return currentSymbol;
+}
+
 </script>
 
 
-<style>
+<style scoped lang="css">
 .button-download .btn-primary {
     width: 150px;
     font-size: small;
@@ -500,4 +572,35 @@ function getOptimizationArrow(optimization, paretoPoints) {
     padding: auto;
     font-size: small;
 }
+
+
+.cuartiles-table {
+    margin: 0 auto;
+    width: 80%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.cuartiles-table th, .cuartiles-table td {
+    border: 1px solid #dddddd;
+    text-align: center;
+    padding: 5px;
+}
+
+.quartil-1 {
+    background-color: #5495D6; 
+}
+
+.quartil-2 {
+    background-color: #7FB0E0; 
+}
+
+.quartil-3 {
+    background-color: #AACAEB; 
+}
+
+.quartil-4 {
+    background-color: #D4E5F5; 
+}
+
 </style>
