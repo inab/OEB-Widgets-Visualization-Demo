@@ -25,6 +25,11 @@
                 <!-- <b-dropdown-divider></b-dropdown-divider> -->
             </b-dropdown>
 
+            <!-- Reset View / optimal view -->
+            <b-button @click="toggleView" variant="primary" class="m-md-2 button-resetView">
+                {{ viewButtonText }}
+            </b-button>
+
         </div>
 
         <br>
@@ -52,7 +57,7 @@
 <script setup>
 const pf = require('pareto-frontier');
 const clustering = require('density-clustering');
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import * as statistics from 'simple-statistics';
 
 const dataset = ref(null);
@@ -69,6 +74,9 @@ const cuartilesData = ref([]);
 const toolID = ref([]);
 const coordenadasX = ref([]);
 const coordenadasY = ref([]);
+
+// view
+const viewApplied = ref(false);
 
 onMounted(async () => {
     const Plotly = require('plotly.js-dist');
@@ -175,7 +183,6 @@ onMounted(async () => {
             //     visible: true,
             // },
         };
-
         traces.push(trace);
     }
 
@@ -226,7 +233,7 @@ onMounted(async () => {
 
     };
 
-    const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout);
+    const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout, { staticPlot: true });
 
     // Update Pareto Frontier 
     scatterPlot.then((gd) => {
@@ -263,6 +270,67 @@ onMounted(async () => {
 // ----------------------------------------------------------------
 // Functions
 // ----------------------------------------------------------------
+const resetView = () => {
+    const Plotly = require('plotly.js-dist');
+    const layout = {
+        xaxis: {
+            range: [0, Math.max(...coordenadasX.value) + 5000],
+        },
+        yaxis: {
+            range: [0, Math.max(...coordenadasY.value) + 0.05],
+        }
+    };
+    Plotly.update('scatter-plot', {}, layout);
+    viewApplied.value = true; 
+};
+
+const optimalView = () => {
+    const Plotly = require('plotly.js-dist');
+
+    const layout = {
+        xaxis: {
+            autorange:true,
+            title: {
+                text: dataset.value.datalink.inline_data.visualization.x_axis,
+                font: {
+                    family: 'Arial, sans-serif',
+                    size: 14,
+                    color: 'black',
+                    weight: 'bold',
+                },
+            }
+        },
+        yaxis: {
+            title: {
+                text: dataset.value.datalink.inline_data.visualization.y_axis,
+                font: {
+                    family: 'Arial, sans-serif',
+                    size: 14,
+                    color: 'black',
+                    weight: 'bold',
+                },
+            },
+        },
+        shapes: []
+    }
+    cuartilesData.value = [];
+    Plotly.update('scatter-plot', {}, layout);
+    viewApplied.value = false; // Optimal view is applied
+};
+
+const toggleView = () => {
+    if (viewApplied.value) {
+        optimalView();
+    } else {
+        resetView();
+    }
+};
+
+const viewButtonText = computed(() => {
+    return viewApplied.value ? 'Optimal View' : 'Reset View';
+});
+
+
 
 // NO CLASSIFICATION
 const noClassification = () => {
@@ -283,9 +351,9 @@ const noClassification = () => {
 const toggleQuartilesVisibility = () => {
     showShapesSquare.value = !showShapesSquare.value;
     calculateQuartiles();
-    if (showShapesSquare.value == false){
-        cuartilesData.value = [];
-    }
+    showShapesSquare.value = false;
+
+
 };
 
 const calculateQuartiles = () => {
@@ -329,7 +397,7 @@ const calculateQuartiles = () => {
             type: 'line',
             x0: cuartilesX[1],
             x1: cuartilesX[1],
-            y0: Math.min(...cuartilesY)-10,
+            y0: 0,
             y1: Math.max(...cuartilesY)+10,
             line: {
                 color: '#C0D4E8',
@@ -341,7 +409,7 @@ const calculateQuartiles = () => {
             type: 'line',
             y0: cuartilesY[1],
             y1: cuartilesY[1],
-            x0: Math.min(...cuartilesX)-1000000,
+            x0: 0,
             x1: Math.max(...cuartilesX)+1500000,
             line: {
                 color: '#C0D4E8',
@@ -366,6 +434,9 @@ const calculateQuartiles = () => {
 const toggleKmeansVisibility = () => {
     showShapesKmeans.value = !showShapesKmeans.value;
     updatePlotVisibility();
+    showShapesKmeans.value = false;
+    cuartilesData.value = [];
+
 };
 // Visibility of the graph with K-means Clustering classification
 const updatePlotVisibility = () => {
@@ -551,8 +622,8 @@ function getSymbol() {
 
 <style scoped lang="css">
 .button-download .btn-primary {
-    width: 150px;
-    font-size: small;
+    width: 200px;
+    /* font-size: small; */
     background-color: #0b579f;
     color: #ffffff;
 }
@@ -563,6 +634,12 @@ function getSymbol() {
 }
 
 .button-classification .btn-primary {
+    width: 200px;
+    background-color: #0b579f;
+    color: #ffffff;
+}
+
+.button-resetView .btn-primary {
     width: 200px;
     background-color: #0b579f;
     color: #ffffff;
@@ -581,26 +658,26 @@ function getSymbol() {
     margin-top: 20px;
 }
 
-.cuartiles-table th, .cuartiles-table td {
+.cuartiles-table th,
+.cuartiles-table td {
     border: 1px solid #dddddd;
     text-align: center;
     padding: 5px;
 }
 
 .quartil-1 {
-    background-color: #5495D6; 
+    background-color: #5495D6;
 }
 
 .quartil-2 {
-    background-color: #7FB0E0; 
+    background-color: #7FB0E0;
 }
 
 .quartil-3 {
-    background-color: #AACAEB; 
+    background-color: #AACAEB;
 }
 
 .quartil-4 {
-    background-color: #D4E5F5; 
+    background-color: #D4E5F5;
 }
-
 </style>
