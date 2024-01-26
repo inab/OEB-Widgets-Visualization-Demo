@@ -19,7 +19,7 @@
         <b-dropdown variant="outline-secondary" right text="Download" :disabled="loading">
           <b-dropdown-header id="dropdown-header-label">Select a format</b-dropdown-header>
           <b-dropdown-item @click="downloadChart('png')">PNG</b-dropdown-item>
-          <b-dropdown-item @click="downloadChart('svg')">SVG</b-dropdown-item>
+          <b-dropdown-item @click="downloadChart('svg')">SVG (only plot)</b-dropdown-item>
           <b-dropdown-divider></b-dropdown-divider>
           <b-dropdown-item @click="downloadChart('pdf')">PDF</b-dropdown-item>
         </b-dropdown>
@@ -27,58 +27,62 @@
 
     </div>
     <br>
-    <!-- Chart -->
-    <div id="barPlot"></div>
-    <br>
-    <!-- ID AND DATE TABLE -->
-    <div v-if="datasetId && formattedDate">
-      <b-table-simple bordered small caption-top responsive>
-        <b-tbody>
-          <b-tr>
-            <b-th variant="secondary" class="text-center">Dataset ID</b-th>
-            <b-td class="text-center">{{ datasetId }}</b-td>
-            <b-th variant="secondary" class="text-center">Last Update</b-th>
-            <b-td class="text-center">{{ formattedDate }}</b-td>
-          </b-tr>
-        </b-tbody>
-      </b-table-simple>
+    <div id="todownload">
+      <!-- Chart -->
+      <div id="barPlot"></div>
+      <br>
+      <!-- ID AND DATE TABLE -->
+      <div v-if="datasetId && formattedDate">
+        <b-table-simple bordered small caption-top responsive id='idDateTable'>
+          <b-tbody>
+            <b-tr>
+              <b-th variant="secondary" class="text-center">Dataset ID</b-th>
+              <b-td class="text-center">{{ datasetId }}</b-td>
+              <b-th variant="secondary" class="text-center">Last Update</b-th>
+              <b-td class="text-center">{{ formattedDate }}</b-td>
+            </b-tr>
+          </b-tbody>
+        </b-table-simple>
+      </div>
+
+
+      <br>
+      <!-- Quartile Table -->
+      <transition name="slide" mode="out-in">
+        <b-container v-if="sortOrder === 'sorted'">
+          <b-row>
+            <b-col>
+              <b-card title="Quartile Data" class="mt-3">
+                <div class="table-responsive">
+                  <table class="table table-bordered" id='quartileTable'>
+                    <thead>
+                      <tr>
+                        <th scope="col" class="table-secondary">Tool</th>
+                        <th scope="col" class="table-secondary">Quartile</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(quartile, index) in quartileDataArray" :key="index">
+                        <td>{{ quartile.tool }}</td>
+                        <td :style="{ backgroundColor: quartile.quartile.bgColor }">{{ quartile.quartile.quartile }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </b-card>
+              <!-- Annotation -->
+              <div class="annotation">
+                <p>* To calculate the quartiles, the values are first ordered from lowest to highest. Thus, the first
+                  quartile is the grouping of the minimum values, and the last quartile, the fourth, is the grouping of
+                  the
+                  maximum values.</p>
+              </div>
+            </b-col>
+          </b-row>
+        </b-container>
+      </transition>
     </div>
 
-
-    <br>
-    <!-- Quartile Table -->
-    <transition name="slide" mode="out-in">
-      <b-container v-if="sortOrder === 'sorted'">
-        <b-row>
-          <b-col>
-            <b-card title="Quartile Data" class="mt-3">
-              <div class="table-responsive">
-                <table class="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th scope="col" class="table-secondary">Tool</th>
-                      <th scope="col" class="table-secondary">Quartile</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="(quartile, index) in quartileDataArray" :key="index">
-                      <td>{{ quartile.tool }}</td>
-                      <td :style="{ backgroundColor: quartile.quartile.bgColor }">{{ quartile.quartile.quartile }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </b-card>
-            <!-- Annotation -->
-            <div class="annotation">
-              <p>* To calculate the quartiles, the values are first ordered from lowest to highest. Thus, the first
-                quartile is the grouping of the minimum values, and the last quartile, the fourth, is the grouping of the
-                maximum values.</p>
-            </div>
-          </b-col>
-        </b-row>
-      </b-container>
-    </transition>
 
 
   </div>
@@ -331,62 +335,84 @@ function calculateQuartiles(data) {
   return metricPositions;
 }
 
-
-
-
-function downloadChart(format) {
-  const Plotly = require('plotly.js-dist');
-  const myPlot = document.getElementById('barPlot');
-
-  if (format === 'png' || format === 'svg') {
-    // Download as PNG or SVG using Plotly's toImage
-    const options = { format, height: 500, width: 700 };
-
-    Plotly.toImage(myPlot, options)
-      .then((url) => {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `benchmarking_chart_${datasetId.value}.${format}`;
-        link.click();
-      })
-      .catch((error) => {
-        console.error(`Error downloading as ${format}`, error);
-      });
-  } else if (format === 'pdf') {
-    // Download as PDF using jspdf and html2canvas
-    const pdfOptions = {
-      filename: `benchmarking_chart_${datasetId.value}.pdf`,
-      image: { type: 'png', quality: 1.0 }, // Increase image quality
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, // Landscape orientation
+async function downloadChart(format) {
+  try {
+    const htmlToCanvas = async (element) => {
+      return await html2canvas(element, { scrollX: 0, scrollY: 0 });
     };
 
-    // Use html2canvas to convert the Plotly chart to an image
-    html2canvas(myPlot, { scale: 2 }) // Increase scale for higher resolution
-      .then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
+    const canvasToImage = (canvas, format) => {
+      if (format === 'png') {
+        return canvas.toDataURL('image/png');
+      } else if (format === 'pdf') {
+        return canvas.toDataURL('image/pdf');
+      }
+    };
+    const downloadPDF = (content) => {
+      try {
+        const quartile = document.getElementById('quartileTable');
+        const doc = new jsPDF();
+        // Calculate the width and height of the image
+        const imgWidth = 190; // Default width
+        let imgHeight = 100; // Default height
+        if (content.width && content.height) {
+          // If content has width and height properties, use them to calculate aspect ratio
+          const aspectRatio = content.width / content.height;
+          imgHeight = imgWidth / aspectRatio;
+        }
 
-        // Create a PDF document
-        const pdf = new jsPDF(pdfOptions.jsPDF);
+        // Adjust image height based on whether quartile table is present
+        if (quartile) {
+          imgHeight = 190; // Adjusted height if quartile table is present
+        }
 
-        // Calculate image dimensions based on PDF page size
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = pdfWidth - 20; // Adjust the margins
-        const imgHeight = (imgWidth / canvas.width) * canvas.height;
+        // Add the image to the PDF
+        doc.addImage(content, 'PNG', 10, 10, imgWidth, imgHeight)
+        // Create a data URI for the PDF content
+        doc.save(`benchmarking_chart_${datasetId.value}.${format}`);
 
-        // Add the image to the PDF document
-        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        return null;
+      }
+    };
 
-        // Save the PDF
-        pdf.save(pdfOptions.filename);
-      })
-      .catch((error) => {
-        console.error('Error exporting chart to PDF', error);
-      });
-  } else {
-    console.error(`Unsupported format: ${format}`);
+
+    const toDownloadDiv = document.getElementById('todownload');
+
+    const downloadCanvas = await htmlToCanvas(toDownloadDiv);
+    const downloadImage = canvasToImage(downloadCanvas, format);
+
+    if (format === 'pdf') {
+      await downloadPDF(downloadCanvas);
+    } else if (format === 'svg') {
+      const Plotly = require('plotly.js-dist');
+      const chart = document.getElementById('barPlot');
+      const options = { format };
+      Plotly.toImage(chart, options)
+        .then((url) => {
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `benchmarking_chart_${datasetId.value}.${format}`;
+          link.click();
+        })
+        .catch((error) => {
+          console.error(`Error downloading the chart as ${format}`, error);
+        });
+    } else {
+      const link = document.createElement('a');
+      link.href = downloadImage;
+      link.download = `benchmarking_chart_${datasetId.value}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  } catch (error) {
+    console.error('Error downloading chart:', error);
   }
 }
+
+
 
 function formatDateString(dateString) {
   const date = new Date(dateString);
@@ -437,5 +463,4 @@ b-td {
   font-size: 12px;
   text-align: center;
 }
-
 </style>
