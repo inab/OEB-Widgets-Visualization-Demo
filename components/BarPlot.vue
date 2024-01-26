@@ -28,10 +28,9 @@
     </div>
     <br>
     <div id="todownload">
-      <!-- Watermark Image -->
-      <img src="/2018.OpenEBench.logo.Manual_page2.png" alt="Watermark" class="watermark">
       <!-- Chart -->
-      <div id="barPlot"></div>
+      <div id="barPlot" style="position: relative;">
+      </div>
       <br>
       <!-- ID AND DATE TABLE -->
       <div v-if="datasetId && formattedDate">
@@ -142,12 +141,13 @@ onBeforeMount(async () => {
     },
   };
 
+
   const layout = {
     title: '',
     xaxis: {
       title: {
         text: '<b>TOOLS</b>',
-        standoff: 30
+        standoff: 30,
       },
       fixedrange: true,
       tickangle: -45,
@@ -156,12 +156,23 @@ onBeforeMount(async () => {
     yaxis: {
       title: '<b>' + data.visualization.metric + '</b>',
       fixedrange: true,
-      range: [0, Math.max(...data.challenge_participants.map(entry => entry.metric_value)) + 1]
+      range: [0, Math.max(...data.challenge_participants.map(entry => entry.metric_value)) + 1],
     },
-    margin: {
-      t: 50,
-    }
-
+    margin: { t: 90, l: 100 },
+    images: [
+      {
+        source: "/2018.OpenEBench.logo.Manual_page2.png", // URL of the image
+        xref: "paper", // Reference point for the x-coordinate
+        yref: "paper", // Reference point for the y-coordinate
+        x: -0.02, // X-coordinate (normalized)
+        y: 1.3, // Y-coordinate (normalized)
+        sizex: 0.2, // Size of the image in the x-direction (normalized)
+        sizey: 0.2, // Size of the image in the y-direction (normalized)
+        xanchor: "left", // Anchor point for the x-coordinate
+        yanchor: "top", // Anchor point for the y-coordinate
+        opacity: 0.5, // Opacity of the image
+      }
+    ]
   };
 
   const config = {
@@ -339,8 +350,8 @@ function calculateQuartiles(data) {
 
 async function downloadChart(format) {
   try {
-    const htmlToCanvas = async (element) => {
-      return await html2canvas(element, { scrollX: 0, scrollY: 0 });
+    const htmlToCanvas = async (element, options) => {
+      return await html2canvas(element, options);
     };
 
     const canvasToImage = (canvas, format) => {
@@ -350,39 +361,26 @@ async function downloadChart(format) {
         return canvas.toDataURL('image/pdf');
       }
     };
+
     const downloadPDF = (content) => {
       try {
-        const quartile = document.getElementById('quartileTable');
         const doc = new jsPDF();
-        // Calculate the width and height of the image
-        const imgWidth = 190; // Default width
-        let imgHeight = 100; // Default height
-        if (content.width && content.height) {
-          // If content has width and height properties, use them to calculate aspect ratio
-          const aspectRatio = content.width / content.height;
-          imgHeight = imgWidth / aspectRatio;
-        }
-
-        // Adjust image height based on whether quartile table is present
-        if (quartile) {
-          imgHeight = 190; // Adjusted height if quartile table is present
-        }
-
-        // Add the image to the PDF
-        doc.addImage(content, 'PNG', 10, 10, imgWidth, imgHeight)
-        // Create a data URI for the PDF content
+        doc.addImage(content, 'PNG', 10, 10);
         doc.save(`benchmarking_chart_${datasetId.value}.${format}`);
-
       } catch (error) {
         console.error('Error generating PDF:', error);
-        return null;
       }
     };
 
-
     const toDownloadDiv = document.getElementById('todownload');
+    const divBounds = toDownloadDiv.getBoundingClientRect();
 
-    const downloadCanvas = await htmlToCanvas(toDownloadDiv);
+    const downloadCanvas = await htmlToCanvas(toDownloadDiv, {
+      scrollX: 0,
+      scrollY: 0,
+      width: divBounds.width,
+      height: divBounds.height,
+    });
     const downloadImage = canvasToImage(downloadCanvas, format);
 
     if (format === 'pdf') {
@@ -391,6 +389,7 @@ async function downloadChart(format) {
       const Plotly = require('plotly.js-dist');
       const chart = document.getElementById('barPlot');
       const options = { format };
+
       Plotly.toImage(chart, options)
         .then((url) => {
           const link = document.createElement('a');
@@ -399,7 +398,7 @@ async function downloadChart(format) {
           link.click();
         })
         .catch((error) => {
-          console.error(`Error downloading the chart as ${format}`, error);
+          console.error(`Error al descargar el gráfico como ${format}`, error);
         });
     } else {
       const link = document.createElement('a');
@@ -413,6 +412,7 @@ async function downloadChart(format) {
     console.error('Error downloading chart:', error);
   }
 }
+
 
 
 
@@ -433,8 +433,18 @@ b-td {
 }
 
 .butns {
-  display: flex;
-  justify-content: flex-end;
+
+  position: absolute;
+  top: 20px;
+  right: 10px;
+  margin-top: 10px;
+  z-index: 9999
+}
+
+.plot-container {
+  position: relative;
+  margin-bottom: 20px;
+  /* Adjust as needed */
 }
 
 .slide-enter-active,
@@ -464,14 +474,5 @@ b-td {
   color: #666;
   font-size: 12px;
   text-align: center;
-}
-
-.watermark {
-  position: absolute;
-  top: 10px;
-  left: 50px;
-  width: 100px;
-  opacity: 0.5;
-  z-index: 1000;
 }
 </style>
