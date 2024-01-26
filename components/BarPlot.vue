@@ -28,6 +28,8 @@
     </div>
     <br>
     <div id="todownload">
+      <!-- Watermark Image -->
+      <img src="/2018.OpenEBench.logo.Manual_page2.png" alt="Watermark" class="watermark">
       <!-- Chart -->
       <div id="barPlot"></div>
       <br>
@@ -462,5 +464,14 @@ b-td {
   color: #666;
   font-size: 12px;
   text-align: center;
+}
+
+.watermark {
+  position: absolute;
+  top: 10px;
+  left: 50px;
+  width: 100px;
+  opacity: 0.5;
+  z-index: 1000;
 }
 </style>
