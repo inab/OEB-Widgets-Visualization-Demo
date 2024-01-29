@@ -61,15 +61,20 @@ import { onMounted, ref, computed } from 'vue';
 import * as statistics from 'simple-statistics';
 
 const dataset = ref(null);
+const data = ref(null);
 const datasetId = ref(null);
 const modificationDate = ref(null);
-
+const paretoPoints = ref([]);
+// 
+const optimalXaxis = ref(null);
+const optimalYaxis = ref(null);
 
 // K-means Clustering
 const showShapesKmeans = ref(false);
 let shapes = [];
 // Square Quartiles
 const showShapesSquare = ref(false);
+const showAnnotationSquare = ref(false);
 const cuartilesData = ref([]);
 const toolID = ref([]);
 const coordenadasX = ref([]);
@@ -84,19 +89,19 @@ onMounted(async () => {
     dataset.value = await response.json();
     datasetId.value = dataset.value._id
     modificationDate.value = new Date(dataset.value.dates.modification).toUTCString()
-    const data = dataset.value.datalink.inline_data
-    const visualization = data.visualization
+    data.value = dataset.value.datalink.inline_data
+    const visualization = data.value.visualization
 
 
     // Data structures for Plotly
     const traces = [];
 
-    // Data for the Pareto frontier
+    // Data for the Pareto frontier and Quartile
     // ----------------------------------------------------------------
-    coordenadasX.value = data.challenge_participants.map((participant) => participant.metric_x);
-    coordenadasY.value = data.challenge_participants.map((participant) => participant.metric_y);
-    toolID.value = data.challenge_participants.map((participant) => participant.tool_id);
-    const dataPoints = data.challenge_participants.map((participant) => ([
+    coordenadasX.value = data.value.challenge_participants.map((participant) => participant.metric_x);
+    coordenadasY.value = data.value.challenge_participants.map((participant) => participant.metric_y);
+    toolID.value = data.value.challenge_participants.map((participant) => participant.tool_id);
+    const dataPoints = data.value.challenge_participants.map((participant) => ([
         participant.metric_x,
         participant.metric_y,
     ]));
@@ -125,11 +130,11 @@ onMounted(async () => {
         };
     });
 
-    const paretoPoints = pf.getParetoFrontier(dataPoints);
+    paretoPoints.value = pf.getParetoFrontier(dataPoints);
 
     const globalParetoTrace = {
-        x: paretoPoints.map((point) => point[0]),
-        y: paretoPoints.map((point) => point[1]),
+        x: paretoPoints.value.map((point) => point[0]),
+        y: paretoPoints.value.map((point) => point[1]),
         mode: 'lines',
         type: 'scatter',
         name: '<span style="color:black;">Global Pareto Frontier</span>',
@@ -141,8 +146,8 @@ onMounted(async () => {
     };
 
     const paretoTrace = {
-        x: paretoPoints.map((point) => point[0]),
-        y: paretoPoints.map((point) => point[1]),
+        x: paretoPoints.value.map((point) => point[0]),
+        y: paretoPoints.value.map((point) => point[1]),
         mode: 'lines',
         type: 'scatter',
         name: 'Calculate Pareto Frontier',
@@ -158,8 +163,8 @@ onMounted(async () => {
     traces.push(globalParetoTrace, paretoTrace);
 
     // Go through each object in challenge participants
-    for (let i = 0; i < data.challenge_participants.length; i++) {
-        const participant = data.challenge_participants[i];
+    for (let i = 0; i < data.value.challenge_participants.length; i++) {
+        const participant = data.value.challenge_participants[i];
 
         const trace = {
             x: [participant.metric_x],
@@ -193,7 +198,7 @@ onMounted(async () => {
         autosize: false,
         width: 1080,
         height: 600,
-        annotations: getOptimizationArrow(visualization.optimization, paretoPoints),
+        annotations: getOptimizationArrow(visualization.optimization, paretoPoints.value),
         xaxis: {
             title: {
                 text: visualization.x_axis,
@@ -233,7 +238,15 @@ onMounted(async () => {
 
     };
 
-    const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout, { staticPlot: true });
+    const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout);
+
+    // Get rangees from ejest graph
+    scatterPlot.then(scatterPlot => {
+        const layoutObj = scatterPlot.layout;
+        optimalXaxis.value = layoutObj.xaxis.range;
+        optimalYaxis.value = layoutObj.yaxis.range;
+    });
+
 
     // Update Pareto Frontier 
     scatterPlot.then((gd) => {
@@ -286,10 +299,9 @@ const resetView = () => {
 
 const optimalView = () => {
     const Plotly = require('plotly.js-dist');
-
     const layout = {
         xaxis: {
-            autorange:true,
+            range: [optimalXaxis.value[0], optimalXaxis.value[1]],
             title: {
                 text: dataset.value.datalink.inline_data.visualization.x_axis,
                 font: {
@@ -301,6 +313,7 @@ const optimalView = () => {
             }
         },
         yaxis: {
+            range: [optimalYaxis.value[0], optimalYaxis.value[1]],
             title: {
                 text: dataset.value.datalink.inline_data.visualization.y_axis,
                 font: {
@@ -311,9 +324,7 @@ const optimalView = () => {
                 },
             },
         },
-        shapes: []
     }
-    cuartilesData.value = [];
     Plotly.update('scatter-plot', {}, layout);
     viewApplied.value = false; // Optimal view is applied
 };
@@ -330,30 +341,30 @@ const viewButtonText = computed(() => {
     return viewApplied.value ? 'Optimal View' : 'Reset View';
 });
 
-
-
 // NO CLASSIFICATION
 const noClassification = () => {
     cuartilesData.value = [];
     showShapesKmeans.value = false;
     showShapesSquare.value = false;
+    showAnnotationSquare.value = false;
     const Plotly = require('plotly.js-dist');
     const layout = {
         shapes: false ? shapes : [],
+        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
     };
     Plotly.update('scatter-plot', {}, layout);
 };
 
 
-// AQUARE QUARTILES
+// SQUARE QUARTILES
 // ----------------------------------------------------------------
 // Function to toggle the visibility of the Square Quartiles
 const toggleQuartilesVisibility = () => {
     showShapesSquare.value = !showShapesSquare.value;
+    showAnnotationSquare.value = !showAnnotationSquare.value
     calculateQuartiles();
     showShapesSquare.value = false;
-
-
+    showAnnotationSquare.value = false;
 };
 
 const calculateQuartiles = () => {
@@ -391,7 +402,7 @@ const calculateQuartiles = () => {
         cuartilesData.value.push({ tool_id: toolId, cuartil });
     });
 
-    // Add quartile lines to the layout
+    // Create quartile lines to the layout
     const shapes = [
         {
             type: 'line',
@@ -418,14 +429,56 @@ const calculateQuartiles = () => {
             }
         },
     ];
-    // Update the layout
-    const Plotly = require('plotly.js-dist');
+
+    // 
+    annotationSquareQuartile(cuartilesData.value, toolID, coordenadasX, coordenadasY)
+    // Add Quartiles
     const layout = {
         shapes: showShapesSquare.value ? shapes : [],
     };
+    const Plotly = require('plotly.js-dist');
     Plotly.update('scatter-plot', {}, layout);
-
 };
+
+const annotationSquareQuartile = (cuartilesData, toolID, coordenadasX, coordenadasY) => {
+    const cuartilPositions = {};
+    cuartilesData.forEach((item) => {
+        const toolIndex = toolID.value.indexOf(item.tool_id);
+        if (!cuartilPositions[item.cuartil]) {
+            cuartilPositions[item.cuartil] = {
+                x: 0,
+                y: 0,
+                count: 0,
+            };
+        }
+        cuartilPositions[item.cuartil].x += coordenadasX.value[toolIndex];
+        cuartilPositions[item.cuartil].y += coordenadasY.value[toolIndex];
+        cuartilPositions[item.cuartil].count += 1;
+    });
+    // Calculate average and create annotations
+    const newAnnotation = Object.keys(cuartilPositions).map((cuartil) => {
+        const avgX = cuartilPositions[cuartil].x / cuartilPositions[cuartil].count;
+        const avgY = cuartilPositions[cuartil].y / cuartilPositions[cuartil].count;
+        return {
+            x: avgX,
+            y: avgY,
+            xref: 'x',
+            yref: 'y',
+            text: cuartil,
+            showarrow: false,
+            font: {
+                size: 30,
+                color: '#5A88B5'
+            }
+        };
+    });
+    const annotations = getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+    const layout = {
+        annotations: showAnnotationSquare.value ? annotations.concat(newAnnotation) : [],
+    };
+    const Plotly = require('plotly.js-dist');
+    Plotly.update('scatter-plot', {}, layout);
+}
 
 
 // K-MEANS CLUSTERING
@@ -446,7 +499,6 @@ const updatePlotVisibility = () => {
     };
     Plotly.update('scatter-plot', {}, layout);
 };
-
 
 // ----------------------------------------------------------------
 // Download
