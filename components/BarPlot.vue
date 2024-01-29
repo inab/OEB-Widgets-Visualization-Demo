@@ -258,7 +258,7 @@ async function toggleSortOrder() {
       animateBars(sortedData);
       // Calculate quartiles and update the table data
       quartileData.value = calculateQuartiles(sortedData);
-      
+
       // Add lines between quartile groups
       addLinesBetweenQuartiles();
 
@@ -268,7 +268,7 @@ async function toggleSortOrder() {
       // Call the animateBars function after updating the chart
       animateBars(originalData.value.challenge_participants);
       quartileData.value = {};
-      
+
       // Remove lines between quartile groups
       removeLinesBetweenQuartiles();
     }
@@ -299,27 +299,57 @@ function addLinesBetweenQuartiles() {
       // Calculate the x-position for the line between the current and previous tools
       const linePosition = (i + i - 1) / 2;
 
-      // Add the line shape to the layout
+      // Add a line shape to the layout with initial y-positions at the bottom
       layout.shapes.push({
         type: 'line',
         xref: 'x',
         yref: 'paper',
         x0: linePosition,
         x1: linePosition,
-        y0: 0,
-        y1: 1,
+        y0: 0,  // Start from the bottom
+        y1: 0,  // Start from the bottom
         line: {
           color: 'rgb(0, 0, 0)',
           width: 1,
           dash: 'dashdot'
         }
       });
+
+      // Animate the line upwards to its final position
+      animateLine(layout.shapes.length - 1);
     }
   }
 
-  // Update the plotly layout
-  Plotly.update('barPlot', {}, layout);
+  // Update the layout with the new shapes
+  Plotly.relayout('barPlot', { shapes: layout.shapes });
 }
+
+function animateLine(shapeIndex) {
+  const Plotly = require('plotly.js-dist');
+  const layout = document.getElementById('barPlot').layout;
+  const shape = layout.shapes[shapeIndex];
+  const yTarget = 1.1; // End at the top
+
+  let y = 0; // Start from the bottom
+
+  const animateStep = () => {
+    if (y <= yTarget) {
+      // Update the y-coordinate of the line shape
+      shape.y1 = y;
+
+      // Update the layout with the modified shape
+      Plotly.relayout('barPlot', { shapes: layout.shapes });
+
+      // Increment y and trigger the next animation step
+      y += 0.025; // Adjust the speed as needed
+      requestAnimationFrame(animateStep);
+    }
+  };
+
+  // Start the animation
+  animateStep();
+}
+
 function removeLinesBetweenQuartiles() {
   const Plotly = require('plotly.js-dist');
   const layout = document.getElementById('barPlot').layout;
