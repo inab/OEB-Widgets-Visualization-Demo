@@ -248,7 +248,7 @@ function animateBars(data) {
     },
   });
 }
-function toggleSortOrder() {
+async function toggleSortOrder() {
   try {
     if (sortOrder.value === 'raw') {
       // Sort logic (descending order)
@@ -258,14 +258,19 @@ function toggleSortOrder() {
       animateBars(sortedData);
       // Calculate quartiles and update the table data
       quartileData.value = calculateQuartiles(sortedData);
+      
+      // Add lines between quartile groups
+      addLinesBetweenQuartiles();
 
     } else {
-
       // Return to raw data
       updateChart(originalData.value.challenge_participants);
       // Call the animateBars function after updating the chart
       animateBars(originalData.value.challenge_participants);
-      quartileData.value = {}
+      quartileData.value = {};
+      
+      // Remove lines between quartile groups
+      removeLinesBetweenQuartiles();
     }
 
     // Toggle sortOrder
@@ -273,6 +278,57 @@ function toggleSortOrder() {
   } catch (error) {
     console.error('Error in toggleSortOrder:', error);
   }
+}
+
+function addLinesBetweenQuartiles() {
+  const Plotly = require('plotly.js-dist');
+  const layout = document.getElementById('barPlot').layout;
+
+  // Ensure layout.shapes is initialized as an array
+  layout.shapes = layout.shapes || [];
+
+  const tools = Object.keys(quartileData.value);
+
+  // Iterate over the tools to find transitions between quartiles
+  for (let i = 1; i < tools.length; i++) {
+    const currentTool = quartileData.value[tools[i]];
+    const previousTool = quartileData.value[tools[i - 1]];
+
+    // If the quartile of the current tool is different from the previous tool, draw a line between them
+    if (currentTool.quartile !== previousTool.quartile) {
+      // Calculate the x-position for the line between the current and previous tools
+      const linePosition = (i + i - 1) / 2;
+
+      // Add the line shape to the layout
+      layout.shapes.push({
+        type: 'line',
+        xref: 'x',
+        yref: 'paper',
+        x0: linePosition,
+        x1: linePosition,
+        y0: 0,
+        y1: 1,
+        line: {
+          color: 'rgb(0, 0, 0)',
+          width: 1,
+          dash: 'dashdot'
+        }
+      });
+    }
+  }
+
+  // Update the plotly layout
+  Plotly.update('barPlot', {}, layout);
+}
+function removeLinesBetweenQuartiles() {
+  const Plotly = require('plotly.js-dist');
+  const layout = document.getElementById('barPlot').layout;
+
+  // Remove existing shapes
+  layout.shapes = layout.shapes.filter(shape => shape.type !== 'line');
+
+  // Update the plotly layout
+  Plotly.update('barPlot', {}, layout);
 }
 
 function updateChart(data) {
@@ -344,9 +400,12 @@ function calculateQuartiles(data) {
       metricPositions[entry.tool_id] = { quartile: 4, bgColor: 'rgb(35, 139, 69)' };
     }
   });
+  console.log(metricPositions)
 
   return metricPositions;
 }
+
+
 
 async function downloadChart(format) {
   try {
