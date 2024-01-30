@@ -368,7 +368,7 @@ function animateLine(shapeIndex) {
       Plotly.relayout('barPlot', { shapes: layout.shapes });
 
       // Increment y and trigger the next animation step
-      y += 0.025; // Adjust the speed as needed
+      y += 0.03; // Adjust the speed as needed
       requestAnimationFrame(animateStep);
     }
   };
@@ -387,6 +387,8 @@ function removeLinesBetweenQuartiles() {
   // Update the plotly layout
   Plotly.update('barPlot', {}, layout);
 }
+
+
 
 function addQuartileLabels() {
   const Plotly = require('plotly.js-dist');
@@ -407,6 +409,9 @@ function addQuartileLabels() {
 
   // Identify quartiles with only one tool
   uniqueQuartiles = Object.keys(quartileCounts).filter(quartile => quartileCounts[quartile] === 1);
+
+  // Set to keep track of added label positions
+  const addedLabelPositions = new Set();
 
   // Iterate over the tools to add quartile labels
   tools.forEach(tool => {
@@ -430,30 +435,31 @@ function addQuartileLabels() {
       labelPosition = sum / positions.length;
     }
 
-    // Add a label annotation to the layout
-    const annotation = {
-      x: labelPosition,
-      y: 1.1, // Top of the chart
-      xref: 'x',
-      yref: 'paper',
-      text: `${quartile}Q`,
-      showarrow: false,
-      font: {
-        size: 16,
-        color: 'rgba(11, 87, 159, 0.5)'
-      }
-    };
+    // Add label only if it hasn't been added at this position
+    if (!addedLabelPositions.has(labelPosition)) {
+      // Add a label annotation to the layout
+      layout.annotations.push({
+        x: labelPosition,
+        y: 1.1, // Top of the chart
+        xref: 'x',
+        yref: 'paper',
+        text: `${quartile}Q`,
+        showarrow: false,
+        font: {
+          size: 16,
+          color: 'rgba(11, 87, 159, 0.5)'
+        }
+      });
 
-    // Log the font of the annotation
-    console.log('Font of label:', annotation.font);
-
-    // Add the annotation to the layout
-    layout.annotations.push(annotation);
+      // Add the label position to the set of added positions
+      addedLabelPositions.add(labelPosition);
+    }
   });
 
   // Update the layout with the new annotations
   Plotly.relayout('barPlot', { annotations: layout.annotations });
 }
+
 
 
 function clearQuartileLabels() {
