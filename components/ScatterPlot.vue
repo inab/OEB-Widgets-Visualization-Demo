@@ -7,7 +7,7 @@
         <!-- Button Row -->
         <div class="row justify-content-end mr-4">
             <!-- Classification -->
-            <b-dropdown text="Classification" size="sm" variant="primary" class="m-md-2 button-classification">
+            <b-dropdown text="Classification" variant="primary" size="sm" class="m-md-2 button-classification">
                 <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
                         method:</strong></b-dropdown-text>
                 <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
@@ -16,19 +16,19 @@
 
             </b-dropdown>
 
+            <!-- Reset View / optimal view -->
+            <b-button @click="toggleView" variant="primary" size="sm" class="m-md-2 button-resetView">
+                {{ viewButtonText }}
+            </b-button>
+
             <!-- Button Dowloand -->
-            <b-dropdown text="Download" size="sm" variant="primary" class="m-md-2 button-download">
+            <b-dropdown text="Download" variant="primary" size="sm" class="m-md-2 button-download">
                 <b-dropdown-text class="font-weight-bold text-download"><strong>Select a format:</strong></b-dropdown-text>
                 <b-dropdown-item @click="downloadChart('png')"> PNG </b-dropdown-item>
                 <b-dropdown-item @click="downloadChart('svg')"> SVG (only plot) </b-dropdown-item>
                 <b-dropdown-item @click="downloadChart('json')"> JSON </b-dropdown-item>
                 <!-- <b-dropdown-divider></b-dropdown-divider> -->
             </b-dropdown>
-
-            <!-- Reset View / optimal view -->
-            <b-button @click="toggleView" variant="primary" class="m-md-2 button-resetView">
-                {{ viewButtonText }}
-            </b-button>
 
         </div>
 
@@ -38,7 +38,7 @@
 
         <!-- Table -->
         <div id="tableSQ" class="">
-            <table class="cuartiles-table" v-if="cuartilesData.length > 0" >
+            <table class="cuartiles-table" v-if="cuartilesData.length > 0">
                 <tr>
                     <th>Tool</th>
                     <th>Quartil</th>
@@ -50,7 +50,7 @@
             </table>
         </div>
 
-        
+
     </div>
 </template>
 
@@ -238,7 +238,7 @@ onMounted(async () => {
 
     };
 
-    const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout);
+    const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout, { staticPlot: true });
 
     // Get rangees from ejest graph
     scatterPlot.then(scatterPlot => {
@@ -294,7 +294,7 @@ const resetView = () => {
         }
     };
     Plotly.update('scatter-plot', {}, layout);
-    viewApplied.value = true; 
+    viewApplied.value = true;
 };
 
 const optimalView = () => {
@@ -342,6 +342,7 @@ const viewButtonText = computed(() => {
 });
 
 // NO CLASSIFICATION
+// ----------------------------------------------------------------
 const noClassification = () => {
     cuartilesData.value = [];
     showShapesKmeans.value = false;
@@ -356,6 +357,7 @@ const noClassification = () => {
 };
 
 
+// ----------------------------------------------------------------
 // SQUARE QUARTILES
 // ----------------------------------------------------------------
 // Function to toggle the visibility of the Square Quartiles
@@ -379,7 +381,6 @@ const calculateQuartiles = () => {
         statistics.quantile(coordenadasY.value, 0.5),
         statistics.quantile(coordenadasY.value, 0.75),
     ];
-
     cuartilesData.value = [];
     toolID.value.forEach((toolId, index) => {
         const x = coordenadasX.value[index];
@@ -409,7 +410,7 @@ const calculateQuartiles = () => {
             x0: cuartilesX[1],
             x1: cuartilesX[1],
             y0: 0,
-            y1: Math.max(...cuartilesY)+10,
+            y1: Math.max(...cuartilesY) + 10,
             line: {
                 color: '#C0D4E8',
                 width: 2,
@@ -421,7 +422,7 @@ const calculateQuartiles = () => {
             y0: cuartilesY[1],
             y1: cuartilesY[1],
             x0: 0,
-            x1: Math.max(...cuartilesX)+1500000,
+            x1: Math.max(...cuartilesX) + 1500000,
             line: {
                 color: '#C0D4E8',
                 width: 2,
@@ -430,7 +431,7 @@ const calculateQuartiles = () => {
         },
     ];
 
-    // 
+    // Annotations
     annotationSquareQuartile(cuartilesData.value, toolID, coordenadasX, coordenadasY)
     // Add Quartiles
     const layout = {
@@ -440,6 +441,7 @@ const calculateQuartiles = () => {
     Plotly.update('scatter-plot', {}, layout);
 };
 
+// Annotation for Square Quartiles
 const annotationSquareQuartile = (cuartilesData, toolID, coordenadasX, coordenadasY) => {
     const cuartilPositions = {};
     cuartilesData.forEach((item) => {
@@ -455,23 +457,88 @@ const annotationSquareQuartile = (cuartilesData, toolID, coordenadasX, coordenad
         cuartilPositions[item.cuartil].y += coordenadasY.value[toolIndex];
         cuartilPositions[item.cuartil].count += 1;
     });
-    // Calculate average and create annotations
-    const newAnnotation = Object.keys(cuartilPositions).map((cuartil) => {
+    let coordenadasCuartil = []
+    const getCoordenadasByCuartil = Object.keys(cuartilPositions).map((cuartil) => {
         const avgX = cuartilPositions[cuartil].x / cuartilPositions[cuartil].count;
         const avgY = cuartilPositions[cuartil].y / cuartilPositions[cuartil].count;
-        return {
-            x: avgX,
-            y: avgY,
-            xref: 'x',
-            yref: 'y',
-            text: cuartil,
-            showarrow: false,
-            font: {
-                size: 30,
-                color: '#5A88B5'
-            }
-        };
+        coordenadasCuartil.push({ x: avgX, y: avgY, numCuartil: cuartil })
     });
+
+    // Create Annotation
+    let position = asignaPositionCuartil(coordenadasCuartil)
+    const newAnnotation = position.map(({ position, numCuartil }) => {
+        let annotation = {};
+        switch (position) {
+            case 'top-left':
+                annotation = {
+                    xref: 'paper',
+                    yref: 'paper',
+                    x: 0.03,
+                    xanchor: 'right',
+                    y: 0.9,
+                    yanchor: 'bottom',
+                    text: numCuartil,
+                    showarrow: false,
+                    font: {
+                        size: 30,
+                        color: '#5A88B5'
+                    }
+                };
+                break;
+            case 'bottom-right':
+                annotation = {
+                    xref: 'paper',
+                    yref: 'paper',
+                    x: 0.97,
+                    xanchor: 'left',
+                    y: 0.1,
+                    yanchor: 'top',
+                    text: numCuartil,
+                    showarrow: false,
+                    font: {
+                        size: 30,
+                        color: '#5A88B5'
+                    }
+                };
+                break;
+            case 'bottom-left':
+                annotation = {
+                    xref: 'paper',
+                    yref: 'paper',
+                    x: 0.01,
+                    xanchor: 'left',
+                    y: 0.1,
+                    yanchor: 'top',
+                    text: numCuartil,
+                    showarrow: false,
+                    font: {
+                        size: 30,
+                        color: '#5A88B5'
+                    }
+                };
+                break;
+            case 'top-right':
+                annotation = {
+                    xref: 'paper',
+                    yref: 'paper',
+                    x: 0.97,
+                    xanchor: 'left',
+                    y: 1,
+                    yanchor: 'top',
+                    text: numCuartil,
+                    showarrow: false,
+                    font: {
+                        size: 30,
+                        color: '#5A88B5'
+                    }
+                };
+                break;
+            default:
+                break;
+        }
+        return annotation;
+    });
+
     const annotations = getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
     const layout = {
         annotations: showAnnotationSquare.value ? annotations.concat(newAnnotation) : [],
@@ -480,10 +547,27 @@ const annotationSquareQuartile = (cuartilesData, toolID, coordenadasX, coordenad
     Plotly.update('scatter-plot', {}, layout);
 }
 
+// Asigna position
+const asignaPositionCuartil = (coordenadasCuartil) => {
+    const positions = coordenadasCuartil.map((point, index) => {
+        const nextIndex = (index + 1) % 4;
+        const position =
+            index === 0
+                ? 'bottom-left'
+                : index === 1
+                    ? 'top-right'
+                    : nextIndex === 0
+                        ? 'bottom-right'
+                        : 'top-left';
+        return { position, numCuartil: point.numCuartil };
+    });
+    return positions
+};
 
+
+// ----------------------------------------------------------------
 // K-MEANS CLUSTERING
 // ----------------------------------------------------------------
-// Function to toggle the visibility of the Kmeans Clustering
 const toggleKmeansVisibility = () => {
     showShapesKmeans.value = !showShapesKmeans.value;
     updatePlotVisibility();
@@ -493,15 +577,18 @@ const toggleKmeansVisibility = () => {
 };
 // Visibility of the graph with K-means Clustering classification
 const updatePlotVisibility = () => {
+    showAnnotationSquare.value = false;
     const Plotly = require('plotly.js-dist');
     const layout = {
-        shapes: showShapesKmeans.value ? shapes : []
+        shapes: showShapesKmeans.value ? shapes : [],
+        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
     };
     Plotly.update('scatter-plot', {}, layout);
 };
 
+
+// DOWNLOAD
 // ----------------------------------------------------------------
-// Download
 const downloadChart = (format) => {
     const Plotly = require('plotly.js-dist');
 
@@ -673,11 +760,8 @@ function getSymbol() {
 
 
 <style scoped lang="css">
-.button-download .btn-primary {
-    width: 200px;
-    /* font-size: small; */
-    background-color: #0b579f;
-    color: #ffffff;
+.button-download {
+    width: 160px;
 }
 
 .text-download {
@@ -685,16 +769,12 @@ function getSymbol() {
     font-size: small;
 }
 
-.button-classification .btn-primary {
+.button-classification {
     width: 200px;
-    background-color: #0b579f;
-    color: #ffffff;
 }
 
-.button-resetView .btn-primary {
-    width: 200px;
-    background-color: #0b579f;
-    color: #ffffff;
+.button-resetView {
+    width: 150px;
 }
 
 .text-classifi {
