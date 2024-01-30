@@ -362,11 +362,11 @@ const noClassification = () => {
 // ----------------------------------------------------------------
 // Function to toggle the visibility of the Square Quartiles
 const toggleQuartilesVisibility = () => {
-    showShapesSquare.value = !showShapesSquare.value;
-    showAnnotationSquare.value = !showAnnotationSquare.value
-    calculateQuartiles();
-    showShapesSquare.value = false;
-    showAnnotationSquare.value = false;
+    if (!showShapesSquare.value){
+        showShapesSquare.value = !showShapesSquare.value;
+        showAnnotationSquare.value = !showAnnotationSquare.value
+        calculateQuartiles();
+    }
 };
 
 const calculateQuartiles = () => {
