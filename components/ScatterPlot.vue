@@ -573,11 +573,12 @@ const toggleKmeansVisibility = () => {
     updatePlotVisibility();
     showShapesKmeans.value = false;
     cuartilesData.value = [];
+    showShapesSquare.value = false;
+    showAnnotationSquare.value = false;
 
 };
 // Visibility of the graph with K-means Clustering classification
 const updatePlotVisibility = () => {
-    showAnnotationSquare.value = false;
     const Plotly = require('plotly.js-dist');
     const layout = {
         shapes: showShapesKmeans.value ? shapes : [],
