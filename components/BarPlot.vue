@@ -72,7 +72,7 @@
                 </div>
               </b-card>
               <!-- Annotation -->
-              <div class="annotation">
+              <div class="annotationfooter">
                 <p>* To calculate the quartiles, the values are first ordered from lowest to highest. Thus, the first
                   quartile is the grouping of the minimum values, and the last quartile, the fourth, is the grouping of
                   the
@@ -173,9 +173,6 @@ onBeforeMount(async () => {
         opacity: 0.5,
       }
     ],
-    hoverlabel: {
-      "cursor": "default",
-    }
   };
 
   const config = {
@@ -419,20 +416,22 @@ function addQuartileLabels() {
     let labelPosition;
     if (quartileCounts[quartile] === 1) {
       // If quartile occurs only once, place the label above the tool
-      labelPosition = tools.indexOf(tool); // Offset by 0.5 for better centering
+      labelPosition = tools.indexOf(tool);
     } else {
-      // If quartile occurs multiple times, calculate the midpoint between tools
+      // If quartile occurs multiple times, calculate the midpoint between tools with the same quartile
       const positions = tools.reduce((acc, curr, index) => {
         if (quartileData.value[curr].quartile === quartile) {
           acc.push(index);
         }
         return acc;
       }, []);
-      labelPosition = positions.reduce((sum, pos) => sum + pos, 0) / positions.length;
+
+      const sum = positions.reduce((sum, pos) => sum + pos, 0);
+      labelPosition = sum / positions.length;
     }
 
     // Add a label annotation to the layout
-    layout.annotations.push({
+    const annotation = {
       x: labelPosition,
       y: 1.1, // Top of the chart
       xref: 'x',
@@ -440,11 +439,16 @@ function addQuartileLabels() {
       text: `${quartile}Q`,
       showarrow: false,
       font: {
-        family: 'Arial',
-        size: 14,
+        size: 16,
         color: 'rgba(11, 87, 159, 0.5)'
       }
-    });
+    };
+
+    // Log the font of the annotation
+    console.log('Font of label:', annotation.font);
+
+    // Add the annotation to the layout
+    layout.annotations.push(annotation);
   });
 
   // Update the layout with the new annotations
@@ -656,7 +660,7 @@ b-td {
   color: white;
 }
 
-.annotation {
+.annotationfooter {
   background-color: #f0f0f0;
   padding: 10px;
   margin-top: 10px;
