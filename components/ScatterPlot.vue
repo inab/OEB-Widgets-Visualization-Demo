@@ -38,7 +38,7 @@
 
         <!-- Table -->
         <div id="tableSQ" class="">
-            <table class="cuartiles-table" v-if="cuartilesData.length > 0">
+            <table class="cuartiles-table table table-striped" v-if="cuartilesData.length > 0">
                 <tr>
                     <th>Tool</th>
                     <th>Quartil</th>
@@ -177,6 +177,7 @@ onMounted(async () => {
                 color: getColor()
             },
             name: participant.tool_id,
+            showlegend: true
             // error_x: {
             //     type: 'data',
             //     array: [participant.stderr_x],
@@ -190,7 +191,6 @@ onMounted(async () => {
         };
         traces.push(trace);
     }
-
 
     // Create the chart layout
     const layout = {
@@ -221,7 +221,6 @@ onMounted(async () => {
                 },
             },
         },
-
         margin: { l: 60, r: 50, t: 30, b: 30, pad: 4 },
         paper_bgcolor: '#ffffff',
         legend: {
@@ -235,10 +234,10 @@ onMounted(async () => {
         },
         plot_bgcolor: '#F8F9F9',
         images: getImagePosition(visualization.optimization),
-
+        showlegend: true
     };
 
-    const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout, { staticPlot: true });
+    const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout);
 
     // Get rangees from ejest graph
     scatterPlot.then(scatterPlot => {
@@ -788,10 +787,15 @@ function getSymbol() {
     margin: 0 auto;
     width: 80%;
     border-collapse: collapse;
+    border-radius: 5px;
     margin-top: 20px;
 }
 
-.cuartiles-table th,
+.cuartiles-table th{
+    background-color: #E2E3E5;
+    text-align: center;
+
+}
 .cuartiles-table td {
     border: 1px solid #dddddd;
     text-align: center;
