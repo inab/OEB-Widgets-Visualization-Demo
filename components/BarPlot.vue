@@ -161,22 +161,27 @@ onBeforeMount(async () => {
     margin: { t: 90, l: 100 },
     images: [
       {
-        source: "/2018.OpenEBench.logo.Manual_page2.png", // URL of the image
-        xref: "paper", // Reference point for the x-coordinate
-        yref: "paper", // Reference point for the y-coordinate
-        x: -0.02, // X-coordinate (normalized)
-        y: 1.3, // Y-coordinate (normalized)
-        sizex: 0.2, // Size of the image in the x-direction (normalized)
-        sizey: 0.2, // Size of the image in the y-direction (normalized)
-        xanchor: "left", // Anchor point for the x-coordinate
-        yanchor: "top", // Anchor point for the y-coordinate
-        opacity: 0.5, // Opacity of the image
+        source: "/2018.OpenEBench.logo.Manual_page2.png",
+        xref: "paper",
+        yref: "paper",
+        x: -0.02,
+        y: 1.3,
+        sizex: 0.2,
+        sizey: 0.2,
+        xanchor: "left",
+        yanchor: "top",
+        opacity: 0.5,
       }
-    ]
+    ],
+    hoverlabel: {
+      "cursor": "default",
+    }
   };
 
   const config = {
-    displayModeBar: false
+    displayModeBar: false,
+    responsive: true,
+    hovermode: false
   }
 
   // Create the bar chart with the initial trace and layout
@@ -218,10 +223,26 @@ onBeforeMount(async () => {
       },
     });
     loading.value = false;
+
   }, 500);
 
-
+  // Select all SVG rect elements with class 'cursor-pointer' within the chart container
+  const chartContainer = document.getElementById('barPlot');
+  // Add a mouseover event listener to the chart container
+  chartContainer.addEventListener('mouseover', function (event) {
+    // Check if the mouseover event is triggered by a cursor-pointer element
+    if (event.target.classList.contains('cursor-pointer')) {
+      // Prevent the default behavior of the mouseover event
+      event.preventDefault();
+      // Set the cursor style to 'default' directly on the target element
+      event.target.style.cursor = 'default';
+    }
+  });
 })
+
+
+
+
 function animateBars(data) {
   const Plotly = require('plotly.js-dist');
   const x = data.map(entry => entry.tool_id);
@@ -248,6 +269,9 @@ function animateBars(data) {
     },
   });
 }
+
+
+
 async function toggleSortOrder() {
   try {
     if (sortOrder.value === 'raw') {
@@ -262,6 +286,9 @@ async function toggleSortOrder() {
       // Add lines between quartile groups
       addLinesBetweenQuartiles();
 
+      // Add quartile labels
+      addQuartileLabels();
+
     } else {
       // Return to raw data
       updateChart(originalData.value.challenge_participants);
@@ -271,6 +298,9 @@ async function toggleSortOrder() {
 
       // Remove lines between quartile groups
       removeLinesBetweenQuartiles();
+
+      // Clear quartile labels
+      clearQuartileLabels();
     }
 
     // Toggle sortOrder
@@ -309,7 +339,7 @@ function addLinesBetweenQuartiles() {
         y0: 0,  // Start from the bottom
         y1: 0,  // Start from the bottom
         line: {
-          color: 'rgb(0, 0, 0)',
+          color: 'rgba(11, 87, 159, 0.5)',
           width: 1,
           dash: 'dashdot'
         }
@@ -359,6 +389,78 @@ function removeLinesBetweenQuartiles() {
 
   // Update the plotly layout
   Plotly.update('barPlot', {}, layout);
+}
+
+function addQuartileLabels() {
+  const Plotly = require('plotly.js-dist');
+  const layout = document.getElementById('barPlot').layout;
+
+  // Ensure layout.annotations is initialized as an array
+  layout.annotations = layout.annotations || [];
+
+  const tools = Object.keys(quartileData.value);
+  const quartileCounts = {}; // Object to store the count of quartiles for each quartile number
+  let uniqueQuartiles = []; // Array to store quartiles with only one tool
+
+  // Count the occurrences of each quartile number
+  tools.forEach(tool => {
+    const quartile = quartileData.value[tool].quartile;
+    quartileCounts[quartile] = (quartileCounts[quartile] || 0) + 1;
+  });
+
+  // Identify quartiles with only one tool
+  uniqueQuartiles = Object.keys(quartileCounts).filter(quartile => quartileCounts[quartile] === 1);
+
+  // Iterate over the tools to add quartile labels
+  tools.forEach(tool => {
+    const quartile = quartileData.value[tool].quartile;
+
+    // Calculate the label position based on quartile count
+    let labelPosition;
+    if (quartileCounts[quartile] === 1) {
+      // If quartile occurs only once, place the label above the tool
+      labelPosition = tools.indexOf(tool); // Offset by 0.5 for better centering
+    } else {
+      // If quartile occurs multiple times, calculate the midpoint between tools
+      const positions = tools.reduce((acc, curr, index) => {
+        if (quartileData.value[curr].quartile === quartile) {
+          acc.push(index);
+        }
+        return acc;
+      }, []);
+      labelPosition = positions.reduce((sum, pos) => sum + pos, 0) / positions.length;
+    }
+
+    // Add a label annotation to the layout
+    layout.annotations.push({
+      x: labelPosition,
+      y: 1.1, // Top of the chart
+      xref: 'x',
+      yref: 'paper',
+      text: `${quartile}Q`,
+      showarrow: false,
+      font: {
+        family: 'Arial',
+        size: 14,
+        color: 'rgba(11, 87, 159, 0.5)'
+      }
+    });
+  });
+
+  // Update the layout with the new annotations
+  Plotly.relayout('barPlot', { annotations: layout.annotations });
+}
+
+
+function clearQuartileLabels() {
+  const Plotly = require('plotly.js-dist');
+  const layout = document.getElementById('barPlot').layout;
+
+  // Ensure layout.annotations is initialized as an array
+  layout.annotations = [];
+
+  // Update the layout with the cleared annotations
+  Plotly.relayout('barPlot', { annotations: layout.annotations });
 }
 
 function updateChart(data) {
@@ -430,7 +532,6 @@ function calculateQuartiles(data) {
       metricPositions[entry.tool_id] = { quartile: 4, bgColor: 'rgb(35, 139, 69)' };
     }
   });
-  console.log(metricPositions)
 
   return metricPositions;
 }
@@ -563,5 +664,9 @@ b-td {
   color: #666;
   font-size: 12px;
   text-align: center;
+}
+
+rect {
+  cursor: default !important;
 }
 </style>
