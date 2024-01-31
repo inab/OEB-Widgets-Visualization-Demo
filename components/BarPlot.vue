@@ -12,8 +12,11 @@
           Return To Raw Results
         </b-button>
         <!-- Button Optimal -->
-        <b-button variant="outline-secondary" :disabled="loading">
+        <b-button variant="outline-secondary" v-if="optimal === 'no'" :disabled="loading" @click="optimalView">
           Optimal View
+        </b-button>
+        <b-button variant="outline-secondary" v-else :disabled="loading" @click="optimalView">
+          Reset View
         </b-button>
         <!-- Button Download -->
         <b-dropdown variant="outline-secondary" right text="Download" :disabled="loading">
@@ -104,6 +107,7 @@ const datasetId = ref(null);
 const datasetDate = ref(null);
 const formattedDate = ref(null);
 const sortOrder = ref('raw');
+const optimal = ref('no');
 const quartileData = ref({});
 const quartileDataArray = computed(() => {
   // Convert quartileData object into an array of objects
@@ -116,7 +120,7 @@ const quartileDataArray = computed(() => {
 onBeforeMount(async () => {
   const Plotly = require('plotly.js-dist');
   loading.value = true;
-  const response = await fetch('/OEBD00700000NI.json');
+  const response = await fetch('/OEBD004000000D.json');
   dataset.value = await response.json();
   datasetId.value = dataset.value._id;
   datasetDate.value = dataset.value.dates.modification;
@@ -125,6 +129,8 @@ onBeforeMount(async () => {
   // Save original data for future use
   originalData.value = data;
 
+  // Calculate maximum value for y-axis range
+  const maxMetricValue = Math.max(...data.challenge_participants.map(entry => entry.metric_value));
 
   const x = data.challenge_participants.map(entry => entry.tool_id);
   const y = data.challenge_participants.map(() => 0);
@@ -156,7 +162,7 @@ onBeforeMount(async () => {
     yaxis: {
       title: '<b>' + data.visualization.metric + '</b>',
       fixedrange: true,
-      range: [0, Math.max(...data.challenge_participants.map(entry => entry.metric_value)) + 1],
+      range: [0, maxMetricValue + 0.1],
     },
     margin: { t: 90, l: 100 },
     images: [
@@ -239,7 +245,6 @@ onBeforeMount(async () => {
 
 
 
-
 function animateBars(data) {
   const Plotly = require('plotly.js-dist');
   const x = data.map(entry => entry.tool_id);
@@ -266,6 +271,70 @@ function animateBars(data) {
     },
   });
 }
+
+async function optimalView() {
+  try {
+    if (optimal.value === 'no') {
+      const Plotly = require('plotly.js-dist');
+
+      // Fetch current data and calculate metric range
+      let data;
+      if (sortOrder.value !== 'raw') {
+        // If data has been sorted, use the sorted data
+        data = sortBy(originalData.value.challenge_participants, entry => entry.metric_value).reverse();
+      } else {
+        // Otherwise, use the original data
+        data = originalData.value.challenge_participants;
+      }
+
+      const metricValues = data.map(entry => entry.metric_value);
+      const minMetric = Math.min(...metricValues);
+      const maxMetric = Math.max(...metricValues);
+
+      // Calculate range between min and max metrics
+      const metricRange = maxMetric - minMetric;
+
+      // Calculate new y-axis range with a slight buffer based on metric range
+      const minY = Math.max(0, minMetric - metricRange * 0.2); // Adjust the factor (0.05) as needed
+      const maxY = maxMetric + metricRange * 0.08; // Adjust the factor (0.05) as needed
+
+      // Update plot layout with new y-axis range
+      Plotly.relayout('barPlot', { 'yaxis.range': [minY, maxY] });
+
+      // Animate the bars after adjusting the y-axis range
+      animateBars(data);
+
+      // Update optimal value to indicate optimal view is active
+      optimal.value = 'yes';
+    } else {
+      const Plotly = require('plotly.js-dist');
+      let data;
+      if (sortOrder.value !== 'raw') {
+        // If data has been sorted, use the sorted data
+        data = sortBy(originalData.value.challenge_participants, entry => entry.metric_value).reverse();
+      } else {
+        // Otherwise, use the original data
+        data = originalData.value.challenge_participants;
+      }
+      // Return to original data view by restoring the original y-axis range
+      const originalLayout = {
+        'yaxis.range': [0, Math.max(...data.map(entry => entry.metric_value)) + 0.1]
+      };
+
+      // Update plot layout with original y-axis range
+      Plotly.relayout('barPlot', originalLayout);
+
+      // Animate the bars after adjusting the y-axis range
+      animateBars(data);
+
+      // Update optimal value to indicate original view is active
+      optimal.value = 'no';
+    }
+  } catch (error) {
+    console.error('Error in optimalView:', error);
+  }
+}
+
 
 
 
@@ -566,6 +635,9 @@ async function downloadChart(format) {
       try {
         const quartile = document.getElementById('quartileTable');
         const doc = new jsPDF();
+        const pdfWidth = doc.internal.pageSize.getWidth(); // Get PDF page width
+        const pdfHeight = doc.internal.pageSize.getHeight(); // Get PDF page height
+
         // Calculate the width and height of the image
         const imgWidth = 190; // Default width
         let imgHeight = 100; // Default height
@@ -580,8 +652,13 @@ async function downloadChart(format) {
           imgHeight = 190; // Adjusted height if quartile table is present
         }
 
-        // Add the image to the PDF
-        doc.addImage(content, 'PNG', 10, 10, imgWidth, imgHeight)
+        // Calculate margins or padding for the PDF content
+        const marginX = 30; // Margin or padding on the left and right sides
+        const marginY = 30; // Margin or padding on the top and bottom sides
+
+        // Add the image to the PDF with margins or padding
+        doc.addImage(content, 'PNG', marginX, marginY, pdfWidth - 2 * marginX, imgHeight);
+
         // Return the generated PDF data URI
         return doc.save(`benchmarking_chart_${datasetId.value}.${format}`);
       } catch (error) {
