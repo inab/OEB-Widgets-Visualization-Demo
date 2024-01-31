@@ -564,11 +564,29 @@ async function downloadChart(format) {
 
     const downloadPDF = (content) => {
       try {
+        const quartile = document.getElementById('quartileTable');
         const doc = new jsPDF();
-        doc.addImage(content, 'PNG', 10, 10);
-        doc.save(`benchmarking_chart_${datasetId.value}.${format}`);
+        // Calculate the width and height of the image
+        const imgWidth = 190; // Default width
+        let imgHeight = 100; // Default height
+        if (content.width && content.height) {
+          // If content has width and height properties, use them to calculate aspect ratio
+          const aspectRatio = content.width / content.height;
+          imgHeight = imgWidth / aspectRatio;
+        }
+
+        // Adjust image height based on whether quartile table is present
+        if (quartile) {
+          imgHeight = 190; // Adjusted height if quartile table is present
+        }
+
+        // Add the image to the PDF
+        doc.addImage(content, 'PNG', 10, 10, imgWidth, imgHeight)
+        // Return the generated PDF data URI
+        return doc.save(`benchmarking_chart_${datasetId.value}.${format}`);
       } catch (error) {
         console.error('Error generating PDF:', error);
+        return null;
       }
     };
 
