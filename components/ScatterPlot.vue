@@ -101,6 +101,7 @@ onMounted(async () => {
     coordenadasX.value = data.value.challenge_participants.map((participant) => participant.metric_x);
     coordenadasY.value = data.value.challenge_participants.map((participant) => participant.metric_y);
     toolID.value = data.value.challenge_participants.map((participant) => participant.tool_id);
+    // 
     const dataPoints = data.value.challenge_participants.map((participant) => ([
         participant.metric_x,
         participant.metric_y,
@@ -108,27 +109,28 @@ onMounted(async () => {
 
     // ----------------------------------------------------------------
     // K-Means Clustering
-    const kmeans = new clustering.KMEANS();
-    const clusters = kmeans.run(dataPoints, 4);
+    // const kmeans = new clustering.KMEANS();
+    // const clusters = kmeans.run(dataPoints, 4);
+    // // Asignar numero de Cluster y crear la tabla
 
-    // Create shapes based on clusters
-    shapes = clusters.map((cluster) => {
-        const xValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][0]);
-        const yValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][1]);
+    // // Create shapes based on clusters
+    // shapes = clusters.map((cluster) => {
+    //     const xValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][0]);
+    //     const yValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][1]);
 
-        return {
-            type: 'rect',
-            xref: 'x',
-            yref: 'y',
-            x0: Math.min(...xValues), y0: Math.min(...yValues),
-            x1: Math.max(...xValues), y1: Math.max(...yValues),
-            opacity: 0.2,
-            fillcolor: 'rgba(0, 72, 129, 183)',
-            line: {
-                color: '#2A6CAB',
-            },
-        };
-    });
+    //     return {
+    //         type: 'rect',
+    //         xref: 'x',
+    //         yref: 'y',
+    //         x0: Math.min(...xValues), y0: Math.min(...yValues),
+    //         x1: Math.max(...xValues), y1: Math.max(...yValues),
+    //         opacity: 0.2,
+    //         fillcolor: 'rgba(0, 72, 129, 183)',
+    //         line: {
+    //             color: '#2A6CAB',
+    //         },
+    //     };
+    // });
 
     paretoPoints.value = pf.getParetoFrontier(dataPoints);
 
@@ -145,6 +147,7 @@ onMounted(async () => {
         },
     };
 
+    // Dynamic
     const paretoTrace = {
         x: paretoPoints.value.map((point) => point[0]),
         y: paretoPoints.value.map((point) => point[1]),
@@ -238,6 +241,7 @@ onMounted(async () => {
     };
 
     const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout);
+    createShapeClustering(dataPoints)
 
     // Get rangees from ejest graph
     scatterPlot.then(scatterPlot => {
@@ -265,18 +269,28 @@ onMounted(async () => {
                 // Hide or show the tool based on its current state
                 const toolHidden = dataPoints[traceIndex].hidden;
                 dataPoints[traceIndex].hidden = !toolHidden;
-
                 // Filter visible tools
                 const visibleTools = dataPoints.filter((tool) => !tool.hidden);
+
+                // Recalculate Clustering
+                createShapeClustering(visibleTools)
+                showShapesKmeans.value = true;
+                const layout = {
+                    shapes: showShapesKmeans.value ? shapes : [],
+                    annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+                };
+
+
                 // Calculate the new Pareto Frontier with the visible tools
                 const newParetoPoints = pf.getParetoFrontier(visibleTools);
+
                 // Update the trace of the Pareto frontier
-                Plotly.update('scatter-plot', { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }, {}, 1);
+                const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
+                Plotly.update('scatter-plot', newTraces, layout, 1);
             }
 
         });
     });
-
 })
 
 // ----------------------------------------------------------------
@@ -361,7 +375,7 @@ const noClassification = () => {
 // ----------------------------------------------------------------
 // Function to toggle the visibility of the Square Quartiles
 const toggleQuartilesVisibility = () => {
-    if (!showShapesSquare.value){
+    if (!showShapesSquare.value) {
         showShapesSquare.value = !showShapesSquare.value;
         showAnnotationSquare.value = !showAnnotationSquare.value
         calculateQuartiles();
@@ -574,7 +588,6 @@ const toggleKmeansVisibility = () => {
     cuartilesData.value = [];
     showShapesSquare.value = false;
     showAnnotationSquare.value = false;
-
 };
 // Visibility of the graph with K-means Clustering classification
 const updatePlotVisibility = () => {
@@ -585,6 +598,34 @@ const updatePlotVisibility = () => {
     };
     Plotly.update('scatter-plot', {}, layout);
 };
+
+const createShapeClustering = (dataPoints) => {
+
+    // ----------------------------------------------------------------
+    // K-Means Clustering
+    const kmeans = new clustering.KMEANS();
+    const clusters = kmeans.run(dataPoints, 4);
+
+    // Create shapes based on clusters
+    shapes = clusters.map((cluster) => {
+        const xValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][0]);
+        const yValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][1]);
+        return {
+            type: 'rect',
+            xref: 'x',
+            yref: 'y',
+            x0: Math.min(...xValues), y0: Math.min(...yValues),
+            x1: Math.max(...xValues), y1: Math.max(...yValues),
+            opacity: 0.2,
+            fillcolor: 'rgba(0, 72, 129, 183)',
+            line: {
+                color: '#2A6CAB',
+            }
+        };
+    });
+
+    // return shapes
+}
 
 
 // DOWNLOAD
@@ -791,11 +832,12 @@ function getSymbol() {
     margin-top: 20px;
 }
 
-.cuartiles-table th{
+.cuartiles-table th {
     background-color: #E2E3E5;
     text-align: center;
 
 }
+
 .cuartiles-table td {
     border: 1px solid #dddddd;
     text-align: center;
