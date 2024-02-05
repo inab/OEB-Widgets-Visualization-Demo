@@ -36,6 +36,7 @@
         <!-- Scatter Plot -->
         <div id="scatter-plot"></div>
 
+
         <!-- Table -->
         <div id="tableSQ" class="">
             <table class="cuartiles-table table table-striped" v-if="cuartilesData.length > 0">
@@ -50,6 +51,13 @@
             </table>
         </div>
 
+        <!-- Error message -->
+        <div>
+            <b-alert :show="dismissCountDown > 0" dismissible variant="danger" @dismissed="dismissCountDown = 0"
+                @dismiss-count-down="countDownChanged">
+                At least four participants are required for the benchmark!!
+            </b-alert>
+        </div>
 
     </div>
 </template>
@@ -72,6 +80,17 @@ const optimalYaxis = ref(null);
 // K-means Clustering
 const showShapesKmeans = ref(false);
 let shapes = [];
+
+// Error messages
+const showMessageError = ref(false);
+const dismissCountDown = ref(0);
+
+const countDownChanged = () => {
+    if (dismissCountDown.value > 0) {
+        dismissCountDown.value -= 1;
+    }
+};
+
 // Square Quartiles
 const showShapesSquare = ref(false);
 const showAnnotationSquare = ref(false);
@@ -109,28 +128,6 @@ onMounted(async () => {
 
     // ----------------------------------------------------------------
     // K-Means Clustering
-    // const kmeans = new clustering.KMEANS();
-    // const clusters = kmeans.run(dataPoints, 4);
-    // // Asignar numero de Cluster y crear la tabla
-
-    // // Create shapes based on clusters
-    // shapes = clusters.map((cluster) => {
-    //     const xValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][0]);
-    //     const yValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][1]);
-
-    //     return {
-    //         type: 'rect',
-    //         xref: 'x',
-    //         yref: 'y',
-    //         x0: Math.min(...xValues), y0: Math.min(...yValues),
-    //         x1: Math.max(...xValues), y1: Math.max(...yValues),
-    //         opacity: 0.2,
-    //         fillcolor: 'rgba(0, 72, 129, 183)',
-    //         line: {
-    //             color: '#2A6CAB',
-    //         },
-    //     };
-    // });
 
     paretoPoints.value = pf.getParetoFrontier(dataPoints);
 
@@ -266,14 +263,44 @@ onMounted(async () => {
             else {
                 // Adjust the index to exclude the Pareto (which is at index 0)
                 traceIndex = traceIndex - 2;
+
                 // Hide or show the tool based on its current state
                 const toolHidden = dataPoints[traceIndex].hidden;
+
+                // If hiding the trace, check if there are at least 4 visible traces
+                if (!toolHidden) {
+                    const visibleTools = dataPoints.filter((tool) => !tool.hidden);
+                    if (visibleTools.length <= 4) {
+                        // Show Message Error
+                        console.log("Debe haber al menos 4 traces visibles.");
+                        // Mostrar el mensaje de error
+                        showMessageError.value = true;
+                        dismissCountDown.value = 5; // Establecer el tiempo deseado en segundos
+
+                        // Iniciar el temporizador para ocultar el alerta después de 5 segundos
+                        const timer = setInterval(() => {
+                            if (dismissCountDown.value > 0) {
+                                dismissCountDown.value -= 1;
+                            } else {
+                                showMessageError.value = false;
+                                clearInterval(timer);
+                            }
+                        }, 1000); // Actualizar cada segundo
+
+                        return false;
+                    }
+                } else {
+                    showMessageError.value = false;
+                }
+
+                // Toggle the hidden state
                 dataPoints[traceIndex].hidden = !toolHidden;
+
                 // Filter visible tools
-                const visibleTools = dataPoints.filter((tool) => !tool.hidden);
+                const updatedVisibleTools = dataPoints.filter((tool) => !tool.hidden);
 
                 // Recalculate Clustering
-                createShapeClustering(visibleTools)
+                createShapeClustering(updatedVisibleTools)
                 showShapesKmeans.value = true;
                 const layout = {
                     shapes: showShapesKmeans.value ? shapes : [],
@@ -282,7 +309,7 @@ onMounted(async () => {
 
 
                 // Calculate the new Pareto Frontier with the visible tools
-                const newParetoPoints = pf.getParetoFrontier(visibleTools);
+                const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools);
 
                 // Update the trace of the Pareto frontier
                 const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
