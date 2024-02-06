@@ -127,8 +127,7 @@ onMounted(async () => {
     ]));
 
     // ----------------------------------------------------------------
-    // K-Means Clustering
-
+    // PARETO
     paretoPoints.value = pf.getParetoFrontier(dataPoints);
 
     const globalParetoTrace = {
@@ -143,24 +142,22 @@ onMounted(async () => {
             color: 'rgb(152, 152, 152)',
         },
     };
-
-    // Dynamic
-    const paretoTrace = {
+    
+    const dynamicParetoTrace = {
         x: paretoPoints.value.map((point) => point[0]),
         y: paretoPoints.value.map((point) => point[1]),
         mode: 'lines',
         type: 'scatter',
-        name: 'Calculate Pareto Frontier',
+        name: 'Dynamic Pareto Frontier',
         line: {
             dash: 'dot',
             width: 2,
-            // color: 'rgb(11, 87, 159)',
             color: 'rgb(244, 124, 33)',
         }
     };
 
     // Add the pareto trace to the trace array
-    traces.push(globalParetoTrace, paretoTrace);
+    traces.push(globalParetoTrace, dynamicParetoTrace);
 
     // Go through each object in challenge participants
     for (let i = 0; i < data.value.challenge_participants.length; i++) {
