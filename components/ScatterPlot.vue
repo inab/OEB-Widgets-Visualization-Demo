@@ -335,12 +335,30 @@ const resetView = () => {
     const layout = {
         xaxis: {
             range: [0, Math.max(...coordenadasX.value) + 5000],
+            title: {
+                text: dataset.value.datalink.inline_data.visualization.x_axis,
+                font: {
+                    family: 'Arial, sans-serif',
+                    size: 14,
+                    color: 'black',
+                    weight: 'bold',
+                },
+            }
         },
         yaxis: {
             range: [0, Math.max(...coordenadasY.value) + 0.05],
+            title: {
+                text: dataset.value.datalink.inline_data.visualization.y_axis,
+                font: {
+                    family: 'Arial, sans-serif',
+                    size: 14,
+                    color: 'black',
+                    weight: 'bold',
+                },
+            },
         }
     };
-    Plotly.update('scatter-plot', {}, layout);
+    Plotly.relayout('scatter-plot', layout);
     viewApplied.value = true;
 };
 
