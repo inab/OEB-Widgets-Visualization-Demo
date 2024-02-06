@@ -80,6 +80,7 @@ const optimalYaxis = ref(null);
 // K-means Clustering
 const showShapesKmeans = ref(false);
 let shapes = [];
+let annotationKmeans = [];
 
 // Error messages
 const showMessageError = ref(false);
@@ -308,7 +309,7 @@ onMounted(async () => {
                 const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
 
                 // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
-                if (viewSquare.value === true) {
+                if (viewKmeans.value === true) {
                     // Recalculate Clustering
                     createShapeClustering(updatedVisibleTools)
                     showShapesKmeans.value = true;
@@ -319,6 +320,9 @@ onMounted(async () => {
                     Plotly.update('scatter-plot', newTraces, layout, 1);
 
                 }
+
+                // Si Square Quartile vista optima
+                // optimalView()
                 Plotly.update('scatter-plot', newTraces, {}, 1);
 
             }
@@ -390,7 +394,7 @@ const optimalView = () => {
             },
         },
     }
-    Plotly.update('scatter-plot', {}, layout);
+    Plotly.relayout('scatter-plot', layout);
     viewApplied.value = false; // Optimal view is applied
 };
 
@@ -410,7 +414,7 @@ const viewButtonText = computed(() => {
 // ----------------------------------------------------------------
 const noClassification = () => {
     cuartilesData.value = [];
-    viewSquare.value = false;
+    viewKmeans.value = false;
     showShapesKmeans.value = false;
     showShapesSquare.value = false;
     showAnnotationSquare.value = false;
@@ -431,7 +435,7 @@ const toggleQuartilesVisibility = () => {
     if (!showShapesSquare.value) {
         showShapesSquare.value = !showShapesSquare.value;
         showAnnotationSquare.value = !showAnnotationSquare.value
-        viewSquare.value = false;
+        viewKmeans.value = false;
         calculateQuartiles();
     }
 };
@@ -505,7 +509,7 @@ const calculateQuartiles = () => {
         shapes: showShapesSquare.value ? shapes : [],
     };
     const Plotly = require('plotly.js-dist');
-    Plotly.update('scatter-plot', {}, layout);
+    Plotly.relayout('scatter-plot', layout);
 };
 
 // Annotation for Square Quartiles
@@ -611,7 +615,7 @@ const annotationSquareQuartile = (cuartilesData, toolID, coordenadasX, coordenad
         annotations: showAnnotationSquare.value ? annotations.concat(newAnnotation) : [],
     };
     const Plotly = require('plotly.js-dist');
-    Plotly.update('scatter-plot', {}, layout);
+    Plotly.relayout('scatter-plot', layout);
 }
 
 // Asigna position
@@ -636,11 +640,11 @@ const asignaPositionCuartil = (coordenadasCuartil) => {
 // K-MEANS CLUSTERING
 // ----------------------------------------------------------------
 const toggleKmeansVisibility = () => {
-    viewSquare.value = true;
+    viewKmeans.value = true;
     if (!showShapesKmeans.value) {
         showShapesKmeans.value = !showShapesKmeans.value;
         updatePlotVisibility();
-        // showShapesKmeans.value = false;
+        showShapesKmeans.value = false;
         cuartilesData.value = [];
         showShapesSquare.value = false;
         showAnnotationSquare.value = false;
@@ -680,6 +684,29 @@ const createShapeClustering = (dataPoints) => {
                 color: '#2A6CAB',
             }
         };
+    });
+
+    let count = 0
+    annotationKmeans = clusters.map((cluster) => {
+        const xValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][0]);
+        const yValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][1]);
+        count = count + 1;
+
+        return {
+            xref: 'x',
+            yref: 'y',
+            x: Math.max(...xValues),
+            xanchor: 'right',
+            y: Math.max(...yValues),
+            yanchor: 'bottom',
+            text: count,
+            showarrow: false,
+            font: {
+                size: 30,
+                color: '#5A88B5'
+            }
+        };
+
     });
 
     // return shapes
