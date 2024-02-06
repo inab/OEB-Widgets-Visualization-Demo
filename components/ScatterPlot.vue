@@ -84,7 +84,6 @@ let shapes = [];
 // Error messages
 const showMessageError = ref(false);
 const dismissCountDown = ref(0);
-
 const countDownChanged = () => {
     if (dismissCountDown.value > 0) {
         dismissCountDown.value -= 1;
@@ -101,6 +100,11 @@ const coordenadasY = ref([]);
 
 // view
 const viewApplied = ref(false);
+
+// Views by Classification
+const viewKmeans = ref(false);
+const viewSquare = ref(false);
+
 
 onMounted(async () => {
     const Plotly = require('plotly.js-dist');
@@ -142,7 +146,7 @@ onMounted(async () => {
             color: 'rgb(152, 152, 152)',
         },
     };
-    
+
     const dynamicParetoTrace = {
         x: paretoPoints.value.map((point) => point[0]),
         y: paretoPoints.value.map((point) => point[1]),
@@ -234,7 +238,12 @@ onMounted(async () => {
         showlegend: true
     };
 
+    // ----------------------------------------------------------------
+    // CREATE SCATTER PLOT
     const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout);
+
+    // ----------------------------------------------------------------
+    // K-Means Clustering
     createShapeClustering(dataPoints)
 
     // Get rangees from ejest graph
@@ -243,7 +252,6 @@ onMounted(async () => {
         optimalXaxis.value = layoutObj.xaxis.range;
         optimalYaxis.value = layoutObj.yaxis.range;
     });
-
 
     // Update Pareto Frontier 
     scatterPlot.then((gd) => {
@@ -261,7 +269,7 @@ onMounted(async () => {
                 // Adjust the index to exclude the Pareto (which is at index 0)
                 traceIndex = traceIndex - 2;
 
-                // Hide or show the tool based on its current state
+                // (Add hidden) Hide or show the tool based on its current state
                 const toolHidden = dataPoints[traceIndex].hidden;
 
                 // If hiding the trace, check if there are at least 4 visible traces
@@ -269,11 +277,8 @@ onMounted(async () => {
                     const visibleTools = dataPoints.filter((tool) => !tool.hidden);
                     if (visibleTools.length <= 4) {
                         // Show Message Error
-                        console.log("Debe haber al menos 4 traces visibles.");
-                        // Mostrar el mensaje de error
                         showMessageError.value = true;
-                        dismissCountDown.value = 5; // Establecer el tiempo deseado en segundos
-
+                        dismissCountDown.value = 5;
                         // Iniciar el temporizador para ocultar el alerta después de 5 segundos
                         const timer = setInterval(() => {
                             if (dismissCountDown.value > 0) {
@@ -282,7 +287,7 @@ onMounted(async () => {
                                 showMessageError.value = false;
                                 clearInterval(timer);
                             }
-                        }, 1000); // Actualizar cada segundo
+                        }, 1000);
 
                         return false;
                     }
@@ -296,21 +301,26 @@ onMounted(async () => {
                 // Filter visible tools
                 const updatedVisibleTools = dataPoints.filter((tool) => !tool.hidden);
 
-                // Recalculate Clustering
-                createShapeClustering(updatedVisibleTools)
-                showShapesKmeans.value = true;
-                const layout = {
-                    shapes: showShapesKmeans.value ? shapes : [],
-                    annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
-                };
-
-
                 // Calculate the new Pareto Frontier with the visible tools
                 const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools);
 
                 // Update the trace of the Pareto frontier
                 const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
-                Plotly.update('scatter-plot', newTraces, layout, 1);
+
+                // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
+                if (viewSquare.value === true) {
+                    // Recalculate Clustering
+                    createShapeClustering(updatedVisibleTools)
+                    showShapesKmeans.value = true;
+                    const layout = {
+                        shapes: showShapesKmeans.value ? shapes : [],
+                        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+                    };
+                    Plotly.update('scatter-plot', newTraces, layout, 1);
+
+                }
+                Plotly.update('scatter-plot', newTraces, {}, 1);
+
             }
 
         });
@@ -382,6 +392,7 @@ const viewButtonText = computed(() => {
 // ----------------------------------------------------------------
 const noClassification = () => {
     cuartilesData.value = [];
+    viewSquare.value = false;
     showShapesKmeans.value = false;
     showShapesSquare.value = false;
     showAnnotationSquare.value = false;
@@ -402,6 +413,7 @@ const toggleQuartilesVisibility = () => {
     if (!showShapesSquare.value) {
         showShapesSquare.value = !showShapesSquare.value;
         showAnnotationSquare.value = !showAnnotationSquare.value
+        viewSquare.value = false;
         calculateQuartiles();
     }
 };
@@ -606,12 +618,16 @@ const asignaPositionCuartil = (coordenadasCuartil) => {
 // K-MEANS CLUSTERING
 // ----------------------------------------------------------------
 const toggleKmeansVisibility = () => {
-    showShapesKmeans.value = !showShapesKmeans.value;
-    updatePlotVisibility();
-    showShapesKmeans.value = false;
-    cuartilesData.value = [];
-    showShapesSquare.value = false;
-    showAnnotationSquare.value = false;
+    viewSquare.value = true;
+    if (!showShapesKmeans.value) {
+        showShapesKmeans.value = !showShapesKmeans.value;
+        updatePlotVisibility();
+        // showShapesKmeans.value = false;
+        cuartilesData.value = [];
+        showShapesSquare.value = false;
+        showAnnotationSquare.value = false;
+    }
+
 };
 // Visibility of the graph with K-means Clustering classification
 const updatePlotVisibility = () => {
