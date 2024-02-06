@@ -76,10 +76,8 @@
               </b-card>
               <!-- Annotation -->
               <div class="annotationfooter">
-                <p>* To calculate the quartiles, the values are first ordered from lowest to highest. Thus, the first
-                  quartile is the grouping of the minimum values, and the last quartile, the fourth, is the grouping of
-                  the
-                  maximum values.</p>
+                <p>* By default, the highest values will be displayed in the first quartile. Inversely if it is specified
+                  in the dataset. </p>
               </div>
             </b-col>
           </b-row>
@@ -105,6 +103,7 @@ const dataset = ref(null);
 const originalData = ref(null);
 const datasetId = ref(null);
 const datasetDate = ref(null);
+const datasetPolarity = ref(null);
 const formattedDate = ref(null);
 const sortOrder = ref('raw');
 const optimal = ref('no');
@@ -124,6 +123,7 @@ onBeforeMount(async () => {
   dataset.value = await response.json();
   datasetId.value = dataset.value._id;
   datasetDate.value = dataset.value.dates.modification;
+  datasetPolarity.value = dataset.value.datalink.inline_data.visualization.better;
   formattedDate.value = formatDateString(datasetDate.value); // Format
   const data = dataset.value.datalink.inline_data;
   // Save original data for future use
@@ -295,13 +295,13 @@ async function optimalView() {
       const metricRange = maxMetric - minMetric;
 
       // Calculate new y-axis range with a slight buffer based on metric range
-      const minY = Math.max(0, minMetric - metricRange * 0.2); // Adjust the factor (0.05) as needed
-      const maxY = maxMetric + metricRange * 0.08; // Adjust the factor (0.05) as needed
+      const minY = Math.max(0, minMetric - metricRange * 0.2);
+      const maxY = maxMetric + metricRange * 0.08;
 
       // Update plot layout with new y-axis range
       Plotly.relayout('barPlot', { 'yaxis.range': [minY, maxY] });
 
-      // Animate the bars after adjusting the y-axis range
+      // Animate the bars
       animateBars(data);
 
       // Update optimal value to indicate optimal view is active
@@ -512,7 +512,7 @@ function addQuartileLabels() {
         y: 1.1, // Top of the chart
         xref: 'x',
         yref: 'paper',
-        text: `${quartile}Q`,
+        text: `Q${quartile}`,
         showarrow: false,
         font: {
           size: 16,
@@ -597,19 +597,35 @@ function calculateQuartiles(data) {
   // Create an object to store metric positions
   const metricPositions = {};
 
-  // Assign positions to metrics based on quartiles
+  // Assign positions to metrics based on quartiles with the polarity of the dataset
+
+
   data.forEach(entry => {
     const metricValue = entry.metric_value;
 
-    if (metricValue <= q1) {
-      metricPositions[entry.tool_id] = { quartile: 1, bgColor: 'rgb(237, 248, 233)' };
-    } else if (metricValue > q1 && metricValue <= q2) {
-      metricPositions[entry.tool_id] = { quartile: 2, bgColor: 'rgb(186, 228, 179)' };
-    } else if (metricValue > q2 && metricValue < q3) {
-      metricPositions[entry.tool_id] = { quartile: 3, bgColor: 'rgb(116, 196, 118)' };
-    } else if (metricValue >= q3) {
-      metricPositions[entry.tool_id] = { quartile: 4, bgColor: 'rgb(35, 139, 69)' };
+    if (datasetPolarity.value === "minimum") {
+      if (metricValue <= q1) {
+        metricPositions[entry.tool_id] = { quartile: 1, bgColor: 'rgb(237, 248, 233)' };
+      } else if (metricValue > q1 && metricValue <= q2) {
+        metricPositions[entry.tool_id] = { quartile: 2, bgColor: 'rgb(186, 228, 179)' };
+      } else if (metricValue > q2 && metricValue < q3) {
+        metricPositions[entry.tool_id] = { quartile: 3, bgColor: 'rgb(116, 196, 118)' };
+      } else if (metricValue >= q3) {
+        metricPositions[entry.tool_id] = { quartile: 4, bgColor: 'rgb(35, 139, 69)' };
+      }
+    } else {
+      if (metricValue <= q1) {
+        metricPositions[entry.tool_id] = { quartile: 4, bgColor: 'rgb(35, 139, 69)' };
+      } else if (metricValue > q1 && metricValue <= q2) {
+        metricPositions[entry.tool_id] = { quartile: 3, bgColor: 'rgb(116, 196, 118)' };
+      } else if (metricValue > q2 && metricValue < q3) {
+        metricPositions[entry.tool_id] = { quartile: 2, bgColor: 'rgb(186, 228, 179)' };
+      } else if (metricValue >= q3) {
+        metricPositions[entry.tool_id] = { quartile: 1, bgColor: 'rgb(237, 248, 233)' };
+      }
     }
+
+
   });
 
   return metricPositions;
