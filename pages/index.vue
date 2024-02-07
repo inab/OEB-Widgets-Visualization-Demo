@@ -26,8 +26,9 @@
           <div v-if="loading" class="spinner-container">
             <b-spinner type="grow" label="Loading..." style="width: 3rem; height: 3rem; color: #0b579f;"></b-spinner>
           </div>
-          <transition name="fade">
-            <BarPlot v-if="!loading" />
+          <transition v-else name="fade">
+            <BarPlot v-if="isBarPlotType" :jsonData="fetchedData" />
+            <div v-else>hello</div>
           </transition>
         </b-card>
       </b-col>
@@ -50,20 +51,33 @@ export default {
   data() {
     return {
       loading: true, // Initial loading state
+      fetchedData: null,
+      isBarPlotType: null
     }
   },
-  mounted() {
-    // Simulate an asynchronous operation (e.g., fetching data)
+
+  async mounted() {
+    // Simulate an asynchronous operation to better layout
     setTimeout(() => {
-      this.loading = false; // Set loading to false when the operation is complete
-    }, 1000); // Adjust the time according to your needs
+      this.loading = false;
+    }, 1000);
+
+     // Fetch your data
+     const response = await fetch('/OEBD004000000D.json'); //endpoint to db
+    this.fetchedData = await response.json();
+
+    if (this.fetchedData) {
+      if (this.fetchedData.datalink.inline_data.visualization && this.fetchedData.datalink.inline_data.visualization.type === 'bar-plot') {
+        this.isBarPlotType = true;
+      }
+    }
+
   },
 
 }
 </script>
 
 <style scoped>
-
 .background {
   background-color: gray !important;
 }
@@ -81,11 +95,13 @@ export default {
 }
 
 /* Add a custom fade transition */
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.5s;
 }
 
-.fade-enter, .fade-leave-to {
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
 }
 </style>

@@ -97,6 +97,8 @@ import { sortBy } from 'lodash';
 const { jsPDF } = require('jspdf');
 const html2canvas = require('html2canvas');
 
+const props = defineProps(['jsonData'])
+
 
 const loading = ref(false); // Loading state
 const dataset = ref(null);
@@ -119,8 +121,8 @@ const quartileDataArray = computed(() => {
 onBeforeMount(async () => {
   const Plotly = require('plotly.js-dist');
   loading.value = true;
-  const response = await fetch('/OEBD004000000D.json');
-  dataset.value = await response.json();
+  dataset.value = await props.jsonData
+  console.log(dataset.value);
   datasetId.value = dataset.value._id;
   datasetDate.value = dataset.value.dates.modification;
   datasetPolarity.value = dataset.value.datalink.inline_data.visualization.better;
