@@ -109,13 +109,6 @@
           "stderr_y": 0.00095600557
         },
         {
-          "tool_id": "OrthoFFGC",
-          "metric_x": 88679,
-          "stderr_x": 0,
-          "metric_y": 0.97539703,
-          "stderr_y": 0.0007281592
-        },
-        {
           "tool_id": "MetaPhOrs_v2.5",
           "metric_x": 167097,
           "stderr_x": 0,
@@ -208,10 +201,6 @@
           "dataset_orig_id": "QfO:2022_SonicParanoid2-sens_P"
         },
         {
-          "label": "OrthoFFGC",
-          "dataset_orig_id": "QfO:2022_OrthoFFGC_P"
-        },
-        {
           "label": "MetaPhOrs_v2.5",
           "dataset_orig_id": "QfO:2022_MetaPhOrs_v2.5_P"
         },
@@ -289,9 +278,6 @@
         "dataset_id": "OEBD00200003D0"
       },
       {
-        "dataset_id": "OEBD00200003E6"
-      },
-      {
         "dataset_id": "OEBD00200003FQ"
       },
       {
@@ -344,9 +330,6 @@
       },
       {
         "dataset_id": "OEBD00200003D1"
-      },
-      {
-        "dataset_id": "OEBD00200003E7"
       },
       {
         "dataset_id": "OEBD00200003FR"
