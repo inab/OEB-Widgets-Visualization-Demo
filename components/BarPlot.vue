@@ -97,10 +97,11 @@ import { sortBy } from 'lodash';
 const { jsPDF } = require('jspdf');
 const html2canvas = require('html2canvas');
 
+// DATA RETRIEVE
 const props = defineProps(['jsonData'])
 
 
-const loading = ref(false); // Loading state
+const loading = ref(false);
 const dataset = ref(null);
 const originalData = ref(null);
 const datasetId = ref(null);
@@ -113,21 +114,27 @@ const quartileData = ref({});
 const quartileDataArray = computed(() => {
   // Convert quartileData object into an array of objects
   const array = Object.entries(quartileData.value).map(([tool, quartile]) => ({ tool, quartile }));
-  // Sort the array alphabetically by the 'tool' property
+  // Sort the array alphabetically
   return array.sort((a, b) => a.tool.localeCompare(b.tool));
 });
 
 
+// ----------------------------------------------------------------
+// CREATE PLOT
+// ----------------------------------------------------------------
 onBeforeMount(async () => {
   const Plotly = require('plotly.js-dist');
   loading.value = true;
+
+  // Dataset values
   dataset.value = await props.jsonData
-  console.log(dataset.value);
+  const data = dataset.value.datalink.inline_data;
+
   datasetId.value = dataset.value._id;
   datasetDate.value = dataset.value.dates.modification;
   datasetPolarity.value = dataset.value.datalink.inline_data.visualization.better;
-  formattedDate.value = formatDateString(datasetDate.value); // Format
-  const data = dataset.value.datalink.inline_data;
+  formattedDate.value = formatDateString(datasetDate.value); // Format the date
+
   // Save original data for future use
   originalData.value = data;
 
@@ -195,7 +202,7 @@ onBeforeMount(async () => {
 
   const myPlot = document.getElementById('barPlot');
 
-
+  // Change the color of tghe bars on hover.
   myPlot.on('plotly_hover', function (event) {
     const pn = event.points[0].pointNumber;
     const hoverColors = Array(x.length).fill('#0b579f'); // Reset colors
@@ -212,7 +219,7 @@ onBeforeMount(async () => {
     Plotly.restyle('barPlot', update);
   });
 
-  // Simulate fetching data (replace this with your actual data fetching logic)
+  // Simulate fetching data with animation
   setTimeout(() => {
     const actualTrace = {
       y: data.challenge_participants.map(entry => entry.metric_value),
@@ -231,6 +238,7 @@ onBeforeMount(async () => {
 
   }, 500);
 
+  // Set up of the cursor inside the plot. Set default.
   // Select all SVG rect elements with class 'cursor-pointer' within the chart container
   const chartContainer = document.getElementById('barPlot');
   // Add a mouseover event listener to the chart container
@@ -245,7 +253,12 @@ onBeforeMount(async () => {
   });
 })
 
+// ----------------------------------------------------------------
+// FUNCTIONS
+// ----------------------------------------------------------------
 
+// ANIMATIONS
+// ----------------------------------------------------------------
 
 function animateBars(data) {
   const Plotly = require('plotly.js-dist');
@@ -274,6 +287,35 @@ function animateBars(data) {
   });
 }
 
+function animateLine(shapeIndex) {
+  const Plotly = require('plotly.js-dist');
+  const layout = document.getElementById('barPlot').layout;
+  const shape = layout.shapes[shapeIndex];
+  const yTarget = 1.1; // End at the top
+
+  let y = 0; // Start from the bottom
+
+  const animateStep = () => {
+    if (y <= yTarget) {
+      // Update the y-coordinate of the line shape
+      shape.y1 = y;
+
+      // Update the layout with the modified shape
+      Plotly.relayout('barPlot', { shapes: layout.shapes });
+
+      // Increment y and trigger the next animation step
+      y += 0.03; // Adjust the speed as needed
+      requestAnimationFrame(animateStep);
+    }
+  };
+
+  // Start the animation
+  animateStep();
+}
+
+
+// BUTTON OPTIMAL VIEW
+// ----------------------------------------------------------------
 async function optimalView() {
   try {
     if (optimal.value === 'no') {
@@ -339,7 +381,8 @@ async function optimalView() {
 
 
 
-
+// BUTTON SORT & CLASSIFY
+// ----------------------------------------------------------------
 async function toggleSortOrder() {
   try {
     if (sortOrder.value === 'raw') {
@@ -378,6 +421,9 @@ async function toggleSortOrder() {
   }
 }
 
+
+// PLOT LAYOUT
+// ----------------------------------------------------------------
 function addLinesBetweenQuartiles() {
   const Plotly = require('plotly.js-dist');
   const layout = document.getElementById('barPlot').layout;
@@ -422,31 +468,6 @@ function addLinesBetweenQuartiles() {
   Plotly.relayout('barPlot', { shapes: layout.shapes });
 }
 
-function animateLine(shapeIndex) {
-  const Plotly = require('plotly.js-dist');
-  const layout = document.getElementById('barPlot').layout;
-  const shape = layout.shapes[shapeIndex];
-  const yTarget = 1.1; // End at the top
-
-  let y = 0; // Start from the bottom
-
-  const animateStep = () => {
-    if (y <= yTarget) {
-      // Update the y-coordinate of the line shape
-      shape.y1 = y;
-
-      // Update the layout with the modified shape
-      Plotly.relayout('barPlot', { shapes: layout.shapes });
-
-      // Increment y and trigger the next animation step
-      y += 0.03; // Adjust the speed as needed
-      requestAnimationFrame(animateStep);
-    }
-  };
-
-  // Start the animation
-  animateStep();
-}
 
 function removeLinesBetweenQuartiles() {
   const Plotly = require('plotly.js-dist');
@@ -544,6 +565,8 @@ function clearQuartileLabels() {
   Plotly.relayout('barPlot', { annotations: layout.annotations });
 }
 
+
+
 function updateChart(data) {
   const Plotly = require('plotly.js-dist');
   const x = data.map(entry => entry.tool_id);
@@ -557,7 +580,8 @@ function updateChart(data) {
   Plotly.update('barPlot', update);
 }
 
-
+// CALCULATE QUARTILES
+// ----------------------------------------------------------------
 // Function to calculate medians in odd or even arrays.
 function calculateMedians(inputArray) {
   const sortedArray = [...inputArray].sort((a, b) => a - b);
@@ -634,7 +658,8 @@ function calculateQuartiles(data) {
 }
 
 
-
+// DOWNLOAD BUTTON
+// ----------------------------------------------------------------
 async function downloadChart(format) {
   try {
     const htmlToCanvas = async (element, options) => {
@@ -728,7 +753,8 @@ async function downloadChart(format) {
 
 
 
-
+// FORMAT DATE
+// ----------------------------------------------------------------
 function formatDateString(dateString) {
   const date = new Date(dateString);
   return date.toLocaleString("en-US", {

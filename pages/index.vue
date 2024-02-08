@@ -62,8 +62,8 @@ export default {
       this.loading = false;
     }, 1000);
 
-     // Fetch your data
-     const response = await fetch('/OEBD004000000D.json'); //endpoint to db
+    // Fetch your data
+    const response = await fetch('https://dev-openebench.bsc.es/api/scientific/staged/Dataset/OEBD004000000D?'); //endpoint to db rest to cofigure
     this.fetchedData = await response.json();
 
     if (this.fetchedData) {
