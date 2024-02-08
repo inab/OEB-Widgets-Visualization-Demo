@@ -96,8 +96,8 @@ const showShapesSquare = ref(false);
 const showAnnotationSquare = ref(false);
 const cuartilesData = ref([]);
 const toolID = ref([]);
-const coordenadasX = ref([]);
-const coordenadasY = ref([]);
+const xAxis = ref([]);
+const yAxis = ref([]);
 
 // view
 const viewApplied = ref(false);
@@ -122,8 +122,8 @@ onMounted(async () => {
 
     // Data for the Pareto frontier and Quartile
     // ----------------------------------------------------------------
-    coordenadasX.value = data.value.challenge_participants.map((participant) => participant.metric_x);
-    coordenadasY.value = data.value.challenge_participants.map((participant) => participant.metric_y);
+    xAxis.value = data.value.challenge_participants.map((participant) => participant.metric_x);
+    yAxis.value = data.value.challenge_participants.map((participant) => participant.metric_y);
     toolID.value = data.value.challenge_participants.map((participant) => participant.tool_id);
     // 
     const dataPoints = data.value.challenge_participants.map((participant) => ([
@@ -133,7 +133,8 @@ onMounted(async () => {
 
     // ----------------------------------------------------------------
     // PARETO
-    paretoPoints.value = pf.getParetoFrontier(dataPoints);
+    let direction = formatOptimalDisplay(visualization.optimization)
+    paretoPoints.value = pf.getParetoFrontier(dataPoints, { optimize: direction} );
 
     const globalParetoTrace = {
         x: paretoPoints.value.map((point) => point[0]),
@@ -321,8 +322,13 @@ onMounted(async () => {
 
                 }
 
-                // Si Square Quartile vista optima
-                optimalView()
+                if (viewSquare.value === true) {  
+                    const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
+                    const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
+                    calculateQuartiles(updatedXCoordinates.value, updatedYCoordinates.value);
+                    optimalView()
+                }
+
                 Plotly.update('scatter-plot', newTraces, {}, 1);
 
             }
@@ -338,7 +344,7 @@ const resetView = () => {
     const Plotly = require('plotly.js-dist');
     const layout = {
         xaxis: {
-            range: [0, Math.max(...coordenadasX.value) + 5000],
+            range: [0, Math.max(...xAxis.value) + 5000],
             title: {
                 text: dataset.value.datalink.inline_data.visualization.x_axis,
                 font: {
@@ -350,7 +356,7 @@ const resetView = () => {
             }
         },
         yaxis: {
-            range: [0, Math.max(...coordenadasY.value) + 0.05],
+            range: [0, Math.max(...yAxis.value) + 0.05],
             title: {
                 text: dataset.value.datalink.inline_data.visualization.y_axis,
                 font: {
@@ -410,11 +416,25 @@ const viewButtonText = computed(() => {
     return viewApplied.value ? 'Optimal View' : 'Reset View';
 });
 
+// PARETO FRONTIER
+// ----------------------------------------------------------------
+// format optimal view
+const formatOptimalDisplay = (optimization) => {
+    if (optimization == 'top-right'){
+        return 'topRight';
+    }else if (optimization == optimization == 'top-left'){
+        return 'topLeft';
+    }else if (optimization == 'bottom-right'){
+        return 'bottomRight';
+    }
+}
+
 // NO CLASSIFICATION
 // ----------------------------------------------------------------
 const noClassification = () => {
     cuartilesData.value = [];
     viewKmeans.value = false;
+    viewSquare.value = false;
     showShapesKmeans.value = false;
     showShapesSquare.value = false;
     showAnnotationSquare.value = false;
@@ -436,26 +456,28 @@ const toggleQuartilesVisibility = () => {
         showShapesSquare.value = !showShapesSquare.value;
         showAnnotationSquare.value = !showAnnotationSquare.value
         viewKmeans.value = false;
-        calculateQuartiles();
+        viewSquare.value = true;
+        // 
+        calculateQuartiles(xAxis.value, yAxis.value);
     }
 };
 
-const calculateQuartiles = () => {
+const calculateQuartiles = (xAxis, yAxis) => {
 
     const cuartilesX = [
-        statistics.quantile(coordenadasX.value, 0.25),
-        statistics.quantile(coordenadasX.value, 0.5),
-        statistics.quantile(coordenadasX.value, 0.75),
+        statistics.quantile(xAxis, 0.25),
+        statistics.quantile(xAxis, 0.5),
+        statistics.quantile(xAxis, 0.75),
     ];
     const cuartilesY = [
-        statistics.quantile(coordenadasY.value, 0.25),
-        statistics.quantile(coordenadasY.value, 0.5),
-        statistics.quantile(coordenadasY.value, 0.75),
+        statistics.quantile(yAxis, 0.25),
+        statistics.quantile(yAxis, 0.5),
+        statistics.quantile(yAxis, 0.75),
     ];
     cuartilesData.value = [];
     toolID.value.forEach((toolId, index) => {
-        const x = coordenadasX.value[index];
-        const y = coordenadasY.value[index];
+        const x = xAxis[index];
+        const y = yAxis[index];
         let cuartil;
 
         if (x <= cuartilesX[1] && y <= cuartilesY[1]) {
@@ -503,7 +525,7 @@ const calculateQuartiles = () => {
     ];
 
     // Annotations
-    annotationSquareQuartile(cuartilesData.value, toolID, coordenadasX, coordenadasY)
+    annotationSquareQuartile(cuartilesData.value, toolID, xAxis, yAxis)
     // Add Quartiles
     const layout = {
         shapes: showShapesSquare.value ? shapes : [],
@@ -513,7 +535,7 @@ const calculateQuartiles = () => {
 };
 
 // Annotation for Square Quartiles
-const annotationSquareQuartile = (cuartilesData, toolID, coordenadasX, coordenadasY) => {
+const annotationSquareQuartile = (cuartilesData, toolID, xAxis, yAxis) => {
     const cuartilPositions = {};
     cuartilesData.forEach((item) => {
         const toolIndex = toolID.value.indexOf(item.tool_id);
@@ -524,8 +546,8 @@ const annotationSquareQuartile = (cuartilesData, toolID, coordenadasX, coordenad
                 count: 0,
             };
         }
-        cuartilPositions[item.cuartil].x += coordenadasX.value[toolIndex];
-        cuartilPositions[item.cuartil].y += coordenadasY.value[toolIndex];
+        cuartilPositions[item.cuartil].x += xAxis[toolIndex];
+        cuartilPositions[item.cuartil].y += yAxis[toolIndex];
         cuartilPositions[item.cuartil].count += 1;
     });
     let coordenadasCuartil = []
@@ -641,6 +663,7 @@ const asignaPositionCuartil = (coordenadasCuartil) => {
 // ----------------------------------------------------------------
 const toggleKmeansVisibility = () => {
     viewKmeans.value = true;
+    viewSquare.value = false;
     if (!showShapesKmeans.value) {
         showShapesKmeans.value = !showShapesKmeans.value;
         updatePlotVisibility();
@@ -771,7 +794,7 @@ const normalize_data = (x_values, y_values) => {
 }
 
 const sortByKey = (array, key) => {
-    return array.sort(function(a, b) {
+    return array.sort(function (a, b) {
         var x = a[key]; var y = b[key];
         return ((x < y) ? -1 : ((x > y) ? 1 : 0)) * -1;
     });
