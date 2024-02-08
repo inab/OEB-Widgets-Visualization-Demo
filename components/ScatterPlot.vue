@@ -669,13 +669,11 @@ const createShapeClustering = (dataPoints) => {
 
     // Obtener los resultados de los clusters
     let results = clusterMaker.clusters();
-    
-    // Ordenar result para en funcion de la optimal corner.
-    let sorted_results = orderResultKMeans(results)
-
+    let sortedResults = JSON.parse(JSON.stringify(results));
+    orderResultKMeans(sortedResults)
 
     // Crear shapes basados en los clusters
-    shapes = results.map((cluster) => {
+    shapes = sortedResults.map((cluster) => {
         const xValues = cluster.points.map(point => point[0]);
         const yValues = cluster.points.map(point => point[1]);
         return {
@@ -696,7 +694,7 @@ const createShapeClustering = (dataPoints) => {
 
     // Crear annotations para los centroides de los clusters
     let count = 0;
-    annotationKmeans = results.map((cluster) => {
+    annotationKmeans = sortedResults.map((cluster) => {
         const centroidX = cluster.centroid[0];
         const centroidY = cluster.centroid[1];
         count++;
@@ -719,12 +717,12 @@ const createShapeClustering = (dataPoints) => {
 
 }
 
-// Ordenas Resulr K-means
-const orderResultKMeans = (results) => {
+// Sorted Results K-means
+const orderResultKMeans = (sortedResults) => {
     // normalize data to 0-1 range
     let centroids_x = []
     let centroids_y = []
-    results.forEach(function (element) {
+    sortedResults.forEach(function (element) {
         centroids_x.push(element.centroid[0])
         centroids_y.push(element.centroid[1])
     })
@@ -737,26 +735,24 @@ const orderResultKMeans = (results) => {
         for (let i = 0; i < x_norm.length; i++) {
             let distance = x_norm[i] + y_norm[i];
             scores.push(distance);
-            results[i]['score'] = distance;
+            sortedResults[i]['score'] = distance;
         };
 
     } else if (better == "bottom-right") {
         for (let i = 0; i < x_norm.length; i++) {
             let distance = x_norm[i] + (1 - y_norm[i]);
             scores.push(distance);
-            results[i]['score'] = distance;
+            sortedResults[i]['score'] = distance;
         };
     } else if (better == "top-left") {
         for (let i = 0; i < x_norm.length; i++) {
             let distance = (1 - x_norm[i]) + y_norm[i];
             scores.push(distance);
-            results[i]['score'] = distance;
+            sortedResults[i]['score'] = distance;
         };
     };
 
-    let sorted_results = sortByKey(results, "score");
-
-    return sorted_results
+    sortByKey(sortedResults, "score");
 }
 
 const normalize_data = (x_values, y_values) => {
