@@ -64,7 +64,7 @@
 
 <script setup>
 const pf = require('pareto-frontier');
-const clustering = require('density-clustering');
+var clusterMaker = require('clusters');
 import { onMounted, ref, computed } from 'vue';
 import * as statistics from 'simple-statistics';
 
@@ -315,14 +315,14 @@ onMounted(async () => {
                     showShapesKmeans.value = true;
                     const layout = {
                         shapes: showShapesKmeans.value ? shapes : [],
-                        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+                        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans)
                     };
                     Plotly.update('scatter-plot', newTraces, layout, 1);
 
                 }
 
                 // Si Square Quartile vista optima
-                // optimalView()
+                optimalView()
                 Plotly.update('scatter-plot', newTraces, {}, 1);
 
             }
@@ -656,28 +656,36 @@ const updatePlotVisibility = () => {
     const Plotly = require('plotly.js-dist');
     const layout = {
         shapes: showShapesKmeans.value ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans),
     };
     Plotly.update('scatter-plot', {}, layout);
 };
 
 const createShapeClustering = (dataPoints) => {
 
-    // ----------------------------------------------------------------
-    // K-Means Clustering
-    const kmeans = new clustering.KMEANS();
-    const clusters = kmeans.run(dataPoints, 4);
+    clusterMaker.k(4);
+    clusterMaker.iterations(500); // Número de iteraciones (mayor número da más tiempo para converger)
+    clusterMaker.data(dataPoints);
 
-    // Create shapes based on clusters
-    shapes = clusters.map((cluster) => {
-        const xValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][0]);
-        const yValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][1]);
+    // Obtener los resultados de los clusters
+    let results = clusterMaker.clusters();
+    
+    // Ordenar result para en funcion de la optimal corner.
+    let sorted_results = orderResultKMeans(results)
+
+
+    // Crear shapes basados en los clusters
+    shapes = results.map((cluster) => {
+        const xValues = cluster.points.map(point => point[0]);
+        const yValues = cluster.points.map(point => point[1]);
         return {
             type: 'rect',
             xref: 'x',
             yref: 'y',
-            x0: Math.min(...xValues), y0: Math.min(...yValues),
-            x1: Math.max(...xValues), y1: Math.max(...yValues),
+            x0: Math.min(...xValues),
+            y0: Math.min(...yValues),
+            x1: Math.max(...xValues),
+            y1: Math.max(...yValues),
             opacity: 0.2,
             fillcolor: 'rgba(0, 72, 129, 183)',
             line: {
@@ -686,18 +694,19 @@ const createShapeClustering = (dataPoints) => {
         };
     });
 
-    let count = 0
-    annotationKmeans = clusters.map((cluster) => {
-        const xValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][0]);
-        const yValues = cluster.map((dataPointIndex) => dataPoints[dataPointIndex][1]);
-        count = count + 1;
+    // Crear annotations para los centroides de los clusters
+    let count = 0;
+    annotationKmeans = results.map((cluster) => {
+        const centroidX = cluster.centroid[0];
+        const centroidY = cluster.centroid[1];
+        count++;
 
         return {
             xref: 'x',
             yref: 'y',
-            x: Math.max(...xValues),
+            x: centroidX,
             xanchor: 'right',
-            y: Math.max(...yValues),
+            y: centroidY,
             yanchor: 'bottom',
             text: count,
             showarrow: false,
@@ -706,10 +715,70 @@ const createShapeClustering = (dataPoints) => {
                 color: '#5A88B5'
             }
         };
-
     });
 
-    // return shapes
+}
+
+// Ordenas Resulr K-means
+const orderResultKMeans = (results) => {
+    // normalize data to 0-1 range
+    let centroids_x = []
+    let centroids_y = []
+    results.forEach(function (element) {
+        centroids_x.push(element.centroid[0])
+        centroids_y.push(element.centroid[1])
+    })
+
+    let [x_norm, y_norm] = normalize_data(centroids_x, centroids_y)
+
+    let scores = [];
+    let better = data.value.visualization.optimization
+    if (better == "top-right") {
+        for (let i = 0; i < x_norm.length; i++) {
+            let distance = x_norm[i] + y_norm[i];
+            scores.push(distance);
+            results[i]['score'] = distance;
+        };
+
+    } else if (better == "bottom-right") {
+        for (let i = 0; i < x_norm.length; i++) {
+            let distance = x_norm[i] + (1 - y_norm[i]);
+            scores.push(distance);
+            results[i]['score'] = distance;
+        };
+    } else if (better == "top-left") {
+        for (let i = 0; i < x_norm.length; i++) {
+            let distance = (1 - x_norm[i]) + y_norm[i];
+            scores.push(distance);
+            results[i]['score'] = distance;
+        };
+    };
+
+    let sorted_results = sortByKey(results, "score");
+
+    return sorted_results
+}
+
+const normalize_data = (x_values, y_values) => {
+    let maxX = Math.max.apply(null, x_values);
+    let maxY = Math.max.apply(null, y_values);
+
+    let x_norm = x_values.map(function (e) {
+        return e / maxX;
+    });
+
+    let y_norm = y_values.map(function (e) {
+        return e / maxY;
+    });
+
+    return [x_norm, y_norm];
+}
+
+const sortByKey = (array, key) => {
+    return array.sort(function(a, b) {
+        var x = a[key]; var y = b[key];
+        return ((x < y) ? -1 : ((x > y) ? 1 : 0)) * -1;
+    });
 }
 
 
