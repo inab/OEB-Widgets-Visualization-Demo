@@ -36,6 +36,13 @@
         <!-- Scatter Plot -->
         <div id="scatter-plot"></div>
 
+        <!-- Error message -->
+        <div>
+            <b-alert :show="dismissCountDown > 0" dismissible variant="danger" @dismissed="dismissCountDown = 0"
+                @dismiss-count-down="countDownChanged">
+                At least four participants are required for the benchmark!!
+            </b-alert>
+        </div>
 
         <!-- Table -->
         <div id="tableSQ" class="">
@@ -46,18 +53,11 @@
                 </tr>
                 <tr v-for="item in cuartilesData" :key="item.tool_id">
                     <td>{{ item.tool_id }}</td>
-                    <td :class="'quartil-' + item.cuartil">{{ item.cuartil }}</td>
+                    <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
                 </tr>
             </table>
         </div>
 
-        <!-- Error message -->
-        <div>
-            <b-alert :show="dismissCountDown > 0" dismissible variant="danger" @dismissed="dismissCountDown = 0"
-                @dismiss-count-down="countDownChanged">
-                At least four participants are required for the benchmark!!
-            </b-alert>
-        </div>
 
     </div>
 </template>
@@ -134,7 +134,7 @@ onMounted(async () => {
     // ----------------------------------------------------------------
     // PARETO
     let direction = formatOptimalDisplay(visualization.optimization)
-    paretoPoints.value = pf.getParetoFrontier(dataPoints, { optimize: direction} );
+    paretoPoints.value = pf.getParetoFrontier(dataPoints, { optimize: direction });
 
     const globalParetoTrace = {
         x: paretoPoints.value.map((point) => point[0]),
@@ -322,10 +322,14 @@ onMounted(async () => {
 
                 }
 
-                if (viewSquare.value === true) {  
+
+                if (viewSquare.value === true) {
                     const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
                     const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
-                    calculateQuartiles(updatedXCoordinates.value, updatedYCoordinates.value);
+                    // añadir las herramientas visibles para la tabla
+                    // toolID.value.splice(traceIndex,1)
+
+                    calculateQuartiles(updatedXCoordinates.value, updatedYCoordinates.value, traceIndex);
                     optimalView()
                 }
 
@@ -420,11 +424,11 @@ const viewButtonText = computed(() => {
 // ----------------------------------------------------------------
 // format optimal view
 const formatOptimalDisplay = (optimization) => {
-    if (optimization == 'top-right'){
+    if (optimization == 'top-right') {
         return 'topRight';
-    }else if (optimization == optimization == 'top-left'){
+    } else if (optimization == optimization == 'top-left') {
         return 'topLeft';
-    }else if (optimization == 'bottom-right'){
+    } else if (optimization == 'bottom-right') {
         return 'bottomRight';
     }
 }
@@ -458,11 +462,12 @@ const toggleQuartilesVisibility = () => {
         viewKmeans.value = false;
         viewSquare.value = true;
         // 
+        // Tengo que añadirle los datos de forma diferente. ToolId para poder pasarle los nuevos datos al quitar una tool
         calculateQuartiles(xAxis.value, yAxis.value);
     }
 };
 
-const calculateQuartiles = (xAxis, yAxis) => {
+const calculateQuartiles = (xAxis, yAxis, traceIndex = null) => {
 
     const cuartilesX = [
         statistics.quantile(xAxis, 0.25),
@@ -474,29 +479,10 @@ const calculateQuartiles = (xAxis, yAxis) => {
         statistics.quantile(yAxis, 0.5),
         statistics.quantile(yAxis, 0.75),
     ];
-    cuartilesData.value = [];
-    toolID.value.forEach((toolId, index) => {
-        const x = xAxis[index];
-        const y = yAxis[index];
-        let cuartil;
 
-        if (x <= cuartilesX[1] && y <= cuartilesY[1]) {
-            cuartil = '1';
-            // cuartil = '4';
-        } else if (x > cuartilesX[1] && y <= cuartilesY[2] && y > cuartilesY[1]) {
-            cuartil = '2';
-            // cuartil = '1';
-        } else if (x <= cuartilesX[1] && y > cuartilesY[1]) {
-            cuartil = '3';
-            // cuartil = '2';
-        } else {
-            cuartil = '4';
-            // cuartil = '3';
-        }
-        cuartilesData.value.push({ tool_id: toolId, cuartil });
-    });
+    let better = data.value.visualization.optimization
+    squareClassificationTools(better, toolID, cuartilesX[1], cuartilesY[1], xAxis, yAxis, traceIndex)
 
-    // Create quartile lines to the layout
     const shapes = [
         {
             type: 'line',
@@ -523,9 +509,8 @@ const calculateQuartiles = (xAxis, yAxis) => {
             }
         },
     ];
-
     // Annotations
-    annotationSquareQuartile(cuartilesData.value, toolID, xAxis, yAxis)
+    annotationSquareQuartile(better)
     // Add Quartiles
     const layout = {
         shapes: showShapesSquare.value ? shapes : [],
@@ -534,31 +519,79 @@ const calculateQuartiles = (xAxis, yAxis) => {
     Plotly.relayout('scatter-plot', layout);
 };
 
+// 
+const squareClassificationTools = (better, toolID, cuartilesX, cuartilesY, xAxis, yAxis, traceIndex) => {
+    cuartilesData.value = [];
+
+    if (better == "bottom-right") {
+        toolID.value.forEach((tool, index) => {
+            const x = xAxis[index];
+            const y = yAxis[index];
+            let cuartil;
+
+            if (x >= cuartilesX && y <= cuartilesY) {
+                cuartil = 1;
+            } else if (x >= cuartilesX && y > cuartilesY) {
+                cuartil = 3;
+            } else if (x < cuartilesX && y > cuartilesY) {
+                cuartil = 4;
+            } else if (x < cuartilesX && y <= cuartilesY) {
+                cuartil = 2;
+            }
+            cuartilesData.value.push({ tool_id: tool, cuartil: cuartil });
+        });
+    } else if (better == "top-right") {
+        toolID.value.forEach((tool, index) => {
+        
+        let cuartil, label;
+        const x = xAxis[index];
+        const y = yAxis[index];
+
+            if (x >= cuartilesX && y < cuartilesY) {
+                cuartil = 3; // 3
+                label = 'M';
+            } else if (x >= cuartilesX && y >= cuartilesY) {
+                cuartil = 1; // 1
+                label = 'T';
+            } else if (x < cuartilesX && y >= cuartilesY) {
+                cuartil = 2; // 2
+                label = 'M';
+            } else if (x < cuartilesX && y < cuartilesY) {
+                cuartil = 4; // 4
+                label = 'B';
+            }else{
+                cuartil = 0; // 3
+                label = '--';
+            }
+        
+
+            cuartilesData.value.push({ tool_id: tool, cuartil: cuartil, label: label });
+        });
+    } else if (better == "top-left") {
+        toolID.value.forEach((tool, index) => {
+            const x = xAxis[index];
+            const y = yAxis[index];
+            let cuartil;
+
+            if (x >= cuartilesX && y < cuartilesY) {
+                cuartil = 4;
+            } else if (x >= cuartilesX && y >= cuartilesY) {
+                cuartil = 2;
+            } else if (x < cuartilesX && y >= cuartilesY) {
+                cuartil = 1;
+            } else if (x < cuartilesX && y < cuartilesY) {
+                cuartil = 3;
+            }
+            cuartilesData.value.push({ tool_id: tool, cuartil: cuartil });
+        });
+    }
+}
+
 // Annotation for Square Quartiles
-const annotationSquareQuartile = (cuartilesData, toolID, xAxis, yAxis) => {
-    const cuartilPositions = {};
-    cuartilesData.forEach((item) => {
-        const toolIndex = toolID.value.indexOf(item.tool_id);
-        if (!cuartilPositions[item.cuartil]) {
-            cuartilPositions[item.cuartil] = {
-                x: 0,
-                y: 0,
-                count: 0,
-            };
-        }
-        cuartilPositions[item.cuartil].x += xAxis[toolIndex];
-        cuartilPositions[item.cuartil].y += yAxis[toolIndex];
-        cuartilPositions[item.cuartil].count += 1;
-    });
-    let coordenadasCuartil = []
-    const getCoordenadasByCuartil = Object.keys(cuartilPositions).map((cuartil) => {
-        const avgX = cuartilPositions[cuartil].x / cuartilPositions[cuartil].count;
-        const avgY = cuartilPositions[cuartil].y / cuartilPositions[cuartil].count;
-        coordenadasCuartil.push({ x: avgX, y: avgY, numCuartil: cuartil })
-    });
+const annotationSquareQuartile = (better) => {
 
     // Create Annotation
-    let position = asignaPositionCuartil(coordenadasCuartil)
+    let position = asignaPositionCuartil(better)
     const newAnnotation = position.map(({ position, numCuartil }) => {
         let annotation = {};
         switch (position) {
@@ -641,19 +674,34 @@ const annotationSquareQuartile = (cuartilesData, toolID, xAxis, yAxis) => {
 }
 
 // Asigna position
-const asignaPositionCuartil = (coordenadasCuartil) => {
-    const positions = coordenadasCuartil.map((point, index) => {
-        const nextIndex = (index + 1) % 4;
-        const position =
-            index === 0
-                ? 'bottom-left'
-                : index === 1
-                    ? 'top-right'
-                    : nextIndex === 0
-                        ? 'bottom-right'
-                        : 'top-left';
-        return { position, numCuartil: point.numCuartil };
-    });
+const asignaPositionCuartil = (better) => {
+
+    // 1: tot, 2y3: Middle, 4:Botton
+    let num_bottom_right, num_bottom_left, num_top_right, num_top_left;
+    if (better == "bottom-right") {
+        num_bottom_right = "T"; // 1
+        num_bottom_left = "M"; // 2
+        num_top_right = "M"; // 3
+        num_top_left = "B"; // 4
+    }
+    else if (better == "top-right") {
+        num_bottom_right = "M"; // 3
+        num_bottom_left = "B"; // 4
+        num_top_right = "T"; // 1
+        num_top_left = "M"; // 2
+
+    } else if (better == "top-left") {
+        num_bottom_right = "B"; // 4
+        num_bottom_left = "M"; // 3
+        num_top_right = "M"; // 2
+        num_top_left = "T"; // 1
+    }
+
+    let positions = [{ position: 'bottom-right', numCuartil: num_bottom_right },
+    { position: 'bottom-left', numCuartil: num_bottom_left },
+    { position: 'top-right', numCuartil: num_top_right },
+    { position: 'top-left', numCuartil: num_top_left },]
+
     return positions
 };
 
@@ -693,7 +741,8 @@ const createShapeClustering = (dataPoints) => {
     // Obtener los resultados de los clusters
     let results = clusterMaker.clusters();
     let sortedResults = JSON.parse(JSON.stringify(results));
-    orderResultKMeans(sortedResults)
+    let better = data.value.visualization.optimization
+    orderResultKMeans(sortedResults, better)
 
     // Crear shapes basados en los clusters
     shapes = sortedResults.map((cluster) => {
@@ -741,7 +790,7 @@ const createShapeClustering = (dataPoints) => {
 }
 
 // Sorted Results K-means
-const orderResultKMeans = (sortedResults) => {
+const orderResultKMeans = (sortedResults, better) => {
     // normalize data to 0-1 range
     let centroids_x = []
     let centroids_y = []
@@ -753,7 +802,6 @@ const orderResultKMeans = (sortedResults) => {
     let [x_norm, y_norm] = normalize_data(centroids_x, centroids_y)
 
     let scores = [];
-    let better = data.value.visualization.optimization
     if (better == "top-right") {
         for (let i = 0; i < x_norm.length; i++) {
             let distance = x_norm[i] + y_norm[i];
@@ -1018,18 +1066,18 @@ function getSymbol() {
 }
 
 .quartil-1 {
-    background-color: #5495D6;
+    background-color: rgb(237, 248, 233);
 }
 
 .quartil-2 {
-    background-color: #7FB0E0;
+    background-color: rgb(186, 228, 179);
 }
 
 .quartil-3 {
-    background-color: #AACAEB;
+    background-color: rgb(116, 196, 118);
 }
 
 .quartil-4 {
-    background-color: #D4E5F5;
+    background-color: rgb(35, 139, 69);
 }
 </style>
