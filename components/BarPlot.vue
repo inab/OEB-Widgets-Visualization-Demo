@@ -93,7 +93,6 @@
 <script setup>
 import { onBeforeMount, ref } from 'vue';
 import { computed } from 'vue';
-import { sortBy } from 'lodash';
 const { jsPDF } = require('jspdf');
 const html2canvas = require('html2canvas');
 
@@ -325,7 +324,7 @@ async function optimalView() {
       let data;
       if (sortOrder.value !== 'raw') {
         // If data has been sorted, use the sorted data
-        data = sortBy(originalData.value.challenge_participants, entry => entry.metric_value).reverse();
+        data = originalData.value.challenge_participants.slice().sort((a, b) => b.metric_value - a.metric_value);
       } else {
         // Otherwise, use the original data
         data = originalData.value.challenge_participants;
@@ -355,7 +354,7 @@ async function optimalView() {
       let data;
       if (sortOrder.value !== 'raw') {
         // If data has been sorted, use the sorted data
-        data = sortBy(originalData.value.challenge_participants, entry => entry.metric_value).reverse();
+        data = originalData.value.challenge_participants.slice().sort((a, b) => b.metric_value - a.metric_value);
       } else {
         // Otherwise, use the original data
         data = originalData.value.challenge_participants;
@@ -387,7 +386,8 @@ async function toggleSortOrder() {
   try {
     if (sortOrder.value === 'raw') {
       // Sort logic (descending order)
-      const sortedData = sortBy(originalData.value.challenge_participants, entry => entry.metric_value).reverse();
+      const sortedData = originalData.value.challenge_participants.slice().sort((a, b) => b.metric_value - a.metric_value);
+
       updateChart(sortedData);
       // Call the animateBars function after updating the chart
       animateBars(sortedData);
@@ -674,55 +674,71 @@ async function downloadChart(format) {
       }
     };
 
+    const combineHTMLContent = async () => {
+      try {
+        const chartContent = document.getElementById('barPlot').outerHTML;
+        const idDateTableContent = document.getElementById('idDateTable').outerHTML;
+        const quartileTableContent = document.getElementById('quartileTable').outerHTML;
+
+        const combinedHTML = `
+          <div class="content-section">
+            ${chartContent}
+          </div>
+          <div class="content-section">
+            ${idDateTableContent}
+          </div>
+          <div class="content-section">
+            ${quartileTableContent}
+          </div>
+        `;
+
+        return combinedHTML;
+      } catch (error) {
+        console.error('Error combining HTML content:', error);
+        return null;
+      }
+    };
+
     const downloadPDF = (content) => {
       try {
-        const quartile = document.getElementById('quartileTable');
         const doc = new jsPDF();
         const pdfWidth = doc.internal.pageSize.getWidth(); // Get PDF page width
         const pdfHeight = doc.internal.pageSize.getHeight(); // Get PDF page height
-
-        // Calculate the width and height of the image
-        const imgWidth = 190; // Default width
-        let imgHeight = 100; // Default height
-        if (content.width && content.height) {
-          // If content has width and height properties, use them to calculate aspect ratio
-          const aspectRatio = content.width / content.height;
-          imgHeight = imgWidth / aspectRatio;
-        }
-
-        // Adjust image height based on whether quartile table is present
-        if (quartile) {
-          imgHeight = 190; // Adjusted height if quartile table is present
-        }
 
         // Calculate margins or padding for the PDF content
         const marginX = 30; // Margin or padding on the left and right sides
         const marginY = 30; // Margin or padding on the top and bottom sides
 
         // Add the image to the PDF with margins or padding
-        doc.addImage(content, 'PNG', marginX, marginY, pdfWidth - 2 * marginX, imgHeight);
-
-        // Return the generated PDF data URI
-        return doc.save(`benchmarking_chart_${datasetId.value}.${format}`);
+        doc.html(content, {
+          callback: () => {
+            doc.save(`combined_content.${format}`);
+          },
+          margin: { top: marginY, bottom: marginY, left: marginX, right: marginX },
+        });
       } catch (error) {
         console.error('Error generating PDF:', error);
-        return null;
       }
     };
 
-    const toDownloadDiv = document.getElementById('todownload');
-    const divBounds = toDownloadDiv.getBoundingClientRect();
+    const combinedHTML = await combineHTMLContent();
 
-    const downloadCanvas = await htmlToCanvas(toDownloadDiv, {
+    // Convert combinedHTML string to DOM element
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = combinedHTML;
+
+    const downloadCanvas = await htmlToCanvas(tempElement, {
       scrollX: 0,
       scrollY: 0,
-      width: divBounds.width,
-      height: divBounds.height,
+      width: tempElement.offsetWidth,
+      height: tempElement.offsetHeight,
     });
     const downloadImage = canvasToImage(downloadCanvas, format);
 
     if (format === 'pdf') {
-      await downloadPDF(downloadCanvas);
+      if (combinedHTML) {
+        await downloadPDF(combinedHTML);
+      }
     } else if (format === 'svg') {
       const Plotly = require('plotly.js-dist');
       const chart = document.getElementById('barPlot');
