@@ -96,6 +96,7 @@ const showShapesSquare = ref(false);
 const showAnnotationSquare = ref(false);
 const cuartilesData = ref([]);
 const toolID = ref([]);
+const allToolID = ref([]);
 const xAxis = ref([]);
 const yAxis = ref([]);
 
@@ -125,6 +126,8 @@ onMounted(async () => {
     xAxis.value = data.value.challenge_participants.map((participant) => participant.metric_x);
     yAxis.value = data.value.challenge_participants.map((participant) => participant.metric_y);
     toolID.value = data.value.challenge_participants.map((participant) => participant.tool_id);
+    allToolID.value = data.value.challenge_participants.map((participant) => participant.tool_id);
+
     // 
     const dataPoints = data.value.challenge_participants.map((participant) => ([
         participant.metric_x,
@@ -255,7 +258,7 @@ onMounted(async () => {
         optimalYaxis.value = layoutObj.yaxis.range;
     });
 
-    // Update Pareto Frontier 
+    // Update Data 
     scatterPlot.then((gd) => {
         gd.on('plotly_legendclick', (event) => {
             let traceIndex = event.curveNumber;
@@ -322,14 +325,20 @@ onMounted(async () => {
 
                 }
 
-
                 if (viewSquare.value === true) {
                     const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
                     const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
-                    // añadir las herramientas visibles para la tabla
-                    // toolID.value.splice(traceIndex,1)
 
-                    calculateQuartiles(updatedXCoordinates.value, updatedYCoordinates.value, traceIndex);
+                    // Create a list of visible tools with their hiding status
+                    const visibleTools = toolID.value.map((tool, index) => ({
+                        name: tool,
+                        hidden: dataPoints[index].hidden
+                    })).filter(tool => !tool.hidden);
+
+                    // List of visible tools
+                    const visibleToolNames = visibleTools.map(tool => tool.name);
+                    // Update data with visible tools
+                    calculateQuartiles(updatedXCoordinates.value, updatedYCoordinates.value, visibleToolNames);
                     optimalView()
                 }
 
@@ -461,35 +470,26 @@ const toggleQuartilesVisibility = () => {
         showAnnotationSquare.value = !showAnnotationSquare.value
         viewKmeans.value = false;
         viewSquare.value = true;
-        // 
-        // Tengo que añadirle los datos de forma diferente. ToolId para poder pasarle los nuevos datos al quitar una tool
-        calculateQuartiles(xAxis.value, yAxis.value);
+        // Calculate quartiles and create annotations on the graph.
+        calculateQuartiles(xAxis.value, yAxis.value, toolID.value);
     }
 };
 
-const calculateQuartiles = (xAxis, yAxis, traceIndex = null) => {
+const calculateQuartiles = (xAxis, yAxis, toolID) => {
 
-    const cuartilesX = [
-        statistics.quantile(xAxis, 0.25),
-        statistics.quantile(xAxis, 0.5),
-        statistics.quantile(xAxis, 0.75),
-    ];
-    const cuartilesY = [
-        statistics.quantile(yAxis, 0.25),
-        statistics.quantile(yAxis, 0.5),
-        statistics.quantile(yAxis, 0.75),
-    ];
+    const cuartilesX = statistics.quantile(xAxis, 0.5);
+    const cuartilesY = statistics.quantile(yAxis, 0.5);
 
     let better = data.value.visualization.optimization
-    squareClassificationTools(better, toolID, cuartilesX[1], cuartilesY[1], xAxis, yAxis, traceIndex)
+    squareClassificationTools(better, toolID, cuartilesX, cuartilesY, xAxis, yAxis)
 
     const shapes = [
         {
             type: 'line',
-            x0: cuartilesX[1],
-            x1: cuartilesX[1],
+            x0: cuartilesX,
+            x1: cuartilesX,
             y0: 0,
-            y1: Math.max(...cuartilesY) + 10,
+            y1: Math.max(cuartilesY) + 10,
             line: {
                 color: '#C0D4E8',
                 width: 2,
@@ -498,10 +498,10 @@ const calculateQuartiles = (xAxis, yAxis, traceIndex = null) => {
         },
         {
             type: 'line',
-            y0: cuartilesY[1],
-            y1: cuartilesY[1],
+            y0: cuartilesY,
+            y1: cuartilesY,
             x0: 0,
-            x1: Math.max(...cuartilesX) + 1500000,
+            x1: Math.max(cuartilesX) + 1500000,
             line: {
                 color: '#C0D4E8',
                 width: 2,
@@ -520,72 +520,65 @@ const calculateQuartiles = (xAxis, yAxis, traceIndex = null) => {
 };
 
 // 
-const squareClassificationTools = (better, toolID, cuartilesX, cuartilesY, xAxis, yAxis, traceIndex) => {
+const squareClassificationTools = (better, toolID, cuartilesX, cuartilesY, xAxis, yAxis) => {
     cuartilesData.value = [];
+    allToolID.value.forEach((tool) => { // Iterar sobre todas las herramientas
+        const index = toolID.indexOf(tool);
+        const x = index !== -1 ? xAxis[index] : null; // Get index and values x, y
+        const y = index !== -1 ? yAxis[index] : null; // Get index and values x, y
 
-    if (better == "bottom-right") {
-        toolID.value.forEach((tool, index) => {
-            const x = xAxis[index];
-            const y = yAxis[index];
-            let cuartil;
+        let cuartil = 0; 
+        let label = '--';
 
-            if (x >= cuartilesX && y <= cuartilesY) {
-                cuartil = 1;
-            } else if (x >= cuartilesX && y > cuartilesY) {
-                cuartil = 3;
-            } else if (x < cuartilesX && y > cuartilesY) {
-                cuartil = 4;
-            } else if (x < cuartilesX && y <= cuartilesY) {
-                cuartil = 2;
+        if (index !== -1) { // Si la herramienta está presente en toolID
+            if (better === "bottom-right") {
+                if (x >= cuartilesX && y <= cuartilesY) {
+                    cuartil = 1;
+                    label = 'T';
+                } else if (x >= cuartilesX && y > cuartilesY) {
+                    cuartil = 3;
+                    label = 'M';
+                } else if (x < cuartilesX && y > cuartilesY) {
+                    cuartil = 4;
+                    label = 'B';
+                } else if (x < cuartilesX && y <= cuartilesY) {
+                    cuartil = 2;
+                    label = 'M';
+                }
+            } else if (better === "top-right") {
+                if (x >= cuartilesX && y < cuartilesY) {
+                    cuartil = 3;
+                    label = 'M';
+                } else if (x >= cuartilesX && y >= cuartilesY) {
+                    cuartil = 1;
+                    label = 'T';
+                } else if (x < cuartilesX && y >= cuartilesY) {
+                    cuartil = 2;
+                    label = 'M';
+                } else if (x < cuartilesX && y < cuartilesY) {
+                    cuartil = 4;
+                    label = 'B';
+                }
+            } else if (better === "top-left") {
+                if (x >= cuartilesX && y < cuartilesY) {
+                    cuartil = 4;
+                    label = 'B';
+                } else if (x >= cuartilesX && y >= cuartilesY) {
+                    cuartil = 2;
+                    label = 'M';
+                } else if (x < cuartilesX && y >= cuartilesY) {
+                    cuartil = 1;
+                    label = 'T';
+                } else if (x < cuartilesX && y < cuartilesY) {
+                    cuartil = 3;
+                    label = 'M';
+                }
             }
-            cuartilesData.value.push({ tool_id: tool, cuartil: cuartil });
-        });
-    } else if (better == "top-right") {
-        toolID.value.forEach((tool, index) => {
-        
-        let cuartil, label;
-        const x = xAxis[index];
-        const y = yAxis[index];
-
-            if (x >= cuartilesX && y < cuartilesY) {
-                cuartil = 3; // 3
-                label = 'M';
-            } else if (x >= cuartilesX && y >= cuartilesY) {
-                cuartil = 1; // 1
-                label = 'T';
-            } else if (x < cuartilesX && y >= cuartilesY) {
-                cuartil = 2; // 2
-                label = 'M';
-            } else if (x < cuartilesX && y < cuartilesY) {
-                cuartil = 4; // 4
-                label = 'B';
-            }else{
-                cuartil = 0; // 3
-                label = '--';
-            }
-        
-
-            cuartilesData.value.push({ tool_id: tool, cuartil: cuartil, label: label });
-        });
-    } else if (better == "top-left") {
-        toolID.value.forEach((tool, index) => {
-            const x = xAxis[index];
-            const y = yAxis[index];
-            let cuartil;
-
-            if (x >= cuartilesX && y < cuartilesY) {
-                cuartil = 4;
-            } else if (x >= cuartilesX && y >= cuartilesY) {
-                cuartil = 2;
-            } else if (x < cuartilesX && y >= cuartilesY) {
-                cuartil = 1;
-            } else if (x < cuartilesX && y < cuartilesY) {
-                cuartil = 3;
-            }
-            cuartilesData.value.push({ tool_id: tool, cuartil: cuartil });
-        });
-    }
+        }
+        cuartilesData.value.push({ tool_id: tool, cuartil: cuartil, label: label });
+    });
 }
+
 
 // Annotation for Square Quartiles
 const annotationSquareQuartile = (better) => {
