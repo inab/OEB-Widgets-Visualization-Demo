@@ -99,7 +99,7 @@ const toolID = ref([]);
 const allToolID = ref([]);
 const xAxis = ref([]);
 const yAxis = ref([]);
-
+const dataPoints = ref([]);
 // view
 const viewApplied = ref(false);
 
@@ -129,7 +129,7 @@ onMounted(async () => {
     allToolID.value = data.value.challenge_participants.map((participant) => participant.tool_id);
 
     // 
-    const dataPoints = data.value.challenge_participants.map((participant) => ([
+    dataPoints.value = data.value.challenge_participants.map((participant) => ([
         participant.metric_x,
         participant.metric_y,
     ]));
@@ -137,7 +137,7 @@ onMounted(async () => {
     // ----------------------------------------------------------------
     // PARETO
     let direction = formatOptimalDisplay(visualization.optimization)
-    paretoPoints.value = pf.getParetoFrontier(dataPoints, { optimize: direction });
+    paretoPoints.value = pf.getParetoFrontier(dataPoints.value, { optimize: direction });
 
     const globalParetoTrace = {
         x: paretoPoints.value.map((point) => point[0]),
@@ -249,7 +249,7 @@ onMounted(async () => {
 
     // ----------------------------------------------------------------
     // K-Means Clustering
-    createShapeClustering(dataPoints)
+    createShapeClustering(dataPoints.value)
 
     // Get rangees from ejest graph
     scatterPlot.then(scatterPlot => {
@@ -275,11 +275,11 @@ onMounted(async () => {
                 traceIndex = traceIndex - 2;
 
                 // (Add hidden) Hide or show the tool based on its current state
-                const toolHidden = dataPoints[traceIndex].hidden;
+                const toolHidden = dataPoints.value[traceIndex].hidden;
 
                 // If hiding the trace, check if there are at least 4 visible traces
                 if (!toolHidden) {
-                    const visibleTools = dataPoints.filter((tool) => !tool.hidden);
+                    const visibleTools = dataPoints.value.filter((tool) => !tool.hidden);
                     if (visibleTools.length <= 4) {
                         // Show Message Error
                         showMessageError.value = true;
@@ -301,13 +301,14 @@ onMounted(async () => {
                 }
 
                 // Toggle the hidden state
-                dataPoints[traceIndex].hidden = !toolHidden;
+                dataPoints.value[traceIndex].hidden = !toolHidden;
 
                 // Filter visible tools
-                const updatedVisibleTools = dataPoints.filter((tool) => !tool.hidden);
+                const updatedVisibleTools = dataPoints.value.filter((tool) => !tool.hidden);
 
                 // Calculate the new Pareto Frontier with the visible tools
-                const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools);
+                let direction = formatOptimalDisplay(visualization.optimization)
+                const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools, { optimize: direction });
 
                 // Update the trace of the Pareto frontier
                 const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
@@ -332,7 +333,7 @@ onMounted(async () => {
                     // Create a list of visible tools with their hiding status
                     const visibleTools = toolID.value.map((tool, index) => ({
                         name: tool,
-                        hidden: dataPoints[index].hidden
+                        hidden: dataPoints.value[index].hidden
                     })).filter(tool => !tool.hidden);
 
                     // List of visible tools
@@ -451,12 +452,28 @@ const noClassification = () => {
     showShapesKmeans.value = false;
     showShapesSquare.value = false;
     showAnnotationSquare.value = false;
+
+    // Reset Plot
     const Plotly = require('plotly.js-dist');
+    const plot = document.getElementById('scatter-plot')
+    const numTraces = plot.data.length
+    const visibleArray = Array(numTraces).fill(true)
+
+    // Reset Pareto Frontier
+    dataPoints.value.forEach(array => { array.hidden = false; });
+    const updatedVisibleTools = dataPoints.value.filter((tool) => !tool.hidden);
+    let direction = formatOptimalDisplay(data.value.visualization.optimization)
+    const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools, { optimize: direction });
+    // Update the trace of the Pareto frontier
+    const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
+
     const layout = {
         shapes: false ? shapes : [],
         annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
     };
-    Plotly.update('scatter-plot', {}, layout);
+    Plotly.update('scatter-plot', newTraces, layout, 1);
+    Plotly.restyle('scatter-plot', { visible: visibleArray })
+
 };
 
 
@@ -465,14 +482,35 @@ const noClassification = () => {
 // ----------------------------------------------------------------
 // Function to toggle the visibility of the Square Quartiles
 const toggleQuartilesVisibility = () => {
+    const Plotly = require('plotly.js-dist');
+
     if (!showShapesSquare.value) {
         showShapesSquare.value = !showShapesSquare.value;
         showAnnotationSquare.value = !showAnnotationSquare.value
         viewKmeans.value = false;
         viewSquare.value = true;
+
+        dataPoints.value.forEach(array => { array.hidden = false; });
+        const plot = document.getElementById('scatter-plot')
+        const numTraces = plot.data.length
+        // Crear un array con visibilidad true para todas las trazas
+        const visibleArray = Array(numTraces).fill(true)
+        Plotly.update('scatter-plot', { visible: visibleArray })
+
+        // Calculate quartiles and create annotations on the graph.
+        calculateQuartiles(xAxis.value, yAxis.value, toolID.value);
+    } else {
+        dataPoints.value.forEach(array => { array.hidden = false; });
+        const plot = document.getElementById('scatter-plot')
+        const numTraces = plot.data.length
+        // Crear un array con visibilidad true para todas las trazas
+        const visibleArray = Array(numTraces).fill(true)
+        Plotly.update('scatter-plot', { visible: visibleArray })
+
         // Calculate quartiles and create annotations on the graph.
         calculateQuartiles(xAxis.value, yAxis.value, toolID.value);
     }
+
 };
 
 const calculateQuartiles = (xAxis, yAxis, toolID) => {
@@ -527,7 +565,7 @@ const squareClassificationTools = (better, toolID, cuartilesX, cuartilesY, xAxis
         const x = index !== -1 ? xAxis[index] : null; // Get index and values x, y
         const y = index !== -1 ? yAxis[index] : null; // Get index and values x, y
 
-        let cuartil = 0; 
+        let cuartil = 0;
         let label = '--';
 
         if (index !== -1) { // Si la herramienta está presente en toolID
