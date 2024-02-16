@@ -249,7 +249,6 @@ onMounted(async () => {
 
     // ----------------------------------------------------------------
     // K-Means Clustering
-    createShapeClustering(dataPoints.value)
 
     // Get rangees from ejest graph
     scatterPlot.then(scatterPlot => {
@@ -315,15 +314,26 @@ onMounted(async () => {
 
                 // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
                 if (viewKmeans.value === true) {
+                   
+
+                    // Create a list of visible tools with their hiding status
+                    const visibleTools = toolID.value.map((tool, index) => ({
+                        name: tool,
+                        hidden: dataPoints.value[index].hidden
+                    })).filter(tool => !tool.hidden);
+                    // List of visible tools
+                    const visibleToolNames = visibleTools.map(tool => tool.name);
+
                     // Recalculate Clustering
-                    createShapeClustering(updatedVisibleTools)
+                    createShapeClustering(updatedVisibleTools, visibleToolNames)
                     showShapesKmeans.value = true;
+
+
                     const layout = {
                         shapes: showShapesKmeans.value ? shapes : [],
                         annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans)
                     };
                     Plotly.update('scatter-plot', newTraces, layout, 1);
-
                 }
 
                 if (viewSquare.value === true) {
@@ -558,17 +568,17 @@ const calculateQuartiles = (xAxis, yAxis, toolID) => {
 };
 
 // 
-const squareClassificationTools = (better, toolID, cuartilesX, cuartilesY, xAxis, yAxis) => {
+const squareClassificationTools = (better, visibleToolID, cuartilesX, cuartilesY, xAxis, yAxis) => {
     cuartilesData.value = [];
     allToolID.value.forEach((tool) => { // Iterar sobre todas las herramientas
-        const index = toolID.indexOf(tool);
+        const index = visibleToolID.indexOf(tool);
         const x = index !== -1 ? xAxis[index] : null; // Get index and values x, y
         const y = index !== -1 ? yAxis[index] : null; // Get index and values x, y
 
         let cuartil = 0;
         let label = '--';
 
-        if (index !== -1) { // Si la herramienta está presente en toolID
+        if (index !== -1) { // Si la herramienta está presente en visibleToolID
             if (better === "bottom-right") {
                 if (x >= cuartilesX && y <= cuartilesY) {
                     cuartil = 1;
@@ -741,39 +751,35 @@ const asignaPositionCuartil = (better) => {
 // K-MEANS CLUSTERING
 // ----------------------------------------------------------------
 const toggleKmeansVisibility = () => {
+
     viewKmeans.value = true;
     viewSquare.value = false;
     if (!showShapesKmeans.value) {
         showShapesKmeans.value = !showShapesKmeans.value;
-        updatePlotVisibility();
+        createShapeClustering(dataPoints.value, toolID.value)
         showShapesKmeans.value = false;
-        cuartilesData.value = [];
         showShapesSquare.value = false;
         showAnnotationSquare.value = false;
     }
 
 };
-// Visibility of the graph with K-means Clustering classification
-const updatePlotVisibility = () => {
-    const Plotly = require('plotly.js-dist');
-    const layout = {
-        shapes: showShapesKmeans.value ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans),
-    };
-    Plotly.update('scatter-plot', {}, layout);
-};
 
-const createShapeClustering = (dataPoints) => {
+const createShapeClustering = (dataPoints, toolIDVisible) => {
 
     clusterMaker.k(4);
-    clusterMaker.iterations(500); // Número de iteraciones (mayor número da más tiempo para converger)
+    clusterMaker.iterations(500);
     clusterMaker.data(dataPoints);
 
     // Obtener los resultados de los clusters
     let results = clusterMaker.clusters();
     let sortedResults = JSON.parse(JSON.stringify(results));
+
     let better = data.value.visualization.optimization
     orderResultKMeans(sortedResults, better)
+
+    const groupedDataPoints = assignGroupToDataPoints(dataPoints, sortedResults );
+    createDataPointForTables(toolIDVisible, groupedDataPoints)
+
 
     // Crear shapes basados en los clusters
     shapes = sortedResults.map((cluster) => {
@@ -818,7 +824,56 @@ const createShapeClustering = (dataPoints) => {
         };
     });
 
+    const Plotly = require('plotly.js-dist');
+    const layout = {
+        shapes: showShapesKmeans.value ? shapes : [],
+        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans),
+    };
+    Plotly.update('scatter-plot', {}, layout);
+
 }
+
+
+const createDataPointForTables = (visibleTools, groupedDataPoints) => {
+    cuartilesData.value = [];
+    allToolID.value.forEach((tool) => {
+        const index = visibleTools.indexOf(tool);
+        let cuartil = 0;
+        let label = '--';
+        if (index !== -1) {
+            cuartil = groupedDataPoints[index][2];
+            label = cuartil.toString();
+        }
+
+        cuartilesData.value.push({ tool_id: tool, cuartil: cuartil, label: label });
+    })
+
+}
+
+const assignGroupToDataPoints = (dataPoints, sortedResults) => {
+    const groupedDataPoints = [];
+
+    for (let i = 0; i < dataPoints.length; i++) {
+        const dataPoint = dataPoints[i];
+
+        for (let j = 0; j < sortedResults.length; j++) {
+            const group = sortedResults[j];
+
+            // Verificar si el punto está en el grupo
+            if (group.points.some(groupPoint => isEqual(groupPoint, dataPoint))) {
+                groupedDataPoints.push([...dataPoint, j + 1]); 
+                break;
+            }
+        }
+    }
+    return groupedDataPoints;
+}
+
+// Función de utilidad para comparar dos puntos y verificar si son iguales
+const isEqual = (point1, point2) => {
+    return point1[0] === point2[0] && point1[1] === point2[1];
+}
+
 
 // Sorted Results K-means
 const orderResultKMeans = (sortedResults, better) => {
@@ -878,6 +933,7 @@ const sortByKey = (array, key) => {
         return ((x < y) ? -1 : ((x > y) ? 1 : 0)) * -1;
     });
 }
+
 
 
 // DOWNLOAD
