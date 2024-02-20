@@ -314,7 +314,6 @@ onMounted(async () => {
 
                 // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
                 if (viewKmeans.value === true) {
-                   
 
                     // Create a list of visible tools with their hiding status
                     const visibleTools = toolID.value.map((tool, index) => ({
@@ -493,35 +492,39 @@ const noClassification = () => {
 // Function to toggle the visibility of the Square Quartiles
 const toggleQuartilesVisibility = () => {
     const Plotly = require('plotly.js-dist');
+    const plot = document.getElementById('scatter-plot');
+    const numTraces = plot.data.length;
 
-    if (!showShapesSquare.value) {
-        showShapesSquare.value = !showShapesSquare.value;
-        showAnnotationSquare.value = !showAnnotationSquare.value
-        viewKmeans.value = false;
-        viewSquare.value = true;
+    // Reset visibilities. Hide the Kmeans and Show the Square
+    showShapesKmeans.value      = false;
+    viewKmeans.value            = false;
+    viewSquare.value            = true;
+    showShapesSquare.value      = true;
+    showAnnotationSquare.value  = true;
 
-        dataPoints.value.forEach(array => { array.hidden = false; });
-        const plot = document.getElementById('scatter-plot')
-        const numTraces = plot.data.length
-        // Crear un array con visibilidad true para todas las trazas
-        const visibleArray = Array(numTraces).fill(true)
-        Plotly.update('scatter-plot', { visible: visibleArray })
+    // Update visibility of Points
+    dataPoints.value.forEach(array => { array.hidden = false; });
 
-        // Calculate quartiles and create annotations on the graph.
-        calculateQuartiles(xAxis.value, yAxis.value, toolID.value);
-    } else {
-        dataPoints.value.forEach(array => { array.hidden = false; });
-        const plot = document.getElementById('scatter-plot')
-        const numTraces = plot.data.length
-        // Crear un array con visibilidad true para todas las trazas
-        const visibleArray = Array(numTraces).fill(true)
-        Plotly.update('scatter-plot', { visible: visibleArray })
+    // Calculate Pareto Frontier
+    const updatedVisibleTools = dataPoints.value.filter(tool => !tool.hidden);
+    const direction = formatOptimalDisplay(data.value.visualization.optimization);
+    const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools, { optimize: direction });
+    const newTraces = { x: [newParetoPoints.map(point => point[0])], y: [newParetoPoints.map(point => point[1])] };
 
-        // Calculate quartiles and create annotations on the graph.
-        calculateQuartiles(xAxis.value, yAxis.value, toolID.value);
-    }
+    const layout = {
+        shapes: false ? shapes : [],
+        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+    };
 
+    const visibleArray = Array(numTraces).fill(true);
+
+    Plotly.update('scatter-plot', newTraces, layout, 1);
+    Plotly.update('scatter-plot', { visible: visibleArray });
+
+    calculateQuartiles(xAxis.value, yAxis.value, toolID.value);
+    optimalView();
 };
+
 
 const calculateQuartiles = (xAxis, yAxis, toolID) => {
 
@@ -751,21 +754,42 @@ const asignaPositionCuartil = (better) => {
 // K-MEANS CLUSTERING
 // ----------------------------------------------------------------
 const toggleKmeansVisibility = () => {
+    const Plotly = require('plotly.js-dist');
+    const plot = document.getElementById('scatter-plot');
+    const numTraces = plot.data.length;
 
-    viewKmeans.value = true;
-    viewSquare.value = false;
-    if (!showShapesKmeans.value) {
-        showShapesKmeans.value = !showShapesKmeans.value;
-        createShapeClustering(dataPoints.value, toolID.value)
-        showShapesKmeans.value = false;
-        showShapesSquare.value = false;
-        showAnnotationSquare.value = false;
-    }
+    // Reset visibilities. Hide the Square and Show the Kmeans
+    showShapesSquare.value      = false;
+    showAnnotationSquare.value  = false;
+    viewSquare.value            = false;
+    showShapesKmeans.value      = true;
+    viewKmeans.value            = true;
+
+    // Update visibility of Points
+    dataPoints.value.forEach(array => { array.hidden = false; });
+
+    // Calculate Pareto Frontier
+    const updatedVisibleTools = dataPoints.value.filter(tool => !tool.hidden);
+    const direction = formatOptimalDisplay(data.value.visualization.optimization);
+    const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools, { optimize: direction });
+    const newTraces = { x: [newParetoPoints.map(point => point[0])], y: [newParetoPoints.map(point => point[1])] };
+
+    // Update visibility of traces in legend
+    const visibleArray = Array(numTraces).fill(true);
+    const layout = {
+        shapes: false ? shapes : [],
+        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+    };
+    Plotly.update('scatter-plot', newTraces, layout, 1);
+    Plotly.update('scatter-plot', { visible: visibleArray });
+
+    // Create shape clustering
+    createShapeClustering(dataPoints.value, toolID.value);
 
 };
 
-const createShapeClustering = (dataPoints, toolIDVisible) => {
 
+const createShapeClustering = (dataPoints, toolIDVisible) => {
     clusterMaker.k(4);
     clusterMaker.iterations(500);
     clusterMaker.data(dataPoints);
@@ -777,7 +801,7 @@ const createShapeClustering = (dataPoints, toolIDVisible) => {
     let better = data.value.visualization.optimization
     orderResultKMeans(sortedResults, better)
 
-    const groupedDataPoints = assignGroupToDataPoints(dataPoints, sortedResults );
+    const groupedDataPoints = assignGroupToDataPoints(dataPoints, sortedResults);
     createDataPointForTables(toolIDVisible, groupedDataPoints)
 
 
@@ -852,16 +876,13 @@ const createDataPointForTables = (visibleTools, groupedDataPoints) => {
 
 const assignGroupToDataPoints = (dataPoints, sortedResults) => {
     const groupedDataPoints = [];
-
     for (let i = 0; i < dataPoints.length; i++) {
         const dataPoint = dataPoints[i];
-
         for (let j = 0; j < sortedResults.length; j++) {
             const group = sortedResults[j];
-
             // Verificar si el punto está en el grupo
             if (group.points.some(groupPoint => isEqual(groupPoint, dataPoint))) {
-                groupedDataPoints.push([...dataPoint, j + 1]); 
+                groupedDataPoints.push([...dataPoint, j + 1]);
                 break;
             }
         }
