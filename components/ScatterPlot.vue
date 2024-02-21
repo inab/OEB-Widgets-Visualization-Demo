@@ -1,63 +1,91 @@
 <template>
     <div>
-        <h4>Scatter plot</h4>
-        <p>Dataset Id: {{ datasetId }} </p>
-        <p>Modification Date: {{ modificationDate }}</p>
+        <b-row >
+            <b-col cols="8">
+                <div class="butns mr-2">
+                    <!-- Buttons -->
+                    <b-button-group class="ml-auto">
+                        <!-- Classification -->
+                        <b-dropdown text="Classification" variant="outline-secondary" class=" button-classification">
+                            <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
+                                    method:</strong></b-dropdown-text>
+                            <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
+                            <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item>
+                            <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
+                        </b-dropdown>
 
-        <!-- Button Row -->
-        <div class="row justify-content-end mr-4">
-            <!-- Classification -->
-            <b-dropdown text="Classification" variant="primary" size="sm" class="m-md-2 button-classification">
-                <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
-                        method:</strong></b-dropdown-text>
-                <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
-                <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item>
-                <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
+                        <!-- Reset View / optimal view -->
+                        <b-button @click="toggleView" variant="outline-secondary" right class=" button-resetView">
+                            {{ viewButtonText }}
+                        </b-button>
 
-            </b-dropdown>
+                        <!-- Button Dowloand -->
+                        <b-dropdown text="Download" variant="outline-secondary" class=" button-download">
+                            <b-dropdown-text class="font-weight-bold text-download"><strong>Select a
+                                    format:</strong></b-dropdown-text>
+                            <b-dropdown-item @click="downloadChart('png')"> PNG </b-dropdown-item>
+                            <b-dropdown-item @click="downloadChart('svg')"> SVG (only plot) </b-dropdown-item>
+                            <b-dropdown-divider></b-dropdown-divider>
+                            <b-dropdown-item @click="downloadChart('json')"> JSON </b-dropdown-item>
+                            <!-- <b-dropdown-item @click="downloadChart('pdf')"> PDF </b-dropdown-item> -->
+                        </b-dropdown>
 
-            <!-- Reset View / optimal view -->
-            <b-button @click="toggleView" variant="primary" size="sm" class="m-md-2 button-resetView">
-                {{ viewButtonText }}
-            </b-button>
-
-            <!-- Button Dowloand -->
-            <b-dropdown text="Download" variant="primary" size="sm" class="m-md-2 button-download">
-                <b-dropdown-text class="font-weight-bold text-download"><strong>Select a format:</strong></b-dropdown-text>
-                <b-dropdown-item @click="downloadChart('png')"> PNG </b-dropdown-item>
-                <b-dropdown-item @click="downloadChart('svg')"> SVG (only plot) </b-dropdown-item>
-                <b-dropdown-item @click="downloadChart('json')"> JSON </b-dropdown-item>
-                <!-- <b-dropdown-divider></b-dropdown-divider> -->
-            </b-dropdown>
-
-        </div>
-
+                    </b-button-group>
+                </div>
+            </b-col>
+        </b-row>
         <br>
-        <!-- Scatter Plot -->
-        <div id="scatter-plot"></div>
 
-        <!-- Error message -->
-        <div>
-            <b-alert :show="dismissCountDown > 0" dismissible variant="danger" @dismissed="dismissCountDown = 0"
-                @dismiss-count-down="countDownChanged">
-                At least four participants are required for the benchmark!!
-            </b-alert>
-        </div>
+        <b-row class="mt-5">
+            <!-- Chart -->
+            <b-col cols="8">
+                <div id="todownload">
 
-        <!-- Table -->
-        <div id="tableSQ" class="">
-            <table class="cuartiles-table table table-striped" v-if="cuartilesData.length > 0">
-                <tr>
-                    <th>Tool</th>
-                    <th>Quartil</th>
-                </tr>
-                <tr v-for="item in cuartilesData" :key="item.tool_id">
-                    <td>{{ item.tool_id }}</td>
-                    <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
-                </tr>
-            </table>
-        </div>
+                    <!-- Scatter Plot -->
+                    <div id="scatter-plot" ></div>
 
+                    <!-- Error message -->
+                    <div class="error-alert">
+                        <b-alert class="b-alert" :show="dismissCountDown > 0" dismissible variant="danger"
+                            @dismissed="dismissCountDown = 0" @dismiss-count-down="countDownChanged">
+                            At least four participants are required for the benchmark!!
+                        </b-alert>
+                    </div><br>
+
+                    <!-- ID AND DATE TABLE -->
+                    <div v-if="datasetId && modificationDate">
+                        <b-table-simple bordered small caption-top responsive id='idDateTable'>
+                            <b-tbody>
+                                <b-tr>
+                                    <b-th variant="secondary" class="text-center">Dataset ID</b-th>
+                                    <b-td class="text-center">{{ datasetId }}</b-td>
+                                    <b-th variant="secondary" class="text-center">Last Update</b-th>
+                                    <b-td class="text-center">{{ modificationDate }}</b-td>
+                                </b-tr>
+                            </b-tbody>
+                        </b-table-simple>
+                    </div>
+
+
+                </div>
+            </b-col>
+
+            <!-- Table -->
+            <b-col cols="4">
+                <div class="">
+                    <table class="cuartiles-table table table-bordered" v-if="cuartilesData.length > 0">
+                        <tr>
+                            <th variant="secondary" >Tool</th>
+                            <th variant="secondary" >Quartil</th>
+                        </tr>
+                        <tr v-for="item in cuartilesData" :key="item.tool_id">
+                            <td>{{ item.tool_id }}</td>
+                            <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </b-col>
+        </b-row>
 
     </div>
 </template>
@@ -113,7 +141,7 @@ onMounted(async () => {
     const response = await fetch('/raw_data_OEBD00200002UK0.json');
     dataset.value = await response.json();
     datasetId.value = dataset.value._id
-    modificationDate.value = new Date(dataset.value.dates.modification).toUTCString()
+    modificationDate.value = formatDateString(dataset.value.dates.modification)
     data.value = dataset.value.datalink.inline_data
     const visualization = data.value.visualization
 
@@ -201,8 +229,7 @@ onMounted(async () => {
     // Create the chart layout
     const layout = {
         title: visualization.x_axis + ' + ' + visualization.y_axis,
-        autosize: false,
-        width: 1080,
+        autosize: true,
         height: 600,
         annotations: getOptimizationArrow(visualization.optimization, paretoPoints.value),
         xaxis: {
@@ -227,25 +254,31 @@ onMounted(async () => {
                 },
             },
         },
-        margin: { l: 60, r: 50, t: 30, b: 30, pad: 4 },
-        paper_bgcolor: '#ffffff',
+        margin: { l: 50, r: 50, t: 80, b: 20, pad: 4 },
         legend: {
             orientation: 'h',
-            x: 0.1,
-            y: -0.2,
-            // borderwidth: 1,
+            x: 0,
+            y: -0.25,
+            xref: 'paper',
+            yref: 'paper',
             font: {
                 size: 14,
             }
         },
-        plot_bgcolor: '#F8F9F9',
+        // plot_bgcolor: '#F8F9F9',
         images: getImagePosition(visualization.optimization),
         showlegend: true
     };
 
+    const config = {
+        displayModeBar: false,
+        responsive: true,
+        hovermode: false
+    }
+
     // ----------------------------------------------------------------
     // CREATE SCATTER PLOT
-    const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout);
+    const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout, config);
 
     // ----------------------------------------------------------------
     // K-Means Clustering
@@ -439,6 +472,17 @@ const viewButtonText = computed(() => {
     return viewApplied.value ? 'Optimal View' : 'Reset View';
 });
 
+// Format Date String
+const formatDateString = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+};
+
+
 // PARETO FRONTIER
 // ----------------------------------------------------------------
 // format optimal view
@@ -496,11 +540,11 @@ const toggleQuartilesVisibility = () => {
     const numTraces = plot.data.length;
 
     // Reset visibilities. Hide the Kmeans and Show the Square
-    showShapesKmeans.value      = false;
-    viewKmeans.value            = false;
-    viewSquare.value            = true;
-    showShapesSquare.value      = true;
-    showAnnotationSquare.value  = true;
+    showShapesKmeans.value = false;
+    viewKmeans.value = false;
+    viewSquare.value = true;
+    showShapesSquare.value = true;
+    showAnnotationSquare.value = true;
 
     // Update visibility of Points
     dataPoints.value.forEach(array => { array.hidden = false; });
@@ -759,11 +803,11 @@ const toggleKmeansVisibility = () => {
     const numTraces = plot.data.length;
 
     // Reset visibilities. Hide the Square and Show the Kmeans
-    showShapesSquare.value      = false;
-    showAnnotationSquare.value  = false;
-    viewSquare.value            = false;
-    showShapesKmeans.value      = true;
-    viewKmeans.value            = true;
+    showShapesSquare.value = false;
+    showAnnotationSquare.value = false;
+    viewSquare.value = false;
+    showShapesKmeans.value = true;
+    viewKmeans.value = true;
 
     // Update visibility of Points
     dataPoints.value.forEach(array => { array.hidden = false; });
@@ -1130,8 +1174,25 @@ function getSymbol() {
 
 
 <style scoped lang="css">
+.butns {
+
+    position: absolute;
+    top: 20px;
+    /* right: 10px; */
+    margin-top: 10px;
+    z-index: 9999
+}
+
+.button-classification {
+    width: 140px;
+}
+
+.button-resetView {
+    width: 140px;
+}
+
 .button-download {
-    width: 160px;
+    width: 140px;
 }
 
 .text-download {
@@ -1139,38 +1200,36 @@ function getSymbol() {
     font-size: small;
 }
 
-.button-classification {
-    width: 200px;
-}
-
-.button-resetView {
-    width: 150px;
-}
-
 .text-classifi {
     padding: auto;
     font-size: small;
 }
 
+.error-alert {
+    width: 70%;
+    margin: 0 auto;
+    height: 2em;
+}
+
+.b-alert {
+    padding: 7px;
+}
 
 .cuartiles-table {
     margin: 0 auto;
-    width: 80%;
-    border-collapse: collapse;
-    border-radius: 5px;
+    width: 100%;
     margin-top: 20px;
 }
 
 .cuartiles-table th {
-    background-color: #E2E3E5;
-    text-align: center;
-
+    background-color: #6c757d;
+    color: white;
 }
 
 .cuartiles-table td {
     border: 1px solid #dddddd;
-    text-align: center;
-    padding: 5px;
+    padding-top: 6px;
+    padding-bottom: 6px;
 }
 
 .quartil-1 {
@@ -1187,5 +1246,10 @@ function getSymbol() {
 
 .quartil-4 {
     background-color: rgb(35, 139, 69);
+}
+
+.table-secondary {
+    background-color: #6c757d;
+    color: white;
 }
 </style>
