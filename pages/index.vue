@@ -1,5 +1,5 @@
 <template>
-  <b-container>
+  <b-container fluid class="pl-5 pr-5">
     <b-row>
       <b-col cols="12" sm="10" md="12">
         <h1 class="mt-3">
@@ -17,37 +17,31 @@
         <h3>Component Visualization</h3>
       </b-col>
 
-      <!-- Componentes -->
+      <!-- Botones de alternancia -->
+      <b-col cols="12" sm="6" md="6">
+        <b-button @click="showScatterPlot = true; showBarPlot = false">Mostrar Scatter Plot</b-button>
+      </b-col>
+      <b-col cols="12" sm="6" md="6">
+        <b-button @click="showBarPlot = true; showScatterPlot = false">Mostrar Bar Plot</b-button>
+      </b-col>
+    </b-row>
 
+    <b-row>
       <!-- Scatter plot -->
-      <b-col cols="12" sm="10" md="12">
-        <b-card class="pl-8 pr-8 pb-4 mt-4">
+      <b-col v-if="showScatterPlot" cols="12" sm="10" md="12">
+        <!-- <b-card class="pl-8 pr-8 pb-4 mt-4"> -->
           <ScatterPlot/>
-        </b-card>
+        <!-- </b-card> -->
       </b-col>
 
 
       <!-- Bar plot -->
-      <!-- <b-col cols="12" sm="10" md="12">
+      <b-col v-if="showBarPlot" cols="12" sm="10" md="12">
         <b-card class="pl-8 pr-8 pb-4 mt-4">
           <BarPlot/>
         </b-card>
-      </b-col> -->
+      </b-col>
 
-      <!-- Box plot -->
-      <!-- <b-col cols="12" sm="10" md="12">
-        <b-card class="pl-8 pr-8 pb-4 mt-4">
-          <BoxPlot/>
-        </b-card>
-      </b-col> -->
-
-
-      <!-- Scatter plot v2 -->
-      <!-- <b-col cols="12" sm="10" md="12">
-        <b-card class="pl-8 pr-8 pb-4 mt-4">
-          <LineCharts/>
-        </b-card>
-      </b-col> -->
 
     </b-row>
     <br>
@@ -68,18 +62,18 @@ import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 
-import LineCharts from '~/components/LineCharts.vue';
 import BarPlot from '~/components/BarPlot.vue';
-import BoxPlot from '~/components/BoxPlot.vue';
 import ScatterPlot from '~/components/ScatterPlot.vue';
 
 export default {
   name: 'IndexPage',
   components:{
-    LineCharts,BarPlot,BoxPlot,ScatterPlot
+    BarPlot,ScatterPlot
   },
   data(){
     return {
+      showScatterPlot: false,
+      showBarPlot: false
     }
   },
 
