@@ -14,34 +14,15 @@
 
     <b-row>
       <b-col cols="12" sm="10" md="12">
-        <h3>Component Visualization</h3>
+        <h3>Component Visualization &#8594; SCATTER PLOT</h3>
       </b-col>
-
-      <!-- Botones de alternancia -->
-      <b-col cols="12" sm="6" md="6">
-        <b-button @click="showScatterPlot = true; showBarPlot = false">Mostrar Scatter Plot</b-button>
-      </b-col>
-      <b-col cols="12" sm="6" md="6">
-        <b-button @click="showBarPlot = true; showScatterPlot = false">Mostrar Bar Plot</b-button>
-      </b-col>
-    </b-row>
+    </b-row> 
 
     <b-row>
       <!-- Scatter plot -->
-      <b-col v-if="showScatterPlot" cols="12" sm="10" md="12">
-        <!-- <b-card class="pl-8 pr-8 pb-4 mt-4"> -->
+      <b-col  cols="12" sm="10" md="12">
           <ScatterPlot/>
-        <!-- </b-card> -->
       </b-col>
-
-
-      <!-- Bar plot -->
-      <b-col v-if="showBarPlot" cols="12" sm="10" md="12">
-        <b-card class="pl-8 pr-8 pb-4 mt-4">
-          <BarPlot/>
-        </b-card>
-      </b-col>
-
 
     </b-row>
     <br>

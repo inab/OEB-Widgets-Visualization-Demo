@@ -1,9 +1,23 @@
 <template>
     <div>
-        <b-row >
+        <b-row>
             <b-col cols="8">
-                <div class="butns mr-2">
-                    <!-- Buttons -->
+                <!-- ID AND DATE TABLE -->
+                <div v-if="datasetId && modificationDate">
+                    <b-table-simple bordered small caption-top responsive id='idDateTable'>
+                        <b-tbody>
+                            <b-tr>
+                                <b-th variant="secondary" class="text-center">Dataset ID</b-th>
+                                <b-td class="text-center">{{ datasetId }}</b-td>
+                                <b-th variant="secondary" class="text-center">Last Update</b-th>
+                                <b-td class="text-center">{{ modificationDate }}</b-td>
+                            </b-tr>
+                        </b-tbody>
+                    </b-table-simple>
+                </div>
+
+                <!-- Buttons -->
+                <div v-if="data" class="butns mr-2 mt-5">
                     <b-button-group class="ml-auto">
                         <!-- Classification -->
                         <b-dropdown text="Classification" variant="outline-secondary" class=" button-classification">
@@ -34,15 +48,15 @@
                 </div>
             </b-col>
         </b-row>
-        <br>
 
-        <b-row class="mt-5">
+
+        <b-row class="mt-4">
             <!-- Chart -->
             <b-col cols="8">
                 <div id="todownload">
 
                     <!-- Scatter Plot -->
-                    <div id="scatter-plot" ></div>
+                    <div id="scatter-plot"></div>
 
                     <!-- Error message -->
                     <div class="error-alert">
@@ -52,21 +66,6 @@
                         </b-alert>
                     </div><br>
 
-                    <!-- ID AND DATE TABLE -->
-                    <div v-if="datasetId && modificationDate">
-                        <b-table-simple bordered small caption-top responsive id='idDateTable'>
-                            <b-tbody>
-                                <b-tr>
-                                    <b-th variant="secondary" class="text-center">Dataset ID</b-th>
-                                    <b-td class="text-center">{{ datasetId }}</b-td>
-                                    <b-th variant="secondary" class="text-center">Last Update</b-th>
-                                    <b-td class="text-center">{{ modificationDate }}</b-td>
-                                </b-tr>
-                            </b-tbody>
-                        </b-table-simple>
-                    </div>
-
-
                 </div>
             </b-col>
 
@@ -75,8 +74,8 @@
                 <div class="">
                     <table class="cuartiles-table table table-bordered" v-if="cuartilesData.length > 0">
                         <tr>
-                            <th variant="secondary" >Tool</th>
-                            <th variant="secondary" >Quartil</th>
+                            <th variant="secondary">Tool</th>
+                            <th variant="secondary">Quartil</th>
                         </tr>
                         <tr v-for="item in cuartilesData" :key="item.tool_id">
                             <td>{{ item.tool_id }}</td>
@@ -228,9 +227,9 @@ onMounted(async () => {
 
     // Create the chart layout
     const layout = {
-        title: visualization.x_axis + ' + ' + visualization.y_axis,
+        // title: visualization.x_axis + ' + ' + visualization.y_axis,
         autosize: true,
-        height: 600,
+        height: 700,
         annotations: getOptimizationArrow(visualization.optimization, paretoPoints.value),
         xaxis: {
             title: {
@@ -258,7 +257,7 @@ onMounted(async () => {
         legend: {
             orientation: 'h',
             x: 0,
-            y: -0.25,
+            y: -0.2,
             xref: 'paper',
             yref: 'paper',
             font: {
@@ -1180,7 +1179,7 @@ function getSymbol() {
     top: 20px;
     /* right: 10px; */
     margin-top: 10px;
-    z-index: 9999
+    z-index: 1
 }
 
 .button-classification {
