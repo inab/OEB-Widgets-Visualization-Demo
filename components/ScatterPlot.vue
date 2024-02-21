@@ -1,63 +1,91 @@
 <template>
     <div>
-        <h4>Scatter plot</h4>
-        <p>Dataset Id: {{ datasetId }} </p>
-        <p>Modification Date: {{ modificationDate }}</p>
+        <b-row >
+            <b-col cols="8">
+                <div class="butns mr-2">
+                    <!-- Buttons -->
+                    <b-button-group class="ml-auto">
+                        <!-- Classification -->
+                        <b-dropdown text="Classification" variant="outline-secondary" class=" button-classification">
+                            <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
+                                    method:</strong></b-dropdown-text>
+                            <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
+                            <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item>
+                            <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
+                        </b-dropdown>
 
-        <!-- Button Row -->
-        <div class="row justify-content-end mr-4">
-            <!-- Classification -->
-            <b-dropdown text="Classification" variant="primary" size="sm" class="m-md-2 button-classification">
-                <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
-                        method:</strong></b-dropdown-text>
-                <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
-                <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item>
-                <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
+                        <!-- Reset View / optimal view -->
+                        <b-button @click="toggleView" variant="outline-secondary" right class=" button-resetView">
+                            {{ viewButtonText }}
+                        </b-button>
 
-            </b-dropdown>
+                        <!-- Button Dowloand -->
+                        <b-dropdown text="Download" variant="outline-secondary" class=" button-download">
+                            <b-dropdown-text class="font-weight-bold text-download"><strong>Select a
+                                    format:</strong></b-dropdown-text>
+                            <b-dropdown-item @click="downloadChart('png')"> PNG </b-dropdown-item>
+                            <b-dropdown-item @click="downloadChart('svg')"> SVG (only plot) </b-dropdown-item>
+                            <b-dropdown-divider></b-dropdown-divider>
+                            <b-dropdown-item @click="downloadChart('json')"> JSON </b-dropdown-item>
+                            <!-- <b-dropdown-item @click="downloadChart('pdf')"> PDF </b-dropdown-item> -->
+                        </b-dropdown>
 
-            <!-- Reset View / optimal view -->
-            <b-button @click="toggleView" variant="primary" size="sm" class="m-md-2 button-resetView">
-                {{ viewButtonText }}
-            </b-button>
-
-            <!-- Button Dowloand -->
-            <b-dropdown text="Download" variant="primary" size="sm" class="m-md-2 button-download">
-                <b-dropdown-text class="font-weight-bold text-download"><strong>Select a format:</strong></b-dropdown-text>
-                <b-dropdown-item @click="downloadChart('png')"> PNG </b-dropdown-item>
-                <b-dropdown-item @click="downloadChart('svg')"> SVG (only plot) </b-dropdown-item>
-                <b-dropdown-item @click="downloadChart('json')"> JSON </b-dropdown-item>
-                <!-- <b-dropdown-divider></b-dropdown-divider> -->
-            </b-dropdown>
-
-        </div>
-
+                    </b-button-group>
+                </div>
+            </b-col>
+        </b-row>
         <br>
-        <!-- Scatter Plot -->
-        <div id="scatter-plot"></div>
+
+        <b-row class="mt-5">
+            <!-- Chart -->
+            <b-col cols="8">
+                <div id="todownload">
+
+                    <!-- Scatter Plot -->
+                    <div id="scatter-plot" ></div>
+
+                    <!-- Error message -->
+                    <div class="error-alert">
+                        <b-alert class="b-alert" :show="dismissCountDown > 0" dismissible variant="danger"
+                            @dismissed="dismissCountDown = 0" @dismiss-count-down="countDownChanged">
+                            At least four participants are required for the benchmark!!
+                        </b-alert>
+                    </div><br>
+
+                    <!-- ID AND DATE TABLE -->
+                    <div v-if="datasetId && modificationDate">
+                        <b-table-simple bordered small caption-top responsive id='idDateTable'>
+                            <b-tbody>
+                                <b-tr>
+                                    <b-th variant="secondary" class="text-center">Dataset ID</b-th>
+                                    <b-td class="text-center">{{ datasetId }}</b-td>
+                                    <b-th variant="secondary" class="text-center">Last Update</b-th>
+                                    <b-td class="text-center">{{ modificationDate }}</b-td>
+                                </b-tr>
+                            </b-tbody>
+                        </b-table-simple>
+                    </div>
 
 
-        <!-- Table -->
-        <div id="tableSQ" class="">
-            <table class="cuartiles-table table table-striped" v-if="cuartilesData.length > 0">
-                <tr>
-                    <th>Tool</th>
-                    <th>Quartil</th>
-                </tr>
-                <tr v-for="item in cuartilesData" :key="item.tool_id">
-                    <td>{{ item.tool_id }}</td>
-                    <td :class="'quartil-' + item.cuartil">{{ item.cuartil }}</td>
-                </tr>
-            </table>
-        </div>
+                </div>
+            </b-col>
 
-        <!-- Error message -->
-        <div>
-            <b-alert :show="dismissCountDown > 0" dismissible variant="danger" @dismissed="dismissCountDown = 0"
-                @dismiss-count-down="countDownChanged">
-                At least four participants are required for the benchmark!!
-            </b-alert>
-        </div>
+            <!-- Table -->
+            <b-col cols="4">
+                <div class="">
+                    <table class="cuartiles-table table table-bordered" v-if="cuartilesData.length > 0">
+                        <tr>
+                            <th variant="secondary" >Tool</th>
+                            <th variant="secondary" >Quartil</th>
+                        </tr>
+                        <tr v-for="item in cuartilesData" :key="item.tool_id">
+                            <td>{{ item.tool_id }}</td>
+                            <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </b-col>
+        </b-row>
 
     </div>
 </template>
@@ -96,9 +124,10 @@ const showShapesSquare = ref(false);
 const showAnnotationSquare = ref(false);
 const cuartilesData = ref([]);
 const toolID = ref([]);
-const coordenadasX = ref([]);
-const coordenadasY = ref([]);
-
+const allToolID = ref([]);
+const xAxis = ref([]);
+const yAxis = ref([]);
+const dataPoints = ref([]);
 // view
 const viewApplied = ref(false);
 
@@ -112,7 +141,7 @@ onMounted(async () => {
     const response = await fetch('/raw_data_OEBD00200002UK0.json');
     dataset.value = await response.json();
     datasetId.value = dataset.value._id
-    modificationDate.value = new Date(dataset.value.dates.modification).toUTCString()
+    modificationDate.value = formatDateString(dataset.value.dates.modification)
     data.value = dataset.value.datalink.inline_data
     const visualization = data.value.visualization
 
@@ -122,18 +151,21 @@ onMounted(async () => {
 
     // Data for the Pareto frontier and Quartile
     // ----------------------------------------------------------------
-    coordenadasX.value = data.value.challenge_participants.map((participant) => participant.metric_x);
-    coordenadasY.value = data.value.challenge_participants.map((participant) => participant.metric_y);
+    xAxis.value = data.value.challenge_participants.map((participant) => participant.metric_x);
+    yAxis.value = data.value.challenge_participants.map((participant) => participant.metric_y);
     toolID.value = data.value.challenge_participants.map((participant) => participant.tool_id);
+    allToolID.value = data.value.challenge_participants.map((participant) => participant.tool_id);
+
     // 
-    const dataPoints = data.value.challenge_participants.map((participant) => ([
+    dataPoints.value = data.value.challenge_participants.map((participant) => ([
         participant.metric_x,
         participant.metric_y,
     ]));
 
     // ----------------------------------------------------------------
     // PARETO
-    paretoPoints.value = pf.getParetoFrontier(dataPoints);
+    let direction = formatOptimalDisplay(visualization.optimization)
+    paretoPoints.value = pf.getParetoFrontier(dataPoints.value, { optimize: direction });
 
     const globalParetoTrace = {
         x: paretoPoints.value.map((point) => point[0]),
@@ -197,8 +229,7 @@ onMounted(async () => {
     // Create the chart layout
     const layout = {
         title: visualization.x_axis + ' + ' + visualization.y_axis,
-        autosize: false,
-        width: 1080,
+        autosize: true,
         height: 600,
         annotations: getOptimizationArrow(visualization.optimization, paretoPoints.value),
         xaxis: {
@@ -223,29 +254,34 @@ onMounted(async () => {
                 },
             },
         },
-        margin: { l: 60, r: 50, t: 30, b: 30, pad: 4 },
-        paper_bgcolor: '#ffffff',
+        margin: { l: 50, r: 50, t: 80, b: 20, pad: 4 },
         legend: {
             orientation: 'h',
-            x: 0.1,
-            y: -0.2,
-            // borderwidth: 1,
+            x: 0,
+            y: -0.25,
+            xref: 'paper',
+            yref: 'paper',
             font: {
                 size: 14,
             }
         },
-        plot_bgcolor: '#F8F9F9',
+        // plot_bgcolor: '#F8F9F9',
         images: getImagePosition(visualization.optimization),
         showlegend: true
     };
 
+    const config = {
+        displayModeBar: false,
+        responsive: true,
+        hovermode: false
+    }
+
     // ----------------------------------------------------------------
     // CREATE SCATTER PLOT
-    const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout);
+    const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout, config);
 
     // ----------------------------------------------------------------
     // K-Means Clustering
-    createShapeClustering(dataPoints)
 
     // Get rangees from ejest graph
     scatterPlot.then(scatterPlot => {
@@ -254,7 +290,7 @@ onMounted(async () => {
         optimalYaxis.value = layoutObj.yaxis.range;
     });
 
-    // Update Pareto Frontier 
+    // Update Data 
     scatterPlot.then((gd) => {
         gd.on('plotly_legendclick', (event) => {
             let traceIndex = event.curveNumber;
@@ -271,11 +307,11 @@ onMounted(async () => {
                 traceIndex = traceIndex - 2;
 
                 // (Add hidden) Hide or show the tool based on its current state
-                const toolHidden = dataPoints[traceIndex].hidden;
+                const toolHidden = dataPoints.value[traceIndex].hidden;
 
                 // If hiding the trace, check if there are at least 4 visible traces
                 if (!toolHidden) {
-                    const visibleTools = dataPoints.filter((tool) => !tool.hidden);
+                    const visibleTools = dataPoints.value.filter((tool) => !tool.hidden);
                     if (visibleTools.length <= 4) {
                         // Show Message Error
                         showMessageError.value = true;
@@ -297,32 +333,58 @@ onMounted(async () => {
                 }
 
                 // Toggle the hidden state
-                dataPoints[traceIndex].hidden = !toolHidden;
+                dataPoints.value[traceIndex].hidden = !toolHidden;
 
                 // Filter visible tools
-                const updatedVisibleTools = dataPoints.filter((tool) => !tool.hidden);
+                const updatedVisibleTools = dataPoints.value.filter((tool) => !tool.hidden);
 
                 // Calculate the new Pareto Frontier with the visible tools
-                const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools);
+                let direction = formatOptimalDisplay(visualization.optimization)
+                const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools, { optimize: direction });
 
                 // Update the trace of the Pareto frontier
                 const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
 
                 // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
                 if (viewKmeans.value === true) {
+
+                    // Create a list of visible tools with their hiding status
+                    const visibleTools = toolID.value.map((tool, index) => ({
+                        name: tool,
+                        hidden: dataPoints.value[index].hidden
+                    })).filter(tool => !tool.hidden);
+                    // List of visible tools
+                    const visibleToolNames = visibleTools.map(tool => tool.name);
+
                     // Recalculate Clustering
-                    createShapeClustering(updatedVisibleTools)
+                    createShapeClustering(updatedVisibleTools, visibleToolNames)
                     showShapesKmeans.value = true;
+
+
                     const layout = {
                         shapes: showShapesKmeans.value ? shapes : [],
                         annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans)
                     };
                     Plotly.update('scatter-plot', newTraces, layout, 1);
-
                 }
 
-                // Si Square Quartile vista optima
-                optimalView()
+                if (viewSquare.value === true) {
+                    const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
+                    const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
+
+                    // Create a list of visible tools with their hiding status
+                    const visibleTools = toolID.value.map((tool, index) => ({
+                        name: tool,
+                        hidden: dataPoints.value[index].hidden
+                    })).filter(tool => !tool.hidden);
+
+                    // List of visible tools
+                    const visibleToolNames = visibleTools.map(tool => tool.name);
+                    // Update data with visible tools
+                    calculateQuartiles(updatedXCoordinates.value, updatedYCoordinates.value, visibleToolNames);
+                    optimalView()
+                }
+
                 Plotly.update('scatter-plot', newTraces, {}, 1);
 
             }
@@ -338,7 +400,7 @@ const resetView = () => {
     const Plotly = require('plotly.js-dist');
     const layout = {
         xaxis: {
-            range: [0, Math.max(...coordenadasX.value) + 5000],
+            range: [0, Math.max(...xAxis.value) + 5000],
             title: {
                 text: dataset.value.datalink.inline_data.visualization.x_axis,
                 font: {
@@ -350,7 +412,7 @@ const resetView = () => {
             }
         },
         yaxis: {
-            range: [0, Math.max(...coordenadasY.value) + 0.05],
+            range: [0, Math.max(...yAxis.value) + 0.05],
             title: {
                 text: dataset.value.datalink.inline_data.visualization.y_axis,
                 font: {
@@ -410,20 +472,61 @@ const viewButtonText = computed(() => {
     return viewApplied.value ? 'Optimal View' : 'Reset View';
 });
 
+// Format Date String
+const formatDateString = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+};
+
+
+// PARETO FRONTIER
+// ----------------------------------------------------------------
+// format optimal view
+const formatOptimalDisplay = (optimization) => {
+    if (optimization == 'top-right') {
+        return 'topRight';
+    } else if (optimization == optimization == 'top-left') {
+        return 'topLeft';
+    } else if (optimization == 'bottom-right') {
+        return 'bottomRight';
+    }
+}
+
 // NO CLASSIFICATION
 // ----------------------------------------------------------------
 const noClassification = () => {
     cuartilesData.value = [];
     viewKmeans.value = false;
+    viewSquare.value = false;
     showShapesKmeans.value = false;
     showShapesSquare.value = false;
     showAnnotationSquare.value = false;
+
+    // Reset Plot
     const Plotly = require('plotly.js-dist');
+    const plot = document.getElementById('scatter-plot')
+    const numTraces = plot.data.length
+    const visibleArray = Array(numTraces).fill(true)
+
+    // Reset Pareto Frontier
+    dataPoints.value.forEach(array => { array.hidden = false; });
+    const updatedVisibleTools = dataPoints.value.filter((tool) => !tool.hidden);
+    let direction = formatOptimalDisplay(data.value.visualization.optimization)
+    const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools, { optimize: direction });
+    // Update the trace of the Pareto frontier
+    const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
+
     const layout = {
         shapes: false ? shapes : [],
         annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
     };
-    Plotly.update('scatter-plot', {}, layout);
+    Plotly.update('scatter-plot', newTraces, layout, 1);
+    Plotly.restyle('scatter-plot', { visible: visibleArray })
+
 };
 
 
@@ -432,56 +535,56 @@ const noClassification = () => {
 // ----------------------------------------------------------------
 // Function to toggle the visibility of the Square Quartiles
 const toggleQuartilesVisibility = () => {
-    if (!showShapesSquare.value) {
-        showShapesSquare.value = !showShapesSquare.value;
-        showAnnotationSquare.value = !showAnnotationSquare.value
-        viewKmeans.value = false;
-        calculateQuartiles();
-    }
+    const Plotly = require('plotly.js-dist');
+    const plot = document.getElementById('scatter-plot');
+    const numTraces = plot.data.length;
+
+    // Reset visibilities. Hide the Kmeans and Show the Square
+    showShapesKmeans.value = false;
+    viewKmeans.value = false;
+    viewSquare.value = true;
+    showShapesSquare.value = true;
+    showAnnotationSquare.value = true;
+
+    // Update visibility of Points
+    dataPoints.value.forEach(array => { array.hidden = false; });
+
+    // Calculate Pareto Frontier
+    const updatedVisibleTools = dataPoints.value.filter(tool => !tool.hidden);
+    const direction = formatOptimalDisplay(data.value.visualization.optimization);
+    const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools, { optimize: direction });
+    const newTraces = { x: [newParetoPoints.map(point => point[0])], y: [newParetoPoints.map(point => point[1])] };
+
+    const layout = {
+        shapes: false ? shapes : [],
+        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+    };
+
+    const visibleArray = Array(numTraces).fill(true);
+
+    Plotly.update('scatter-plot', newTraces, layout, 1);
+    Plotly.update('scatter-plot', { visible: visibleArray });
+
+    calculateQuartiles(xAxis.value, yAxis.value, toolID.value);
+    optimalView();
 };
 
-const calculateQuartiles = () => {
 
-    const cuartilesX = [
-        statistics.quantile(coordenadasX.value, 0.25),
-        statistics.quantile(coordenadasX.value, 0.5),
-        statistics.quantile(coordenadasX.value, 0.75),
-    ];
-    const cuartilesY = [
-        statistics.quantile(coordenadasY.value, 0.25),
-        statistics.quantile(coordenadasY.value, 0.5),
-        statistics.quantile(coordenadasY.value, 0.75),
-    ];
-    cuartilesData.value = [];
-    toolID.value.forEach((toolId, index) => {
-        const x = coordenadasX.value[index];
-        const y = coordenadasY.value[index];
-        let cuartil;
+const calculateQuartiles = (xAxis, yAxis, toolID) => {
 
-        if (x <= cuartilesX[1] && y <= cuartilesY[1]) {
-            cuartil = '1';
-            // cuartil = '4';
-        } else if (x > cuartilesX[1] && y <= cuartilesY[2] && y > cuartilesY[1]) {
-            cuartil = '2';
-            // cuartil = '1';
-        } else if (x <= cuartilesX[1] && y > cuartilesY[1]) {
-            cuartil = '3';
-            // cuartil = '2';
-        } else {
-            cuartil = '4';
-            // cuartil = '3';
-        }
-        cuartilesData.value.push({ tool_id: toolId, cuartil });
-    });
+    const cuartilesX = statistics.quantile(xAxis, 0.5);
+    const cuartilesY = statistics.quantile(yAxis, 0.5);
 
-    // Create quartile lines to the layout
+    let better = data.value.visualization.optimization
+    squareClassificationTools(better, toolID, cuartilesX, cuartilesY, xAxis, yAxis)
+
     const shapes = [
         {
             type: 'line',
-            x0: cuartilesX[1],
-            x1: cuartilesX[1],
+            x0: cuartilesX,
+            x1: cuartilesX,
             y0: 0,
-            y1: Math.max(...cuartilesY) + 10,
+            y1: Math.max(cuartilesY) + 10,
             line: {
                 color: '#C0D4E8',
                 width: 2,
@@ -490,10 +593,10 @@ const calculateQuartiles = () => {
         },
         {
             type: 'line',
-            y0: cuartilesY[1],
-            y1: cuartilesY[1],
+            y0: cuartilesY,
+            y1: cuartilesY,
             x0: 0,
-            x1: Math.max(...cuartilesX) + 1500000,
+            x1: Math.max(cuartilesX) + 1500000,
             line: {
                 color: '#C0D4E8',
                 width: 2,
@@ -501,9 +604,8 @@ const calculateQuartiles = () => {
             }
         },
     ];
-
     // Annotations
-    annotationSquareQuartile(cuartilesData.value, toolID, coordenadasX, coordenadasY)
+    annotationSquareQuartile(better)
     // Add Quartiles
     const layout = {
         shapes: showShapesSquare.value ? shapes : [],
@@ -512,31 +614,72 @@ const calculateQuartiles = () => {
     Plotly.relayout('scatter-plot', layout);
 };
 
-// Annotation for Square Quartiles
-const annotationSquareQuartile = (cuartilesData, toolID, coordenadasX, coordenadasY) => {
-    const cuartilPositions = {};
-    cuartilesData.forEach((item) => {
-        const toolIndex = toolID.value.indexOf(item.tool_id);
-        if (!cuartilPositions[item.cuartil]) {
-            cuartilPositions[item.cuartil] = {
-                x: 0,
-                y: 0,
-                count: 0,
-            };
+// 
+const squareClassificationTools = (better, visibleToolID, cuartilesX, cuartilesY, xAxis, yAxis) => {
+    cuartilesData.value = [];
+    allToolID.value.forEach((tool) => { // Iterar sobre todas las herramientas
+        const index = visibleToolID.indexOf(tool);
+        const x = index !== -1 ? xAxis[index] : null; // Get index and values x, y
+        const y = index !== -1 ? yAxis[index] : null; // Get index and values x, y
+
+        let cuartil = 0;
+        let label = '--';
+
+        if (index !== -1) { // Si la herramienta está presente en visibleToolID
+            if (better === "bottom-right") {
+                if (x >= cuartilesX && y <= cuartilesY) {
+                    cuartil = 1;
+                    label = 'T';
+                } else if (x >= cuartilesX && y > cuartilesY) {
+                    cuartil = 3;
+                    label = 'M';
+                } else if (x < cuartilesX && y > cuartilesY) {
+                    cuartil = 4;
+                    label = 'B';
+                } else if (x < cuartilesX && y <= cuartilesY) {
+                    cuartil = 2;
+                    label = 'M';
+                }
+            } else if (better === "top-right") {
+                if (x >= cuartilesX && y < cuartilesY) {
+                    cuartil = 3;
+                    label = 'M';
+                } else if (x >= cuartilesX && y >= cuartilesY) {
+                    cuartil = 1;
+                    label = 'T';
+                } else if (x < cuartilesX && y >= cuartilesY) {
+                    cuartil = 2;
+                    label = 'M';
+                } else if (x < cuartilesX && y < cuartilesY) {
+                    cuartil = 4;
+                    label = 'B';
+                }
+            } else if (better === "top-left") {
+                if (x >= cuartilesX && y < cuartilesY) {
+                    cuartil = 4;
+                    label = 'B';
+                } else if (x >= cuartilesX && y >= cuartilesY) {
+                    cuartil = 2;
+                    label = 'M';
+                } else if (x < cuartilesX && y >= cuartilesY) {
+                    cuartil = 1;
+                    label = 'T';
+                } else if (x < cuartilesX && y < cuartilesY) {
+                    cuartil = 3;
+                    label = 'M';
+                }
+            }
         }
-        cuartilPositions[item.cuartil].x += coordenadasX.value[toolIndex];
-        cuartilPositions[item.cuartil].y += coordenadasY.value[toolIndex];
-        cuartilPositions[item.cuartil].count += 1;
+        cuartilesData.value.push({ tool_id: tool, cuartil: cuartil, label: label });
     });
-    let coordenadasCuartil = []
-    const getCoordenadasByCuartil = Object.keys(cuartilPositions).map((cuartil) => {
-        const avgX = cuartilPositions[cuartil].x / cuartilPositions[cuartil].count;
-        const avgY = cuartilPositions[cuartil].y / cuartilPositions[cuartil].count;
-        coordenadasCuartil.push({ x: avgX, y: avgY, numCuartil: cuartil })
-    });
+}
+
+
+// Annotation for Square Quartiles
+const annotationSquareQuartile = (better) => {
 
     // Create Annotation
-    let position = asignaPositionCuartil(coordenadasCuartil)
+    let position = asignaPositionCuartil(better)
     const newAnnotation = position.map(({ position, numCuartil }) => {
         let annotation = {};
         switch (position) {
@@ -619,19 +762,34 @@ const annotationSquareQuartile = (cuartilesData, toolID, coordenadasX, coordenad
 }
 
 // Asigna position
-const asignaPositionCuartil = (coordenadasCuartil) => {
-    const positions = coordenadasCuartil.map((point, index) => {
-        const nextIndex = (index + 1) % 4;
-        const position =
-            index === 0
-                ? 'bottom-left'
-                : index === 1
-                    ? 'top-right'
-                    : nextIndex === 0
-                        ? 'bottom-right'
-                        : 'top-left';
-        return { position, numCuartil: point.numCuartil };
-    });
+const asignaPositionCuartil = (better) => {
+
+    // 1: tot, 2y3: Middle, 4:Botton
+    let num_bottom_right, num_bottom_left, num_top_right, num_top_left;
+    if (better == "bottom-right") {
+        num_bottom_right = "T"; // 1
+        num_bottom_left = "M"; // 2
+        num_top_right = "M"; // 3
+        num_top_left = "B"; // 4
+    }
+    else if (better == "top-right") {
+        num_bottom_right = "M"; // 3
+        num_bottom_left = "B"; // 4
+        num_top_right = "T"; // 1
+        num_top_left = "M"; // 2
+
+    } else if (better == "top-left") {
+        num_bottom_right = "B"; // 4
+        num_bottom_left = "M"; // 3
+        num_top_right = "M"; // 2
+        num_top_left = "T"; // 1
+    }
+
+    let positions = [{ position: 'bottom-right', numCuartil: num_bottom_right },
+    { position: 'bottom-left', numCuartil: num_bottom_left },
+    { position: 'top-right', numCuartil: num_top_right },
+    { position: 'top-left', numCuartil: num_top_left },]
+
     return positions
 };
 
@@ -640,42 +798,59 @@ const asignaPositionCuartil = (coordenadasCuartil) => {
 // K-MEANS CLUSTERING
 // ----------------------------------------------------------------
 const toggleKmeansVisibility = () => {
-    viewKmeans.value = true;
-    if (!showShapesKmeans.value) {
-        showShapesKmeans.value = !showShapesKmeans.value;
-        updatePlotVisibility();
-        showShapesKmeans.value = false;
-        cuartilesData.value = [];
-        showShapesSquare.value = false;
-        showAnnotationSquare.value = false;
-    }
-
-};
-// Visibility of the graph with K-means Clustering classification
-const updatePlotVisibility = () => {
     const Plotly = require('plotly.js-dist');
+    const plot = document.getElementById('scatter-plot');
+    const numTraces = plot.data.length;
+
+    // Reset visibilities. Hide the Square and Show the Kmeans
+    showShapesSquare.value = false;
+    showAnnotationSquare.value = false;
+    viewSquare.value = false;
+    showShapesKmeans.value = true;
+    viewKmeans.value = true;
+
+    // Update visibility of Points
+    dataPoints.value.forEach(array => { array.hidden = false; });
+
+    // Calculate Pareto Frontier
+    const updatedVisibleTools = dataPoints.value.filter(tool => !tool.hidden);
+    const direction = formatOptimalDisplay(data.value.visualization.optimization);
+    const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools, { optimize: direction });
+    const newTraces = { x: [newParetoPoints.map(point => point[0])], y: [newParetoPoints.map(point => point[1])] };
+
+    // Update visibility of traces in legend
+    const visibleArray = Array(numTraces).fill(true);
     const layout = {
-        shapes: showShapesKmeans.value ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans),
+        shapes: false ? shapes : [],
+        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
     };
-    Plotly.update('scatter-plot', {}, layout);
+    Plotly.update('scatter-plot', newTraces, layout, 1);
+    Plotly.update('scatter-plot', { visible: visibleArray });
+
+    // Create shape clustering
+    createShapeClustering(dataPoints.value, toolID.value);
+
 };
 
-const createShapeClustering = (dataPoints) => {
 
+const createShapeClustering = (dataPoints, toolIDVisible) => {
     clusterMaker.k(4);
-    clusterMaker.iterations(500); // Número de iteraciones (mayor número da más tiempo para converger)
+    clusterMaker.iterations(500);
     clusterMaker.data(dataPoints);
 
     // Obtener los resultados de los clusters
     let results = clusterMaker.clusters();
-    
-    // Ordenar result para en funcion de la optimal corner.
-    let sorted_results = orderResultKMeans(results)
+    let sortedResults = JSON.parse(JSON.stringify(results));
+
+    let better = data.value.visualization.optimization
+    orderResultKMeans(sortedResults, better)
+
+    const groupedDataPoints = assignGroupToDataPoints(dataPoints, sortedResults);
+    createDataPointForTables(toolIDVisible, groupedDataPoints)
 
 
     // Crear shapes basados en los clusters
-    shapes = results.map((cluster) => {
+    shapes = sortedResults.map((cluster) => {
         const xValues = cluster.points.map(point => point[0]);
         const yValues = cluster.points.map(point => point[1]);
         return {
@@ -696,7 +871,7 @@ const createShapeClustering = (dataPoints) => {
 
     // Crear annotations para los centroides de los clusters
     let count = 0;
-    annotationKmeans = results.map((cluster) => {
+    annotationKmeans = sortedResults.map((cluster) => {
         const centroidX = cluster.centroid[0];
         const centroidY = cluster.centroid[1];
         count++;
@@ -717,14 +892,60 @@ const createShapeClustering = (dataPoints) => {
         };
     });
 
+    const Plotly = require('plotly.js-dist');
+    const layout = {
+        shapes: showShapesKmeans.value ? shapes : [],
+        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans),
+    };
+    Plotly.update('scatter-plot', {}, layout);
+
 }
 
-// Ordenas Resulr K-means
-const orderResultKMeans = (results) => {
+
+const createDataPointForTables = (visibleTools, groupedDataPoints) => {
+    cuartilesData.value = [];
+    allToolID.value.forEach((tool) => {
+        const index = visibleTools.indexOf(tool);
+        let cuartil = 0;
+        let label = '--';
+        if (index !== -1) {
+            cuartil = groupedDataPoints[index][2];
+            label = cuartil.toString();
+        }
+
+        cuartilesData.value.push({ tool_id: tool, cuartil: cuartil, label: label });
+    })
+
+}
+
+const assignGroupToDataPoints = (dataPoints, sortedResults) => {
+    const groupedDataPoints = [];
+    for (let i = 0; i < dataPoints.length; i++) {
+        const dataPoint = dataPoints[i];
+        for (let j = 0; j < sortedResults.length; j++) {
+            const group = sortedResults[j];
+            // Verificar si el punto está en el grupo
+            if (group.points.some(groupPoint => isEqual(groupPoint, dataPoint))) {
+                groupedDataPoints.push([...dataPoint, j + 1]);
+                break;
+            }
+        }
+    }
+    return groupedDataPoints;
+}
+
+// Función de utilidad para comparar dos puntos y verificar si son iguales
+const isEqual = (point1, point2) => {
+    return point1[0] === point2[0] && point1[1] === point2[1];
+}
+
+
+// Sorted Results K-means
+const orderResultKMeans = (sortedResults, better) => {
     // normalize data to 0-1 range
     let centroids_x = []
     let centroids_y = []
-    results.forEach(function (element) {
+    sortedResults.forEach(function (element) {
         centroids_x.push(element.centroid[0])
         centroids_y.push(element.centroid[1])
     })
@@ -732,31 +953,28 @@ const orderResultKMeans = (results) => {
     let [x_norm, y_norm] = normalize_data(centroids_x, centroids_y)
 
     let scores = [];
-    let better = data.value.visualization.optimization
     if (better == "top-right") {
         for (let i = 0; i < x_norm.length; i++) {
             let distance = x_norm[i] + y_norm[i];
             scores.push(distance);
-            results[i]['score'] = distance;
+            sortedResults[i]['score'] = distance;
         };
 
     } else if (better == "bottom-right") {
         for (let i = 0; i < x_norm.length; i++) {
             let distance = x_norm[i] + (1 - y_norm[i]);
             scores.push(distance);
-            results[i]['score'] = distance;
+            sortedResults[i]['score'] = distance;
         };
     } else if (better == "top-left") {
         for (let i = 0; i < x_norm.length; i++) {
             let distance = (1 - x_norm[i]) + y_norm[i];
             scores.push(distance);
-            results[i]['score'] = distance;
+            sortedResults[i]['score'] = distance;
         };
     };
 
-    let sorted_results = sortByKey(results, "score");
-
-    return sorted_results
+    sortByKey(sortedResults, "score");
 }
 
 const normalize_data = (x_values, y_values) => {
@@ -775,11 +993,12 @@ const normalize_data = (x_values, y_values) => {
 }
 
 const sortByKey = (array, key) => {
-    return array.sort(function(a, b) {
+    return array.sort(function (a, b) {
         var x = a[key]; var y = b[key];
         return ((x < y) ? -1 : ((x > y) ? 1 : 0)) * -1;
     });
 }
+
 
 
 // DOWNLOAD
@@ -955,8 +1174,25 @@ function getSymbol() {
 
 
 <style scoped lang="css">
+.butns {
+
+    position: absolute;
+    top: 20px;
+    /* right: 10px; */
+    margin-top: 10px;
+    z-index: 9999
+}
+
+.button-classification {
+    width: 140px;
+}
+
+.button-resetView {
+    width: 140px;
+}
+
 .button-download {
-    width: 160px;
+    width: 140px;
 }
 
 .text-download {
@@ -964,53 +1200,56 @@ function getSymbol() {
     font-size: small;
 }
 
-.button-classification {
-    width: 200px;
-}
-
-.button-resetView {
-    width: 150px;
-}
-
 .text-classifi {
     padding: auto;
     font-size: small;
 }
 
+.error-alert {
+    width: 70%;
+    margin: 0 auto;
+    height: 2em;
+}
+
+.b-alert {
+    padding: 7px;
+}
 
 .cuartiles-table {
     margin: 0 auto;
-    width: 80%;
-    border-collapse: collapse;
-    border-radius: 5px;
+    width: 100%;
     margin-top: 20px;
 }
 
 .cuartiles-table th {
-    background-color: #E2E3E5;
-    text-align: center;
-
+    background-color: #6c757d;
+    color: white;
 }
 
 .cuartiles-table td {
     border: 1px solid #dddddd;
-    text-align: center;
-    padding: 5px;
+    padding-top: 6px;
+    padding-bottom: 6px;
 }
 
 .quartil-1 {
-    background-color: #5495D6;
+    background-color: rgb(237, 248, 233);
 }
 
 .quartil-2 {
-    background-color: #7FB0E0;
+    background-color: rgb(186, 228, 179);
 }
 
 .quartil-3 {
-    background-color: #AACAEB;
+    background-color: rgb(116, 196, 118);
 }
 
 .quartil-4 {
-    background-color: #D4E5F5;
+    background-color: rgb(35, 139, 69);
+}
+
+.table-secondary {
+    background-color: #6c757d;
+    color: white;
 }
 </style>
