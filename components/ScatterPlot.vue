@@ -2,9 +2,8 @@
     <div>
         <b-row>
             <b-col cols="8">
-
-                <!-- Buttons -->
-                <div v-if="data" class="butns">
+                <div class="butns mr-2">
+                    <!-- Buttons -->
                     <b-button-group class="ml-auto">
                         <!-- Classification -->
                         <b-dropdown text="Classification" variant="outline-secondary" class=" button-classification">
@@ -51,7 +50,7 @@
                             @dismissed="dismissCountDown = 0" @dismiss-count-down="countDownChanged">
                             At least four participants are required for the benchmark!!
                         </b-alert>
-                    </div>
+                    </div><br>
 
                     <!-- ID AND DATE TABLE -->
                     <div v-if="datasetId && modificationDate">
@@ -67,6 +66,7 @@
                         </b-table-simple>
                     </div>
 
+
                 </div>
             </b-col>
 
@@ -75,8 +75,8 @@
                 <div>
                     <table class="table table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
                         <tr>
-                            <th>Tool</th>
-                            <th>Quartil</th>
+                            <th variant="secondary" >Tool</th>
+                            <th variant="secondary" >Quartil</th>
                         </tr>
                         <tr v-for="(item, index) in cuartilesData" :key="item.tool_id" @click="handleTableRowClick(index)">
                             <td>{{ item.tool_id }}</td>
