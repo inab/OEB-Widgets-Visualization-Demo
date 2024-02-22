@@ -2,22 +2,9 @@
     <div>
         <b-row>
             <b-col cols="8">
-                <!-- ID AND DATE TABLE -->
-                <div v-if="datasetId && modificationDate">
-                    <b-table-simple bordered small caption-top responsive id='idDateTable'>
-                        <b-tbody>
-                            <b-tr>
-                                <b-th variant="secondary" class="text-center">Dataset ID</b-th>
-                                <b-td class="text-center">{{ datasetId }}</b-td>
-                                <b-th variant="secondary" class="text-center">Last Update</b-th>
-                                <b-td class="text-center">{{ modificationDate }}</b-td>
-                            </b-tr>
-                        </b-tbody>
-                    </b-table-simple>
-                </div>
 
                 <!-- Buttons -->
-                <div v-if="data" class="butns mr-2 mt-5">
+                <div v-if="data" class="butns">
                     <b-button-group class="ml-auto">
                         <!-- Classification -->
                         <b-dropdown text="Classification" variant="outline-secondary" class=" button-classification">
@@ -53,31 +40,45 @@
         <b-row class="mt-4">
             <!-- Chart -->
             <b-col cols="8">
-                <div id="todownload">
+                <div>
 
                     <!-- Scatter Plot -->
                     <div id="scatter-plot"></div>
 
                     <!-- Error message -->
-                    <div class="error-alert">
+                    <div class="error-alert mb-3">
                         <b-alert class="b-alert" :show="dismissCountDown > 0" dismissible variant="danger"
                             @dismissed="dismissCountDown = 0" @dismiss-count-down="countDownChanged">
                             At least four participants are required for the benchmark!!
                         </b-alert>
-                    </div><br>
+                    </div>
+
+                    <!-- ID AND DATE TABLE -->
+                    <div v-if="datasetId && modificationDate">
+                        <b-table-simple bordered small caption-top responsive id='idDateTable'>
+                            <b-tbody>
+                                <b-tr>
+                                    <b-th variant="secondary" class="text-center">Dataset ID</b-th>
+                                    <b-td class="text-center">{{ datasetId }}</b-td>
+                                    <b-th variant="secondary" class="text-center">Last Update</b-th>
+                                    <b-td class="text-center">{{ modificationDate }}</b-td>
+                                </b-tr>
+                            </b-tbody>
+                        </b-table-simple>
+                    </div>
 
                 </div>
             </b-col>
 
             <!-- Table -->
             <b-col cols="4">
-                <div class="">
-                    <table class="cuartiles-table table table-bordered" v-if="cuartilesData.length > 0">
+                <div>
+                    <table class="table table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
                         <tr>
-                            <th variant="secondary">Tool</th>
-                            <th variant="secondary">Quartil</th>
+                            <th>Tool</th>
+                            <th>Quartil</th>
                         </tr>
-                        <tr v-for="item in cuartilesData" :key="item.tool_id">
+                        <tr v-for="(item, index) in cuartilesData" :key="item.tool_id" @click="handleTableRowClick(index)">
                             <td>{{ item.tool_id }}</td>
                             <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
                         </tr>
@@ -289,7 +290,7 @@ onMounted(async () => {
         optimalYaxis.value = layoutObj.yaxis.range;
     });
 
-    // Update Data 
+    // Capture legend event
     scatterPlot.then((gd) => {
         gd.on('plotly_legendclick', (event) => {
             let traceIndex = event.curveNumber;
@@ -302,90 +303,8 @@ onMounted(async () => {
                 return true;
             }
             else {
-                // Adjust the index to exclude the Pareto (which is at index 0)
-                traceIndex = traceIndex - 2;
-
-                // (Add hidden) Hide or show the tool based on its current state
-                const toolHidden = dataPoints.value[traceIndex].hidden;
-
-                // If hiding the trace, check if there are at least 4 visible traces
-                if (!toolHidden) {
-                    const visibleTools = dataPoints.value.filter((tool) => !tool.hidden);
-                    if (visibleTools.length <= 4) {
-                        // Show Message Error
-                        showMessageError.value = true;
-                        dismissCountDown.value = 5;
-                        // Iniciar el temporizador para ocultar el alerta después de 5 segundos
-                        const timer = setInterval(() => {
-                            if (dismissCountDown.value > 0) {
-                                dismissCountDown.value -= 1;
-                            } else {
-                                showMessageError.value = false;
-                                clearInterval(timer);
-                            }
-                        }, 1000);
-
-                        return false;
-                    }
-                } else {
-                    showMessageError.value = false;
-                }
-
-                // Toggle the hidden state
-                dataPoints.value[traceIndex].hidden = !toolHidden;
-
-                // Filter visible tools
-                const updatedVisibleTools = dataPoints.value.filter((tool) => !tool.hidden);
-
-                // Calculate the new Pareto Frontier with the visible tools
-                let direction = formatOptimalDisplay(visualization.optimization)
-                const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools, { optimize: direction });
-
-                // Update the trace of the Pareto frontier
-                const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
-
-                // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
-                if (viewKmeans.value === true) {
-
-                    // Create a list of visible tools with their hiding status
-                    const visibleTools = toolID.value.map((tool, index) => ({
-                        name: tool,
-                        hidden: dataPoints.value[index].hidden
-                    })).filter(tool => !tool.hidden);
-                    // List of visible tools
-                    const visibleToolNames = visibleTools.map(tool => tool.name);
-
-                    // Recalculate Clustering
-                    createShapeClustering(updatedVisibleTools, visibleToolNames)
-                    showShapesKmeans.value = true;
-
-
-                    const layout = {
-                        shapes: showShapesKmeans.value ? shapes : [],
-                        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans)
-                    };
-                    Plotly.update('scatter-plot', newTraces, layout, 1);
-                }
-
-                if (viewSquare.value === true) {
-                    const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
-                    const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
-
-                    // Create a list of visible tools with their hiding status
-                    const visibleTools = toolID.value.map((tool, index) => ({
-                        name: tool,
-                        hidden: dataPoints.value[index].hidden
-                    })).filter(tool => !tool.hidden);
-
-                    // List of visible tools
-                    const visibleToolNames = visibleTools.map(tool => tool.name);
-                    // Update data with visible tools
-                    calculateQuartiles(updatedXCoordinates.value, updatedYCoordinates.value, visibleToolNames);
-                    optimalView()
-                }
-
-                Plotly.update('scatter-plot', newTraces, {}, 1);
-
+                // Update the graph based on the selected trace
+                updatePlotOnSelection(traceIndex)
             }
 
         });
@@ -394,6 +313,122 @@ onMounted(async () => {
 
 // ----------------------------------------------------------------
 // Functions
+// ----------------------------------------------------------------
+// Handle the click on the table
+const handleTableRowClick = (index) => {
+    const traceIndex = index + 2; // Adjust the index
+    toggleTraceVisibility(traceIndex);
+    updatePlotOnSelection(traceIndex)
+}
+
+// Toggle trace visibility
+const toggleTraceVisibility = (traceIndex) => {
+    const scatterPlotElement = document.getElementById('scatter-plot');
+    const plotlyData = scatterPlotElement.data;
+    const plotlyLayout = scatterPlotElement.layout;
+
+    // Check whether the trace is visible or not
+    const isVisible = plotlyData[traceIndex].visible;
+
+    // Update the visibility state of the trace
+    plotlyData[traceIndex].visible = isVisible === true ? 'legendonly' : true;
+
+    // Update the chart with the new data
+    const Plotly = require('plotly.js-dist');
+    Plotly.react('scatter-plot', plotlyData, plotlyLayout);
+}
+
+// Update the graph based on the selected trace
+const updatePlotOnSelection = (traceIndex) => {
+
+    const Plotly = require('plotly.js-dist');
+
+    // Adjust the index to exclude the Pareto (which is at index 0)
+    traceIndex = traceIndex - 2;
+
+    // (Add hidden) Hide or show the tool based on its current state
+    const toolHidden = dataPoints.value[traceIndex].hidden;
+
+    // If hiding the trace, check if there are at least 4 visible traces
+    if (!toolHidden) {
+        const visibleTools = dataPoints.value.filter((tool) => !tool.hidden);
+        if (visibleTools.length <= 4) {
+            // Show Message Error
+            showMessageError.value = true;
+            dismissCountDown.value = 5;
+            // Iniciar el temporizador para ocultar el alerta después de 5 segundos
+            const timer = setInterval(() => {
+                if (dismissCountDown.value > 0) {
+                    dismissCountDown.value -= 1;
+                } else {
+                    showMessageError.value = false;
+                    clearInterval(timer);
+                }
+            }, 1000);
+
+            return false;
+        }
+    } else {
+        showMessageError.value = false;
+    }
+
+    // Toggle the hidden state
+    dataPoints.value[traceIndex].hidden = !toolHidden;
+
+    // Filter visible tools
+    const updatedVisibleTools = dataPoints.value.filter((tool) => !tool.hidden);
+
+    // Calculate the new Pareto Frontier with the visible tools
+    let direction = formatOptimalDisplay(data.value.visualization.optimization)
+    const newParetoPoints = pf.getParetoFrontier(updatedVisibleTools, { optimize: direction });
+
+    // Update the trace of the Pareto frontier
+    const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
+
+    // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
+    if (viewKmeans.value === true) {
+
+        // Create a list of visible tools with their hiding status
+        const visibleTools = toolID.value.map((tool, index) => ({
+            name: tool,
+            hidden: dataPoints.value[index].hidden
+        })).filter(tool => !tool.hidden);
+        // List of visible tools
+        const visibleToolNames = visibleTools.map(tool => tool.name);
+
+        // Recalculate Clustering
+        createShapeClustering(updatedVisibleTools, visibleToolNames)
+        showShapesKmeans.value = true;
+
+
+        const layout = {
+            shapes: showShapesKmeans.value ? shapes : [],
+            annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans)
+        };
+        Plotly.update('scatter-plot', newTraces, layout, 1);
+    }
+
+    if (viewSquare.value === true) {
+        const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
+        const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
+
+        // Create a list of visible tools with their hiding status
+        const visibleTools = toolID.value.map((tool, index) => ({
+            name: tool,
+            hidden: dataPoints.value[index].hidden
+        })).filter(tool => !tool.hidden);
+
+        // List of visible tools
+        const visibleToolNames = visibleTools.map(tool => tool.name);
+        // Update data with visible tools
+        calculateQuartiles(updatedXCoordinates.value, updatedYCoordinates.value, visibleToolNames);
+        optimalView()
+    }
+
+    Plotly.update('scatter-plot', newTraces, {}, 1);
+}
+
+// Scatter Plot Views
 // ----------------------------------------------------------------
 const resetView = () => {
     const Plotly = require('plotly.js-dist');
@@ -1176,7 +1211,7 @@ function getSymbol() {
 .butns {
 
     position: absolute;
-    top: 20px;
+    top: 14px;
     /* right: 10px; */
     margin-top: 10px;
     z-index: 1
@@ -1216,19 +1251,18 @@ function getSymbol() {
 
 .cuartiles-table {
     margin: 0 auto;
-    width: 100%;
-    margin-top: 20px;
+    width: 90%;
 }
 
 .cuartiles-table th {
     background-color: #6c757d;
     color: white;
+    border: solid 1px #6c757d;
 }
 
 .cuartiles-table td {
-    border: 1px solid #dddddd;
-    padding-top: 6px;
-    padding-bottom: 6px;
+    padding-top: 8px;
+    padding-bottom: 8px;
 }
 
 .quartil-1 {
