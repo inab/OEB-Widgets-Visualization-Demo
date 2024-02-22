@@ -2,8 +2,22 @@
     <div>
         <b-row>
             <b-col cols="8">
-                <div class="butns mr-2">
-                    <!-- Buttons -->
+                <!-- ID AND DATE TABLE -->
+                <div v-if="datasetId && modificationDate">
+                    <b-table-simple bordered small caption-top responsive id='idDateTable'>
+                        <b-tbody>
+                            <b-tr>
+                                <b-th variant="secondary" class="text-center">Dataset ID</b-th>
+                                <b-td class="text-center">{{ datasetId }}</b-td>
+                                <b-th variant="secondary" class="text-center">Last Update</b-th>
+                                <b-td class="text-center">{{ modificationDate }}</b-td>
+                            </b-tr>
+                        </b-tbody>
+                    </b-table-simple>
+                </div>
+
+                <!-- Buttons -->
+                <div v-if="data" class="butns mr-2 mt-5">
                     <b-button-group class="ml-auto">
                         <!-- Classification -->
                         <b-dropdown text="Classification" variant="outline-secondary" class=" button-classification">
@@ -52,21 +66,6 @@
                         </b-alert>
                     </div><br>
 
-                    <!-- ID AND DATE TABLE -->
-                    <div v-if="datasetId && modificationDate">
-                        <b-table-simple bordered small caption-top responsive id='idDateTable'>
-                            <b-tbody>
-                                <b-tr>
-                                    <b-th variant="secondary" class="text-center">Dataset ID</b-th>
-                                    <b-td class="text-center">{{ datasetId }}</b-td>
-                                    <b-th variant="secondary" class="text-center">Last Update</b-th>
-                                    <b-td class="text-center">{{ modificationDate }}</b-td>
-                                </b-tr>
-                            </b-tbody>
-                        </b-table-simple>
-                    </div>
-
-
                 </div>
             </b-col>
 
@@ -75,8 +74,8 @@
                 <div>
                     <table class="table table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
                         <tr>
-                            <th variant="secondary" >Tool</th>
-                            <th variant="secondary" >Quartil</th>
+                            <th variant="secondary">Tool</th>
+                            <th variant="secondary">Quartil</th>
                         </tr>
                         <tr v-for="(item, index) in cuartilesData" :key="item.tool_id" @click="handleTableRowClick(index)">
                             <td>{{ item.tool_id }}</td>
