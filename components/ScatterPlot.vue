@@ -56,11 +56,30 @@
                             At least four participants are required for the benchmark!!
                         </b-alert>
                     </div>
+<<<<<<< HEAD
+=======
+
+                    <!-- ID AND DATE TABLE -->
+                    <div v-if="datasetId && modificationDate">
+                        <b-table-simple bordered small caption-top responsive id='idDateTable'>
+                            <b-tbody>
+                                <b-tr>
+                                    <b-th variant="secondary" class="text-center">Dataset ID</b-th>
+                                    <b-td class="text-center">{{ datasetId }}</b-td>
+                                    <b-th variant="secondary" class="text-center">Last Update</b-th>
+                                    <b-td class="text-center">{{ modificationDate }}</b-td>
+                                </b-tr>
+                            </b-tbody>
+                        </b-table-simple>
+                    </div>
+
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
                 </div>
             </b-col>
 
             <!-- Table -->
             <b-col cols="4">
+<<<<<<< HEAD
                 <div id="benchmarkingTable">
                     <!-- Quartile Table -->
                     <div class="table-container">
@@ -92,6 +111,19 @@
                             </tbody>
                         </table>
                     </div>
+=======
+                <div>
+                    <table class="table table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
+                        <tr>
+                            <th>Tool</th>
+                            <th>Quartil</th>
+                        </tr>
+                        <tr v-for="(item, index) in cuartilesData" :key="item.tool_id" @click="handleTableRowClick(index)">
+                            <td>{{ item.tool_id }}</td>
+                            <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
+                        </tr>
+                    </table>
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
                 </div>
             </b-col>
         </b-row>
@@ -322,9 +354,13 @@ onMounted(async () => {
         optimalYaxis.value = layoutObj.yaxis.range;
     });
 
+<<<<<<< HEAD
 
     // Capture legend event
     // ----------------------------------------------------------------
+=======
+    // Capture legend event
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
     scatterPlot.then((gd) => {
         gd.on('plotly_legendclick', (event) => {
             let traceIndex = event.curveNumber;
@@ -338,11 +374,15 @@ onMounted(async () => {
             }
             else {
                 // Update the graph based on the selected trace
+<<<<<<< HEAD
                 // Si response es false la trace no se oculta de la legend
                 let response = updatePlotOnSelection(traceIndex)
                 if (response == false) {
                     return false;
                 }
+=======
+                updatePlotOnSelection(traceIndex)
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
             }
 
         });
@@ -352,9 +392,12 @@ onMounted(async () => {
 // ----------------------------------------------------------------
 // FUNCTIONS
 // ----------------------------------------------------------------
+<<<<<<< HEAD
 
 // ACTIONS FOR TABLE
 // ----------------------------------------------------------------
+=======
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
 // Handle the click on the table
 const handleTableRowClick = (index) => {
     const traceIndex = index + 2; // Adjust the index
@@ -368,6 +411,7 @@ const toggleTraceVisibility = (traceIndex) => {
     const plotlyData = scatterPlotElement.data;
     const plotlyLayout = scatterPlotElement.layout;
 
+<<<<<<< HEAD
     // Check the visibility state of the trace
     let isVisible = plotlyData[traceIndex].visible;
     if (isVisible === undefined) {
@@ -386,6 +430,10 @@ const toggleTraceVisibility = (traceIndex) => {
     if (visibleCount === 6 && isVisible !== 'legendonly') {
         return;
     }
+=======
+    // Check whether the trace is visible or not
+    const isVisible = plotlyData[traceIndex].visible;
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
 
     // Update the visibility state of the trace
     plotlyData[traceIndex].visible = isVisible === true ? 'legendonly' : true;
@@ -413,7 +461,11 @@ const updatePlotOnSelection = (traceIndex) => {
             // Show Message Error
             showMessageError.value = true;
             dismissCountDown.value = 5;
+<<<<<<< HEAD
             // Start timer to hide alert after 5 seconds
+=======
+            // Iniciar el temporizador para ocultar el alerta después de 5 segundos
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
             const timer = setInterval(() => {
                 if (dismissCountDown.value > 0) {
                     dismissCountDown.value -= 1;
@@ -422,6 +474,10 @@ const updatePlotOnSelection = (traceIndex) => {
                     clearInterval(timer);
                 }
             }, 1000);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
             return false;
         }
     } else {
@@ -441,12 +497,17 @@ const updatePlotOnSelection = (traceIndex) => {
     // Update the trace of the Pareto frontier
     const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
 
+<<<<<<< HEAD
 
 
     // Update Kmeans Clustering
     // ----------------------------------------------------------------
     if (viewKmeans.value === true) {
         // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
+=======
+    // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
+    if (viewKmeans.value === true) {
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
 
         // Create a list of visible tools with their hiding status
         const visibleTools = toolID.value.map((tool, index) => ({
@@ -461,18 +522,28 @@ const updatePlotOnSelection = (traceIndex) => {
         showShapesKmeans.value = true;
 
 
+<<<<<<< HEAD
         // Create a new layout
         const layout = {
             shapes: showShapesKmeans.value ? shapes : [],
             annotations: getOptimizationArrow(data.value.visualization.optimization).concat(annotationKmeans)
+=======
+        const layout = {
+            shapes: showShapesKmeans.value ? shapes : [],
+            annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans)
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
         };
         Plotly.update('scatter-plot', newTraces, layout, 1);
     }
 
+<<<<<<< HEAD
     // Update Square Quartiles
     // ----------------------------------------------------------------
     if (viewSquare.value === true) {
         // If the Square view is active, the quartiles are calculated with the visible traces
+=======
+    if (viewSquare.value === true) {
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
         const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
         const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
 
@@ -489,6 +560,7 @@ const updatePlotOnSelection = (traceIndex) => {
         optimalView()
     }
 
+<<<<<<< HEAD
     // Update Diagonal Quartiles
     // ----------------------------------------------------------------
     if (viewDiagonal.value === true){
@@ -508,6 +580,13 @@ const updatePlotOnSelection = (traceIndex) => {
 // ----------------------------------------------------------------
 
 // Reset View (Real dimensions)
+=======
+    Plotly.update('scatter-plot', newTraces, {}, 1);
+}
+
+// Scatter Plot Views
+// ----------------------------------------------------------------
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
 const resetView = () => {
     const Plotly = require('plotly.js-dist');
     const layout = {
@@ -1601,6 +1680,10 @@ html {
 .butns {
     position: absolute;
     top: 14px;
+<<<<<<< HEAD
+=======
+    /* right: 10px; */
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
     margin-top: 10px;
     z-index: 1;
 }
@@ -1647,9 +1730,14 @@ html {
 }
 
 .cuartiles-table {
+<<<<<<< HEAD
     width: 100%;
     table-layout: fixed;
     border-collapse: collapse;
+=======
+    margin: 0 auto;
+    width: 90%;
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
 }
 
 .cuartiles-table th {
@@ -1659,14 +1747,23 @@ html {
     z-index: 1;
     background-color: #6c757d;
     color: white;
+<<<<<<< HEAD
     white-space: nowrap;
 }
 .toolHeader{
     width: 60%;
+=======
+    border: solid 1px #6c757d;
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
 }
 .cuartiles-table td {
+<<<<<<< HEAD
     padding: 8px;
     vertical-align: top;
+=======
+    padding-top: 8px;
+    padding-bottom: 8px;
+>>>>>>> 671690b (Add: Tool column linked to the chart legend)
 }
 
 .toolColumn {
