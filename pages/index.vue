@@ -16,21 +16,24 @@
       <b-col cols="12" sm="10" md="12">
         <h3>Component Visualization &#8594; SCATTER PLOT</h3>
       </b-col>
-    </b-row> 
+    </b-row>
 
     <b-row>
+      <!-- Wrapper div for spinner with centering styles -->
+      <div v-if="loading" class="spinner-container">
+        <b-spinner type="grow" label="Loading..." style="width: 3rem; height: 3rem; color: #0b579f;"></b-spinner>
+      </div>
       <!-- Scatter plot -->
-      <b-col  cols="12" sm="10" md="12">
-          <ScatterPlot/>
+      <b-col cols="12" sm="10" md="12">
+        <transition name="fade">
+          <ScatterPlot v-if="!loading" />
+        </transition>
       </b-col>
 
     </b-row>
     <br>
 
   </b-container>
-
-  <!-- <LineCharts/> -->
-  <!-- <BarChart/> -->
 </template>
 
 <script>
@@ -48,27 +51,44 @@ import ScatterPlot from '~/components/ScatterPlot.vue';
 
 export default {
   name: 'IndexPage',
-  components:{
-    BarPlot,ScatterPlot
+  components: {
+    BarPlot, ScatterPlot
   },
-  data(){
+  data() {
     return {
-      showScatterPlot: false,
-      showBarPlot: false
+      loading: true, // Initial loading state
     }
+  },
+  mounted() {
+    // Simulate an asynchronous operation (e.g., fetching data)
+    setTimeout(() => {
+      this.loading = false; // Set loading to false when the operation is complete
+    }, 1000); // Adjust the time according to your needs
   },
 
 }
 </script>
 
 <style scoped>
-
 .background {
   background-color: gray !important;
 }
-.border-alert{
+
+.border-alert {
   border-left: 5px solid #dee2e6 !important;
   text-align: left;
 }
 
+.spinner-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Add a custom fade transition */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
 </style>
