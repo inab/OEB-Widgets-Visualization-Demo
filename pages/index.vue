@@ -26,8 +26,12 @@
       <!-- Scatter plot -->
       <b-col cols="12" sm="10" md="12">
         <transition name="fade">
+<<<<<<< HEAD
           <ScatterPlot v-if="isScatterPlotType" :inline_data="inline_data" :datasetId="datasetId" />
           <BarPlot v-if="isBarPlotType" :jsonData="fetchedData" />
+=======
+          <ScatterPlot v-if="!loading" />
+>>>>>>> cf2dca4 (Add:  spinner to Scatter Plot)
         </transition>
       </b-col>
 
@@ -58,6 +62,7 @@ export default {
   data() {
     return {
       loading: true, // Initial loading state
+<<<<<<< HEAD
       fetchedData: null,
       inline_data: null,
       isBarPlotType: null,
@@ -89,7 +94,15 @@ export default {
         this.isScatterPlotType = true;
         this.titlePlot = 'SCATTER PLOT'
       }
+=======
+>>>>>>> cf2dca4 (Add:  spinner to Scatter Plot)
     }
+  },
+  mounted() {
+    // Simulate an asynchronous operation (e.g., fetching data)
+    setTimeout(() => {
+      this.loading = false; // Set loading to false when the operation is complete
+    }, 1000); // Adjust the time according to your needs
   },
 
 }
