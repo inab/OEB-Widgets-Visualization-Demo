@@ -303,7 +303,11 @@ onMounted(async () => {
             }
             else {
                 // Update the graph based on the selected trace
-                updatePlotOnSelection(traceIndex)
+                // Si response es false la trace no se oculta de la legend
+                let response = updatePlotOnSelection(traceIndex)
+                if (response == false){
+                    return false;
+                }
             }
 
         });
@@ -326,8 +330,21 @@ const toggleTraceVisibility = (traceIndex) => {
     const plotlyData = scatterPlotElement.data;
     const plotlyLayout = scatterPlotElement.layout;
 
-    // Check whether the trace is visible or not
+    // Check the visibility state of the trace
     const isVisible = plotlyData[traceIndex].visible;
+
+    // Count the number of currently visible traces
+    let visibleCount = 0;
+    plotlyData.forEach(trace => {
+        if (trace.visible !== 'legendonly') {
+            visibleCount++;
+        }
+    });
+
+    // If there are only four visible traces and the trace being toggled is currently visible, return without changing its visibility
+    if (visibleCount === 6 && isVisible !== 'legendonly') {
+        return;
+    }
 
     // Update the visibility state of the trace
     plotlyData[traceIndex].visible = isVisible === true ? 'legendonly' : true;
@@ -355,7 +372,7 @@ const updatePlotOnSelection = (traceIndex) => {
             // Show Message Error
             showMessageError.value = true;
             dismissCountDown.value = 5;
-            // Iniciar el temporizador para ocultar el alerta después de 5 segundos
+            // Start timer to hide alert after 5 seconds
             const timer = setInterval(() => {
                 if (dismissCountDown.value > 0) {
                     dismissCountDown.value -= 1;
@@ -364,7 +381,6 @@ const updatePlotOnSelection = (traceIndex) => {
                     clearInterval(timer);
                 }
             }, 1000);
-
             return false;
         }
     } else {
@@ -407,6 +423,7 @@ const updatePlotOnSelection = (traceIndex) => {
         Plotly.update('scatter-plot', newTraces, layout, 1);
     }
 
+    // If the Square view is active, the quartiles are calculated with the visible traces
     if (viewSquare.value === true) {
         const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
         const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
