@@ -375,6 +375,7 @@ onMounted(async () => {
             else {
                 // Update the graph based on the selected trace
 <<<<<<< HEAD
+<<<<<<< HEAD
                 // Si response es false la trace no se oculta de la legend
                 let response = updatePlotOnSelection(traceIndex)
                 if (response == false) {
@@ -383,6 +384,13 @@ onMounted(async () => {
 =======
                 updatePlotOnSelection(traceIndex)
 >>>>>>> 671690b (Add: Tool column linked to the chart legend)
+=======
+                // Si response es false la trace no se oculta de la legend
+                let response = updatePlotOnSelection(traceIndex)
+                if (response == false){
+                    return false;
+                }
+>>>>>>> 9f0c89a (Fix: trace view in legend)
             }
 
         });
@@ -412,6 +420,7 @@ const toggleTraceVisibility = (traceIndex) => {
     const plotlyLayout = scatterPlotElement.layout;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     // Check the visibility state of the trace
     let isVisible = plotlyData[traceIndex].visible;
     if (isVisible === undefined) {
@@ -432,8 +441,24 @@ const toggleTraceVisibility = (traceIndex) => {
     }
 =======
     // Check whether the trace is visible or not
+=======
+    // Check the visibility state of the trace
+>>>>>>> 9f0c89a (Fix: trace view in legend)
     const isVisible = plotlyData[traceIndex].visible;
 >>>>>>> 671690b (Add: Tool column linked to the chart legend)
+
+    // Count the number of currently visible traces
+    let visibleCount = 0;
+    plotlyData.forEach(trace => {
+        if (trace.visible !== 'legendonly') {
+            visibleCount++;
+        }
+    });
+
+    // If there are only four visible traces and the trace being toggled is currently visible, return without changing its visibility
+    if (visibleCount === 6 && isVisible !== 'legendonly') {
+        return;
+    }
 
     // Update the visibility state of the trace
     plotlyData[traceIndex].visible = isVisible === true ? 'legendonly' : true;
@@ -462,10 +487,14 @@ const updatePlotOnSelection = (traceIndex) => {
             showMessageError.value = true;
             dismissCountDown.value = 5;
 <<<<<<< HEAD
+<<<<<<< HEAD
             // Start timer to hide alert after 5 seconds
 =======
             // Iniciar el temporizador para ocultar el alerta después de 5 segundos
 >>>>>>> 671690b (Add: Tool column linked to the chart legend)
+=======
+            // Start timer to hide alert after 5 seconds
+>>>>>>> 9f0c89a (Fix: trace view in legend)
             const timer = setInterval(() => {
                 if (dismissCountDown.value > 0) {
                     dismissCountDown.value -= 1;
@@ -475,9 +504,12 @@ const updatePlotOnSelection = (traceIndex) => {
                 }
             }, 1000);
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> 671690b (Add: Tool column linked to the chart legend)
+=======
+>>>>>>> 9f0c89a (Fix: trace view in legend)
             return false;
         }
     } else {
@@ -537,8 +569,12 @@ const updatePlotOnSelection = (traceIndex) => {
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     // Update Square Quartiles
     // ----------------------------------------------------------------
+=======
+    // If the Square view is active, the quartiles are calculated with the visible traces
+>>>>>>> 9f0c89a (Fix: trace view in legend)
     if (viewSquare.value === true) {
         // If the Square view is active, the quartiles are calculated with the visible traces
 =======
