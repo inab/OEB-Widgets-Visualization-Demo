@@ -116,10 +116,14 @@
                     <table class="table table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
                         <tr>
                             <th>Tool</th>
-                            <th>Quartil</th>
+                            <th>Quartile</th>
                         </tr>
-                        <tr v-for="(item, index) in cuartilesData" :key="item.tool_id" @click="handleTableRowClick(index)">
-                            <td>{{ item.tool_id }}</td>
+                        <tr class="toolRow" v-for="(item, index) in cuartilesData" :key="item.tool_id">
+                            <td class="toolColumn" @click="handleTableRowClick(index)">
+                                <div class="color-box"
+                                    :style="{ backgroundColor: markerColors[index % markerColors.length] }"></div>
+                                <span>{{ item.tool_id }}</span>
+                            </td>
                             <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
                         </tr>
                     </table>
@@ -128,7 +132,7 @@
             </b-col>
         </b-row>
 
-    </div>
+    </div> 
 </template>
 
 <script setup>
@@ -387,7 +391,7 @@ onMounted(async () => {
 =======
                 // Si response es false la trace no se oculta de la legend
                 let response = updatePlotOnSelection(traceIndex)
-                if (response == false){
+                if (response == false) {
                     return false;
                 }
 >>>>>>> 9f0c89a (Fix: trace view in legend)
@@ -1783,14 +1787,7 @@ html {
     z-index: 1;
     background-color: #6c757d;
     color: white;
-<<<<<<< HEAD
-    white-space: nowrap;
-}
-.toolHeader{
-    width: 60%;
-=======
     border: solid 1px #6c757d;
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
 }
 .cuartiles-table td {
 <<<<<<< HEAD
@@ -1799,45 +1796,8 @@ html {
 =======
     padding-top: 8px;
     padding-bottom: 8px;
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
 }
 
-.toolColumn {
-    cursor: pointer;
-    position: relative;
-}
-
-.toolColumn .color-box {
-    width: 20px;
-    height: 100%;
-    display: inline-block;
-    position: absolute;
-    left: 0px;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: rgba(255, 255, 255, 0.5);
-}
-
-.toolColumn span {
-    display: inline-block;
-    margin-left: 25px;
-    transition: transform 0.3s ease;
-}
-
-.toolColumn:hover span {
-    transform: translateX(5px);
-    font-style: italic;
-    color: #0A58A2;
-}
-@media (max-width: 768px) {
-    .toolHeader {
-        width: 30%; /* Ajusta el ancho de la columna de herramientas */
-    }
-
-    .toolColumn span {
-        margin-left: 15px; /* Restaura el margen a su valor original */
-    }
-}
 .quartil-1 {
     background-color: rgb(237, 248, 233);
 }
