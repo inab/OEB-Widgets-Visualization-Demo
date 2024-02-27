@@ -1,5 +1,7 @@
 <template>
     <div>
+
+
         <b-row>
             <b-col cols="8">
                 <!-- ID AND DATE TABLE -->
@@ -74,11 +76,15 @@
                 <div>
                     <table class="table table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
                         <tr>
-                            <th variant="secondary">Tool</th>
-                            <th variant="secondary">Quartil</th>
+                            <th>Tool</th>
+                            <th>Quartile</th>
                         </tr>
-                        <tr v-for="(item, index) in cuartilesData" :key="item.tool_id" @click="handleTableRowClick(index)">
-                            <td>{{ item.tool_id }}</td>
+                        <tr class="toolRow" v-for="(item, index) in cuartilesData" :key="item.tool_id">
+                            <td class="toolColumn" @click="handleTableRowClick(index)">
+                                <div class="color-box"
+                                    :style="{ backgroundColor: markerColors[index % markerColors.length] }"></div>
+                                <span>{{ item.tool_id }}</span>
+                            </td>
                             <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
                         </tr>
                     </table>
@@ -86,7 +92,7 @@
             </b-col>
         </b-row>
 
-    </div>
+    </div> 
 </template>
 
 <script setup>
@@ -305,7 +311,7 @@ onMounted(async () => {
                 // Update the graph based on the selected trace
                 // Si response es false la trace no se oculta de la legend
                 let response = updatePlotOnSelection(traceIndex)
-                if (response == false){
+                if (response == false) {
                     return false;
                 }
             }
@@ -1273,13 +1279,42 @@ function getSymbol() {
 .cuartiles-table th {
     background-color: #6c757d;
     color: white;
-    border: solid 1px #6c757d;
 }
 
 .cuartiles-table td {
     padding-top: 8px;
     padding-bottom: 8px;
 }
+
+.toolColumn {
+    cursor: pointer;
+    position: relative;
+}
+
+.toolColumn .color-box {
+    width: 20px;
+    height: 100%;
+    display: inline-block;
+    position: absolute;
+    left: 0px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.toolColumn span {
+    display: inline-block;
+    margin-left: 15px;
+    transition: transform 0.3s ease;
+}
+
+
+
+.toolColumn:hover span {
+    transform: translateX(5px);
+    font-style: italic;
+    color: #0A58A2;
+}
+
 
 .quartil-1 {
     background-color: rgb(237, 248, 233);
