@@ -1,100 +1,106 @@
 <template>
   <div>
-
-    <div class="butns">
-      <!-- Buttons -->
-      <b-button-group class="ml-auto">
-        <!-- Button Sort -->
-        <b-button variant="outline-secondary" v-if="sortOrder === 'raw'" @click="toggleSortOrder" :disabled="loading">
-          Sort & Classify Data
-        </b-button>
-        <b-button variant="outline-secondary" v-else @click="toggleSortOrder" :disabled="loading">
-          Return To Raw Results
-        </b-button>
-        <!-- Button Optimal -->
-        <b-button variant="outline-secondary" v-if="optimal === 'no'" :disabled="loading" @click="optimalView">
-          Optimal View
-        </b-button>
-        <b-button variant="outline-secondary" v-else :disabled="loading" @click="optimalView">
-          Reset View
-        </b-button>
-        <!-- Button Download -->
-        <b-dropdown variant="outline-secondary" right text="Download" :disabled="loading">
-          <b-dropdown-header id="dropdown-header-label">Select a format</b-dropdown-header>
-          <b-dropdown-item @click="downloadChart('png')">PNG</b-dropdown-item>
-          <b-dropdown-item @click="downloadChart('svg')">SVG (only plot)</b-dropdown-item>
-          <b-dropdown-divider></b-dropdown-divider>
-          <b-dropdown-item @click="downloadChart('pdf')">PDF</b-dropdown-item>
-        </b-dropdown>
-      </b-button-group>
-
-    </div>
-    <br>
+    <b-row>
+      <b-col cols="8">
+        <div class="butns">
+          <!-- Buttons -->
+          <b-button-group class="ml-auto">
+            <!-- Button Sort -->
+            <b-button variant="outline-secondary" v-if="sortOrder === 'raw'" @click="toggleSortOrder" :disabled="loading">
+              Sort & Classify Data
+            </b-button>
+            <b-button variant="outline-secondary" v-else @click="toggleSortOrder" :disabled="loading">
+              Return To Raw Results
+            </b-button>
+            <!-- Button Optimal -->
+            <b-button variant="outline-secondary" v-if="optimal === 'no'" :disabled="loading" @click="optimalView">
+              Optimal View
+            </b-button>
+            <b-button variant="outline-secondary" v-else :disabled="loading" @click="optimalView">
+              Reset View
+            </b-button>
+            <!-- Button Download -->
+            <b-dropdown variant="outline-secondary" right text="Download" :disabled="loading">
+              <b-dropdown-header id="dropdown-header-label">Select a format</b-dropdown-header>
+              <b-dropdown-item @click="downloadChart('png')">PNG</b-dropdown-item>
+              <b-dropdown-item @click="downloadChart('svg')">SVG (only plot)</b-dropdown-item>
+              <b-dropdown-divider></b-dropdown-divider>
+              <b-dropdown-item @click="downloadChart('pdf')">PDF</b-dropdown-item>
+            </b-dropdown>
+          </b-button-group>
+        </div>
+      </b-col>
+    </b-row>
     <div id="todownload">
-      <!-- Chart -->
-      <div id="barPlot" style="position: relative;">
-      </div>
-      <br>
-      <!-- ID AND DATE TABLE -->
-      <div v-if="datasetId && formattedDate">
-        <b-table-simple bordered small caption-top responsive id='idDateTable'>
-          <b-tbody>
-            <b-tr>
-              <b-th variant="secondary" class="text-center">Dataset ID</b-th>
-              <b-td class="text-center">{{ datasetId }}</b-td>
-              <b-th variant="secondary" class="text-center">Last Update</b-th>
-              <b-td class="text-center">{{ formattedDate }}</b-td>
-            </b-tr>
-          </b-tbody>
-        </b-table-simple>
-      </div>
+      <b-row class="mt-4">
+        <!-- Chart -->
+        <b-col cols="8">
+          <div id="barPlot"></div>
+        </b-col>
 
+        <!-- Quartile Table -->
+        <b-col cols="4">
+          <div
+            :class="{ 'table-container': true, 'fade-in': sortOrder === 'sorted', 'fade-out': sortOrder === 'raw' }">
+            <table class="table table-fixed table-bordered quartile-table-container" id='quartileTable'>
+              <thead>
+                <tr>
+                  <th style="width: 60%;" class="table-secondary">Tool</th>
+                  <th style="width: 40%;" class="table-secondary">Quartile</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(quartile, index) in quartileDataArray" :key="index">
+                  <td>{{ quartile.tool }}</td>
+                  <td :style="{ backgroundColor: quartile.quartile.bgColor }">{{ quartile.quartile.quartile }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </b-col>
+      </b-row>
 
-      <br>
-      <!-- Quartile Table -->
-      <transition name="slide" mode="out-in">
-        <b-container v-if="sortOrder === 'sorted'">
-          <b-row>
-            <b-col>
-              <b-card title="Quartile Data" class="mt-3">
-                <div class="table-responsive">
-                  <table class="table table-bordered" id='quartileTable'>
-                    <thead>
-                      <tr>
-                        <th scope="col" class="table-secondary">Tool</th>
-                        <th scope="col" class="table-secondary">Quartile</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="(quartile, index) in quartileDataArray" :key="index">
-                        <td>{{ quartile.tool }}</td>
-                        <td :style="{ backgroundColor: quartile.quartile.bgColor }">{{ quartile.quartile.quartile }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </b-card>
-              <!-- Annotation -->
-              <div class="annotationfooter">
-                <p>* By default, the highest values will be displayed in the first quartile. Inversely if it is specified
-                  in the dataset. </p>
-              </div>
-            </b-col>
-          </b-row>
-        </b-container>
-      </transition>
+      <!-- Row for the paragraph -->
+      <b-row class="mt-4">
+        <!-- Column for the ID table -->
+        <b-col cols="8">
+          <!-- ID AND DATE TABLE -->
+          <div v-if="datasetId && formattedDate">
+            <b-table-simple bordered small caption-top responsive id='idDateTable'>
+              <b-tbody>
+                <b-tr>
+                  <b-th variant="secondary" class="text-center">Dataset ID</b-th>
+                  <b-td class="text-center">{{ datasetId }}</b-td>
+                  <b-th variant="secondary" class="text-center">Last Update</b-th>
+                  <b-td class="text-center">{{ formattedDate }}</b-td>
+                </b-tr>
+              </b-tbody>
+            </b-table-simple>
+          </div>
+        </b-col>
+
+        <!-- Column for the paragraph -->
+        <b-col cols="4">
+          <!-- Annotation -->
+          <div v-if="sortOrder === 'sorted'" class="annotationfooter">
+            * By default, the highest values will be displayed in the first quartile. Inversely if it is specified.
+          </div>
+        </b-col>
+      </b-row>
     </div>
-
-
-
   </div>
 </template>
 
 <script setup>
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, ref, watch } from 'vue';
 import { computed } from 'vue';
-const { jsPDF } = require('jspdf');
+
+
 const html2canvas = require('html2canvas');
+const { jsPDF } = require('jspdf');
+
+import 'jspdf-autotable';
 
 // DATA RETRIEVE
 const props = defineProps(['jsonData'])
@@ -117,6 +123,7 @@ const quartileDataArray = computed(() => {
   return array.sort((a, b) => a.tool.localeCompare(b.tool));
 });
 
+const showAdditionalTable = ref(false);
 
 // ----------------------------------------------------------------
 // CREATE PLOT
@@ -129,6 +136,7 @@ onBeforeMount(async () => {
   dataset.value = await props.jsonData
   const data = dataset.value.datalink.inline_data;
 
+  const visualization = data.visualization
   datasetId.value = dataset.value._id;
   datasetDate.value = dataset.value.dates.modification;
   datasetPolarity.value = dataset.value.datalink.inline_data.visualization.better;
@@ -158,31 +166,47 @@ onBeforeMount(async () => {
 
   const layout = {
     title: '',
+    autosize: true,
+    height: 800,
     xaxis: {
       title: {
-        text: '<b>TOOLS</b>',
+        text: 'TOOLS',
         standoff: 30,
+        font: {
+          family: 'Arial, sans-serif',
+          size: 18,
+          color: 'black',
+          weight: 'bold',
+        },
       },
       fixedrange: true,
       tickangle: -45,
-      tickfont: { size: 10 },
+      tickfont: { size: 12 },
     },
     yaxis: {
-      title: '<b>' + data.visualization.metric + '</b>',
+      title: {
+        text: visualization.metric,
+        font: {
+          family: 'Arial, sans-serif',
+          size: 18,
+          color: 'black',
+          weight: 'bold',
+        },
+      },
       fixedrange: true,
       range: [0, maxMetricValue + 0.1],
     },
-    margin: { t: 90, l: 100 },
+    margin: { l: 50, r: 50, t: 100, b: 110, pad: 4 },
     images: [
       {
         source: "/2018.OpenEBench.logo.Manual_page2.png",
         xref: "paper",
         yref: "paper",
-        x: -0.02,
-        y: 1.3,
-        sizex: 0.2,
-        sizey: 0.2,
-        xanchor: "left",
+        x: 0.95,
+        y: 1.17,
+        sizex: 0.1,
+        sizey: 0.3,
+        xanchor: "right",
         yanchor: "top",
         opacity: 0.5,
       }
@@ -237,6 +261,7 @@ onBeforeMount(async () => {
 
   }, 500);
 
+
   // Set up of the cursor inside the plot. Set default.
   // Select all SVG rect elements with class 'cursor-pointer' within the chart container
   const chartContainer = document.getElementById('barPlot');
@@ -250,12 +275,12 @@ onBeforeMount(async () => {
       event.target.style.cursor = 'default';
     }
   });
+
 })
 
 // ----------------------------------------------------------------
 // FUNCTIONS
 // ----------------------------------------------------------------
-
 // ANIMATIONS
 // ----------------------------------------------------------------
 
@@ -290,7 +315,7 @@ function animateLine(shapeIndex) {
   const Plotly = require('plotly.js-dist');
   const layout = document.getElementById('barPlot').layout;
   const shape = layout.shapes[shapeIndex];
-  const yTarget = 1.1; // End at the top
+  const yTarget = 1; // End at the top
 
   let y = 0; // Start from the bottom
 
@@ -385,6 +410,7 @@ async function optimalView() {
 async function toggleSortOrder() {
   try {
     if (sortOrder.value === 'raw') {
+      showAdditionalTable.value = !showAdditionalTable.value;
       // Sort logic (descending order)
       const sortedData = originalData.value.challenge_participants.slice().sort((a, b) => b.metric_value - a.metric_value);
 
@@ -532,7 +558,7 @@ function addQuartileLabels() {
       // Add a label annotation to the layout
       layout.annotations.push({
         x: labelPosition,
-        y: 1.1, // Top of the chart
+        y: 1.03, // Top of the chart
         xref: 'x',
         yref: 'paper',
         text: `Q${quartile}`,
@@ -661,100 +687,90 @@ function calculateQuartiles(data) {
 // DOWNLOAD BUTTON
 // ----------------------------------------------------------------
 async function downloadChart(format) {
+  console.log('Downloading chart as', format);
   try {
-    const htmlToCanvas = async (element, options) => {
-      return await html2canvas(element, options);
-    };
-
-    const canvasToImage = (canvas, format) => {
-      if (format === 'png') {
-        return canvas.toDataURL('image/png');
-      } else if (format === 'pdf') {
-        return canvas.toDataURL('image/pdf');
-      }
-    };
-
-    const combineHTMLContent = async () => {
-      try {
-        const chartContent = document.getElementById('barPlot').outerHTML;
-        const idDateTableContent = document.getElementById('idDateTable').outerHTML;
-        const quartileTableContent = document.getElementById('quartileTable').outerHTML;
-
-        const combinedHTML = `
-          <div class="content-section">
-            ${chartContent}
-          </div>
-          <div class="content-section">
-            ${idDateTableContent}
-          </div>
-          <div class="content-section">
-            ${quartileTableContent}
-          </div>
-        `;
-
-        return combinedHTML;
-      } catch (error) {
-        console.error('Error combining HTML content:', error);
-        return null;
-      }
-    };
-
-    const downloadPDF = (content) => {
-      try {
-        const doc = new jsPDF();
-        const pdfWidth = doc.internal.pageSize.getWidth(); // Get PDF page width
-        const pdfHeight = doc.internal.pageSize.getHeight(); // Get PDF page height
-
-        // Calculate margins or padding for the PDF content
-        const marginX = 30; // Margin or padding on the left and right sides
-        const marginY = 30; // Margin or padding on the top and bottom sides
-
-        // Add the image to the PDF with margins or padding
-        doc.html(content, {
-          callback: () => {
-            doc.save(`combined_content.${format}`);
-          },
-          margin: { top: marginY, bottom: marginY, left: marginX, right: marginX },
-        });
-      } catch (error) {
-        console.error('Error generating PDF:', error);
-      }
-    };
-
-    const combinedHTML = await combineHTMLContent();
-
-    // Convert combinedHTML string to DOM element
-    const tempElement = document.createElement('div');
-    tempElement.innerHTML = combinedHTML;
-
-    const downloadCanvas = await htmlToCanvas(tempElement, {
-      scrollX: 0,
-      scrollY: 0,
-      width: tempElement.offsetWidth,
-      height: tempElement.offsetHeight,
-    });
-    const downloadImage = canvasToImage(downloadCanvas, format);
-
     if (format === 'pdf') {
-      if (combinedHTML) {
-        await downloadPDF(combinedHTML);
+      const Plotly = require('plotly.js-dist');
+      const pdf = new jsPDF();
+
+      // Get chart image as base64 data URI
+      const chartImageURI = await Plotly.toImage(document.getElementById('barPlot'), { format: 'png' });
+      const chartHeight = 110;
+      const chartWidth = 175;
+
+      pdf.addImage(chartImageURI, 'JPEG', 10, 10, chartWidth, chartHeight, null, 'FAST', 0, 0, { dpi: 600 });
+
+      // Add table as text to the PDF
+      pdf.autoTable({
+        html: '#idDateTable',
+        startY: chartHeight + 20, // Start table below chart with 20mm margin
+        theme: 'grid',
+        tableWidth: 'auto',
+        styles: {
+          cellPadding: 1,
+          fontSize: 8,
+          overflow: 'linebreak'
+        },
+        margin: { top: 10 }
+      });
+
+
+      // Add additional table if it is visible
+      if (showAdditionalTable.value) {
+        const columns = ["Tool", "Quartile"]; // Define your columns
+
+        // Extract data from quartileDataArray
+        const rows = quartileDataArray.value.map(quartile => [quartile.tool, quartile.quartile.quartile]);
+
+        // Generate autoTable with custom styles
+        pdf.autoTable({
+          head: [columns],
+          body: rows,
+          startY: pdf.autoTable.previous.finalY + 10,
+          theme: 'grid',
+          tableWidth: 'auto',
+          styles: {
+            cellPadding: 1,
+            fontSize: 8,
+            overflow: 'linebreak'
+          },
+          didParseCell: function (cell, rows) {
+            if (rows.column.dataKey === 'quartile') {
+              cell.styles.halign = 'right';
+
+            }
+          }
+        });
       }
+
+      // Save the PDF
+      pdf.save(`benchmarking_chart_${datasetId.value}.${format}`);
+
     } else if (format === 'svg') {
       const Plotly = require('plotly.js-dist');
       const chart = document.getElementById('barPlot');
-      const options = { format };
+      const options = { format: 'svg', width: 800, height: 600 };
 
       Plotly.toImage(chart, options)
-        .then((url) => {
+        .then((svg) => {
           const link = document.createElement('a');
-          link.href = url;
+          link.href = 'data:image/svg+xml;base64,' + btoa(svg);
           link.download = `benchmarking_chart_${datasetId.value}.${format}`;
           link.click();
         })
         .catch((error) => {
-          console.error(`Error al descargar el gráfico como ${format}`, error);
+          console.error(`Error downloading the chart as ${format}`, error);
         });
     } else {
+      const toDownloadDiv = document.getElementById('todownload');
+      const downloadCanvas = await html2canvas(toDownloadDiv, {
+        scrollX: 0,
+        scrollY: 0,
+        width: toDownloadDiv.offsetWidth,
+        height: toDownloadDiv.offsetHeight,
+      });
+      const downloadImage = downloadCanvas.toDataURL(`image/${format}`);
+
       const link = document.createElement('a');
       link.href = downloadImage;
       link.download = `benchmarking_chart_${datasetId.value}.${format}`;
@@ -790,10 +806,9 @@ b-td {
 .butns {
 
   position: absolute;
-  top: 20px;
-  right: 10px;
+  top: 14px;
   margin-top: 10px;
-  z-index: 9999
+  z-index: 1
 }
 
 .plot-container {
@@ -802,19 +817,6 @@ b-td {
   /* Adjust as needed */
 }
 
-.slide-enter-active,
-.slide-leave-active {
-  transition: transform 0.5s ease;
-}
-
-.slide-enter,
-.slide-leave-to {
-  transform: translateY(100%);
-}
-
-.table {
-  width: 100%;
-}
 
 .table-secondary {
   background-color: #6c757d;
@@ -823,15 +825,82 @@ b-td {
 
 .annotationfooter {
   background-color: #f0f0f0;
-  padding: 10px;
-  margin-top: 10px;
   border-radius: 5px;
   color: #666;
   font-size: 12px;
   text-align: center;
+  padding: 8px;
+  /* Adjust padding as needed */
 }
+
+#idDateTable {
+  display: flex;
+  align-items: center;
+}
+
 
 rect {
   cursor: default !important;
+}
+
+.table-container {
+  max-height: 710px;
+  overflow-y: auto;
+}
+
+.quartile-table-container {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.quartile-table-container th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.quartile-table-container td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden; /* Ensure element is hidden after fading out */
+  }
+}
+/* Apply animation when table enters and leaves */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.fade-out {
+  animation: fadeOut 0.5s ease-in-out;
+}
+
+/* Ensure table headers are affected by animation */
+.fade-out table th,
+.fade-out table td {
+  opacity: 0;
+}
+
+/* Hide borders of table headers during fade-out */
+.fade-out table th {
+  border-color: transparent;
 }
 </style>
