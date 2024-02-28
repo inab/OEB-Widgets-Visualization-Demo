@@ -75,25 +75,33 @@
             <!-- Table -->
             <b-col cols="4">
                 <div>
-                    <table class="table table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
-                        <tr>
-                            <th>Tool</th>
-                            <th>Quartile</th>
-                        </tr>
-                        <tr class="toolRow" v-for="(item, index) in cuartilesData" :key="item.tool_id">
-                            <td class="toolColumn" @click="handleTableRowClick(index)">
-                                <div class="color-box"
-                                    :style="{ backgroundColor: markerColors[index % markerColors.length] }"></div>
-                                <span>{{ item.tool_id }}</span>
-                            </td>
-                            <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
-                        </tr>
-                    </table>
+                    <div class="table-container">
+                        <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60%;">Tool</th>
+                                    <th style="width: 40%;">Quartile</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(item, index) in cuartilesData" :key="item.tool_id">
+                                    <td class="toolColumn" @click="handleTableRowClick(index)">
+                                        <div class="color-box"
+                                            :style="{ backgroundColor: markerColors[index % markerColors.length] }"></div>
+                                        <span>{{ item.tool_id }}</span>
+                                    </td>
+                                    <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+
                 </div>
             </b-col>
         </b-row>
 
-    </div> 
+    </div>
 </template>
 
 <script setup>
@@ -1272,12 +1280,20 @@ function getSymbol() {
     padding: 7px;
 }
 
+.table-container {
+    max-height: 788px;
+    overflow-y: auto;
+}
+
 .cuartiles-table {
-    margin: 0 auto;
-    width: 90%;
+    width: 100%;
+    table-layout: fixed;
 }
 
 .cuartiles-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
     background-color: #6c757d;
     color: white;
 }
@@ -1308,13 +1324,12 @@ function getSymbol() {
     transition: transform 0.3s ease;
 }
 
-
-
 .toolColumn:hover span {
     transform: translateX(5px);
     font-style: italic;
     color: #0A58A2;
 }
+
 
 
 .quartil-1 {
@@ -1336,5 +1351,4 @@ function getSymbol() {
 .table-secondary {
     background-color: #6c757d;
     color: white;
-}
-</style>
+}</style>
