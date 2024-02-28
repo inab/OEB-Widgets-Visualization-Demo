@@ -139,10 +139,12 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(item, index) in cuartilesData" :key="item.tool_id">
+                                <tr v-for="(item, index) in cuartilesData" :key="item.tool_id"
+                                    :class="{ 'quartil-zero': item.cuartil === 0 }">
                                     <td class="toolColumn" @click="handleTableRowClick(index)">
                                         <div class="color-box"
-                                            :style="{ backgroundColor: markerColors[index % markerColors.length] }"></div>
+                                            :style="{ backgroundColor: markerColors[index % markerColors.length], opacity: (item.cuartil === 0 ? 0.5 : 1) }">
+                                        </div>
                                         <span>{{ item.tool_id }}</span>
                                     </td>
                                     <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
@@ -152,7 +154,11 @@
                     </div>
 
 
+<<<<<<< HEAD
 >>>>>>> e1533f4 (Add scroll in table v1)
+=======
+
+>>>>>>> 207eabe (Add styles when tool is hidden)
                 </div>
             </b-col>
         </b-row>
@@ -1787,6 +1793,7 @@ html {
 
 .table-container {
 <<<<<<< HEAD
+<<<<<<< HEAD
     max-height: 700px;
     overflow-y: auto;
     font-size: 1.1rem;
@@ -1812,6 +1819,9 @@ html {
     top: -1px;
 =======
     max-height: 788px;
+=======
+    max-height: 810px;
+>>>>>>> 207eabe (Add styles when tool is hidden)
     overflow-y: auto;
 }
 
@@ -1853,6 +1863,7 @@ html {
     left: 0px;
     top: 50%;
     transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.5);
 }
 
 .toolColumn span {
@@ -1867,9 +1878,12 @@ html {
     color: #0A58A2;
 }
 
+<<<<<<< HEAD
 
 
 >>>>>>> e1533f4 (Add scroll in table v1)
+=======
+>>>>>>> 207eabe (Add styles when tool is hidden)
 .quartil-1 {
     background-color: rgb(237, 248, 233);
 }
@@ -1887,16 +1901,22 @@ html {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 207eabe (Add styles when tool is hidden)
 .quartil-zero {
     background-color: rgba(237, 231, 231, 0.5);
 }
 
+<<<<<<< HEAD
 .info-icon{
     color: #ffffff;
     margin-left: 5px;
 }
 </style>
 =======
+=======
+>>>>>>> 207eabe (Add styles when tool is hidden)
 .table-secondary {
     background-color: #6c757d;
     color: white;
