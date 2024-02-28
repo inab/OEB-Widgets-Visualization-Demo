@@ -40,8 +40,7 @@
 
         <!-- Quartile Table -->
         <b-col cols="4">
-          <div
-            :class="{ 'table-container': true, 'fade-in': sortOrder === 'sorted', 'fade-out': sortOrder === 'raw' }">
+          <div :class="{ 'table-container': true, 'fade-in': sortOrder === 'sorted', 'fade-out': sortOrder === 'raw' }">
             <table class="table table-fixed table-bordered quartile-table-container" id='quartileTable'>
               <thead>
                 <tr>
@@ -67,13 +66,13 @@
         <b-col cols="8">
           <!-- ID AND DATE TABLE -->
           <div v-if="datasetId && formattedDate">
-            <b-table-simple bordered small caption-top responsive id='idDateTable'>
+            <b-table-simple small bordered caption-top responsive id='idDateTable'>
               <b-tbody>
                 <b-tr>
-                  <b-th variant="secondary" class="text-center">Dataset ID</b-th>
+                  <b-th style="border-radius: 10px 0 0 10px;" variant="secondary" class="text-center">Dataset ID</b-th>
                   <b-td class="text-center">{{ datasetId }}</b-td>
                   <b-th variant="secondary" class="text-center">Last Update</b-th>
-                  <b-td class="text-center">{{ formattedDate }}</b-td>
+                  <b-td style="border-radius: 0 10px 10px 0;" class="text-center">{{ formattedDate }}</b-td>
                 </b-tr>
               </b-tbody>
             </b-table-simple>
@@ -846,6 +845,7 @@ rect {
 .table-container {
   max-height: 710px;
   overflow-y: auto;
+  border-radius: 10px;
 }
 
 .quartile-table-container {
@@ -879,11 +879,14 @@ rect {
   0% {
     opacity: 1;
   }
+
   100% {
     opacity: 0;
-    visibility: hidden; /* Ensure element is hidden after fading out */
+    visibility: hidden;
+    /* Ensure element is hidden after fading out */
   }
 }
+
 /* Apply animation when table enters and leaves */
 .fade-in {
   animation: fadeIn 0.5s ease-in-out;
