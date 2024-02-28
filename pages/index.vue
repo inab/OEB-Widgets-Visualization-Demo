@@ -1,5 +1,5 @@
 <template>
-  <b-container>
+  <b-container fluid class="pl-5 pr-5">
     <b-row>
       <b-col cols="12" sm="10" md="12">
         <h1 class="mt-3">
@@ -16,24 +16,23 @@
       <b-col cols="12" sm="10" md="12">
         <h3>Component Visualization ➜ BAR PLOT</h3>
       </b-col>
-
+    </b-row>
       <!-- Componentes -->
 
-      <!-- Bar plot -->
-      <b-col cols="12" sm="10" md="12">
-        <b-card class="pl-8 pr-8 pb-4 mt-4">
-          <!-- Wrapper div for spinner with centering styles -->
-          <div v-if="loading" class="spinner-container">
-            <b-spinner type="grow" label="Loading..." style="width: 3rem; height: 3rem; color: #0b579f;"></b-spinner>
-          </div>
-          <transition v-else name="fade">
-            <BarPlot v-if="isBarPlotType" :jsonData="fetchedData" />
-            <div v-else>hello</div>
-          </transition>
-        </b-card>
-      </b-col>
 
-    </b-row>
+      <b-row>
+        <!-- Wrapper div for spinner with centering styles -->
+        <div v-if="loading" class="spinner-container">
+          <b-spinner type="grow" label="Loading..." style="width: 3rem; height: 3rem; color: #0b579f;"></b-spinner>
+        </div>
+        <!-- Bar plot -->
+        <b-col v-else cols="12" sm="10" md="12">
+        <transition  name="fade">
+          <BarPlot v-if="isBarPlotType" :jsonData="fetchedData" />
+        </transition>
+        </b-col>
+
+      </b-row>
 
   </b-container>
 </template>
@@ -55,7 +54,6 @@ export default {
       isBarPlotType: null
     }
   },
-
   async mounted() {
     // Simulate an asynchronous operation to better layout
     setTimeout(() => {
@@ -63,7 +61,7 @@ export default {
     }, 1000);
 
     // Fetch your data
-    const response = await fetch('https://dev-openebench.bsc.es/api/scientific/staged/Dataset/OEBD004000000D?'); //endpoint to db rest to cofigure
+    const response = await fetch('/OEBD004000000D.json'); //endpoint to db rest to cofigure
     this.fetchedData = await response.json();
 
     if (this.fetchedData) {
