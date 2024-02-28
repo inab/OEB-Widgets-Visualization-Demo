@@ -84,10 +84,12 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(item, index) in cuartilesData" :key="item.tool_id">
+                                <tr v-for="(item, index) in cuartilesData" :key="item.tool_id"
+                                    :class="{ 'quartil-zero': item.cuartil === 0 }">
                                     <td class="toolColumn" @click="handleTableRowClick(index)">
                                         <div class="color-box"
-                                            :style="{ backgroundColor: markerColors[index % markerColors.length] }"></div>
+                                            :style="{ backgroundColor: markerColors[index % markerColors.length], opacity: (item.cuartil === 0 ? 0.5 : 1) }">
+                                        </div>
                                         <span>{{ item.tool_id }}</span>
                                     </td>
                                     <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
@@ -95,6 +97,7 @@
                             </tbody>
                         </table>
                     </div>
+
 
 
                 </div>
@@ -1281,7 +1284,7 @@ function getSymbol() {
 }
 
 .table-container {
-    max-height: 788px;
+    max-height: 810px;
     overflow-y: auto;
 }
 
@@ -1316,6 +1319,7 @@ function getSymbol() {
     left: 0px;
     top: 50%;
     transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.5);
 }
 
 .toolColumn span {
@@ -1329,8 +1333,6 @@ function getSymbol() {
     font-style: italic;
     color: #0A58A2;
 }
-
-
 
 .quartil-1 {
     background-color: rgb(237, 248, 233);
@@ -1346,6 +1348,10 @@ function getSymbol() {
 
 .quartil-4 {
     background-color: rgb(35, 139, 69);
+}
+
+.quartil-zero {
+    background-color: rgba(237, 231, 231, 0.5);
 }
 
 .table-secondary {
