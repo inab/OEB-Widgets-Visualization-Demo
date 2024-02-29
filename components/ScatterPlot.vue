@@ -99,9 +99,9 @@
                     </div>
                     <!-- Annotation -->
                     <div class="annotationfooter" v-if="viewSquare">
-                        <p>Quartiles 2 and 3 are labeled as 'Mid (M)', indicating an average ranking. Meanwhile, 
-                        'Top (T)' represents quartiles above the average, and 'Bottom (B)' those below, providing 
-                        a clear understanding of the rankings.</p>
+                        The Square quartile labels, 'Top (T)', represent quartiles that are above average. 
+                        'Mid (M)' indicates an average ranking, and 'Bottom (B)' denotes those below average, 
+                        providing a clear understanding of the rankings.
                     </div>
 
                 </div>
@@ -1357,11 +1357,11 @@ function getSymbol() {
 }
 .annotationfooter {
   background-color: #f0f0f0;
-  padding: 10px;
-  margin-top: 10px;
+  padding: 8px;
+  margin-top: 20px;
   border-radius: 5px;
   color: #666;
-  font-size: 12px;
+  font-size: 10px;
   text-align: center;
 }
 .table-secondary {
