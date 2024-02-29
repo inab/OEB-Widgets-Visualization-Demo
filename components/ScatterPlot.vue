@@ -114,6 +114,7 @@
 =======
                 <div>
 <<<<<<< HEAD
+<<<<<<< HEAD
                     <table class="table table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
                         <tr>
                             <th>Tool</th>
@@ -132,6 +133,10 @@
 =======
                     <div class="table-container">
                         <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
+=======
+                    <div class="table-container" :style="{ maxHeight: viewSquare ? '700px' : '810px' }">
+                        <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0" >
+>>>>>>> 3ea2494 (Add legend to Square cuartile)
                             <thead>
                                 <tr>
                                     <th style="width: 60%;">Tool</th>
@@ -152,11 +157,20 @@
                             </tbody>
                         </table>
                     </div>
+<<<<<<< HEAD
 
 
 <<<<<<< HEAD
 >>>>>>> e1533f4 (Add scroll in table v1)
 =======
+=======
+                    <!-- Annotation -->
+                    <div class="annotationfooter" v-if="viewSquare">
+                        <p>Quartiles 2 and 3 are labeled as 'Mid (M)', indicating an average ranking. Meanwhile, 
+                        'Top (T)' represents quartiles above the average, and 'Bottom (B)' those below, providing 
+                        a clear understanding of the rankings.</p>
+                    </div>
+>>>>>>> 3ea2494 (Add legend to Square cuartile)
 
 >>>>>>> 207eabe (Add styles when tool is hidden)
                 </div>
@@ -302,6 +316,7 @@ onMounted(async () => {
             },
             name: participant.tool_id,
             showlegend: true,
+<<<<<<< HEAD
             error_x: {
                 type: 'data',
                 array: [participant.stderr_x],
@@ -321,6 +336,18 @@ onMounted(async () => {
 
 
             },
+=======
+            // error_x: {
+            //     type: 'data',
+            //     array: [participant.stderr_x],
+            //     visible: true,
+            // },
+            // error_y: {
+            //     type: 'data',
+            //     array: [participant.stderr_y],
+            //     visible: true,
+            // },
+>>>>>>> 3ea2494 (Add legend to Square cuartile)
         };
         traces.push(trace);
     }
@@ -1752,9 +1779,12 @@ html {
     position: absolute;
     top: 14px;
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     /* right: 10px; */
 >>>>>>> 671690b (Add: Tool column linked to the chart legend)
+=======
+>>>>>>> 3ea2494 (Add legend to Square cuartile)
     margin-top: 10px;
     z-index: 1;
 }
@@ -1907,6 +1937,7 @@ html {
 .quartil-zero {
     background-color: rgba(237, 231, 231, 0.5);
 }
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 .info-icon{
@@ -1917,6 +1948,17 @@ html {
 =======
 =======
 >>>>>>> 207eabe (Add styles when tool is hidden)
+=======
+.annotationfooter {
+  background-color: #f0f0f0;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 5px;
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+}
+>>>>>>> 3ea2494 (Add legend to Square cuartile)
 .table-secondary {
     background-color: #6c757d;
     color: white;
