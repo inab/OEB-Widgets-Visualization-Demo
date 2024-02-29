@@ -21,7 +21,8 @@
                 <div v-if="data" class="butns mr-2 mt-5">
                     <b-button-group class="ml-auto">
                         <!-- Classification -->
-                        <b-dropdown :text="classificationButtonText" variant="outline-secondary" class="button-classification">
+                        <b-dropdown :text="classificationButtonText" variant="outline-secondary"
+                            class="button-classification">
                             <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
                                     method:</strong></b-dropdown-text>
                             <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
@@ -39,10 +40,10 @@
                             <b-dropdown-text class="font-weight-bold text-download"><strong>Select a
                                     format:</strong></b-dropdown-text>
                             <b-dropdown-item @click="downloadChart('png')"> PNG </b-dropdown-item>
+                            <b-dropdown-item @click="downloadChart('pdf')"> PDF </b-dropdown-item>
                             <b-dropdown-item @click="downloadChart('svg')"> SVG (only plot) </b-dropdown-item>
                             <b-dropdown-divider></b-dropdown-divider>
-                            <b-dropdown-item @click="downloadChart('json')"> JSON </b-dropdown-item>
-                            <!-- <b-dropdown-item @click="downloadChart('pdf')"> PDF </b-dropdown-item> -->
+                            <b-dropdown-item @click="downloadChart('json')"> JSON (raw data)</b-dropdown-item>
                         </b-dropdown>
 
                     </b-button-group>
@@ -51,7 +52,7 @@
         </b-row>
 
 
-        <b-row class="mt-4">
+        <b-row class="mt-4" id="todownload">
             <!-- Chart -->
             <b-col cols="8">
                 <div>
@@ -72,10 +73,10 @@
 
             <!-- Table -->
             <b-col cols="4">
-                <div>
+                <div id="benchmarkingTable">
                     <!-- Quartile Table -->
                     <div class="table-container" :style="{ maxHeight: viewSquare ? '700px' : '810px' }">
-                        <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0" >
+                        <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
                             <thead>
                                 <tr>
                                     <th style="width: 60%;">Tool</th>
@@ -98,8 +99,8 @@
                     </div>
                     <!-- Annotation -->
                     <div class="annotationfooter" v-if="viewSquare">
-                        The Square quartile labels, 'Top (T)', represent quartiles that are above average. 
-                        'Mid (M)' indicates an average ranking, and 'Bottom (B)' denotes those below average, 
+                        The Square quartile labels, 'Top (T)', represent quartiles that are above average.
+                        'Mid (M)' indicates an average ranking, and 'Bottom (B)' denotes those below average,
                         providing a clear understanding of the rankings.
                     </div>
 
@@ -115,6 +116,8 @@ const pf = require('pareto-frontier');
 var clusterMaker = require('clusters');
 import { onMounted, ref, computed } from 'vue';
 import * as statistics from 'simple-statistics';
+const html2canvas = require('html2canvas');
+const { jsPDF } = require('jspdf');
 
 const dataset = ref(null);
 const data = ref(null);
@@ -544,12 +547,12 @@ const viewButtonText = computed(() => {
 });
 
 const classificationButtonText = computed(() => {
-    if(viewKmeans.value){
+    if (viewKmeans.value) {
         return 'K-Means Clustering';
-    }else if(viewSquare.value){
+    } else if (viewSquare.value) {
         return 'Square Quartiles';
-    }else{
-        return 'No Classification'
+    } else {
+        return 'Classification'
     }
 });
 
@@ -1084,25 +1087,86 @@ const sortByKey = (array, key) => {
 
 // DOWNLOAD
 // ----------------------------------------------------------------
-const downloadChart = (format) => {
+const downloadChart = async (format) => {
     const Plotly = require('plotly.js-dist');
-
     const chart = document.getElementById('scatter-plot');
 
-    if (format === 'png' || format === 'svg' || format === 'pdf') {
-        // Descargar como PNG, SVG o PDF usando Chart Studio
-        const options = { format, height: 500, width: 700 };
+    if (format === 'png') {
+        if (viewSquare.value || viewKmeans.value) {
+            const toDownloadDiv = document.getElementById('todownload');
+            const downloadCanvas = await html2canvas(toDownloadDiv, {
+                scrollX: 0,
+                scrollY: 0,
+                width: toDownloadDiv.offsetWidth,
+                height: toDownloadDiv.offsetHeight,
+            });
+            const downloadImage = downloadCanvas.toDataURL(`image/${format}`);
 
+            const link = document.createElement('a');
+            link.href = downloadImage;
+            link.download = `benchmarking_chart_${datasetId.value}.${format}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            const options = { format, height: 700, width: 800 };
+            Plotly.toImage(chart, options)
+                .then((url) => {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `benchmarking_chart_${datasetId.value}.${format}`;
+                    link.click();
+                })
+                .catch((error) => {
+                    console.error(`Error downloading graphic as ${format}`, error);
+                });
+        }
+
+    } else if (format === 'svg') {
+        const options = { format, height: 700, width: 800 };
         Plotly.toImage(chart, options)
             .then((url) => {
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `${datasetId.value}.${format}`;
+                link.download = `benchmarking_chart_${datasetId.value}.${format}`;
                 link.click();
             })
             .catch((error) => {
-                console.error(`Error al descargar el gráfico como ${format}`, error);
+                console.error(`Error downloading graphic as ${format}`, error);
             });
+
+    } else if (format === 'pdf') {
+        const pdf = new jsPDF();
+        
+        pdf.text('Benchmarking', 105, 10, null, null, 'center');
+
+        // Get chart image as base64 data URI
+        const chartImageURI = await Plotly.toImage(chart, { format: 'png' });
+        const chartHeight = 130;
+        const chartWidth = 170;
+
+        pdf.addImage(chartImageURI, 'PNG', 10, 15, chartWidth, chartHeight, null, 'FAST', 0, null, 'center');
+
+        if (viewSquare.value || viewKmeans.value) {
+            const table = document.getElementById('benchmarkingTable');
+            const downloadCanvas = await html2canvas(table, {
+                scrollX: 0,
+                scrollY: 0,
+                width: table.offsetWidth,
+                height: table.offsetHeight,
+            });
+            const tableImageURI = downloadCanvas.toDataURL(`image/png`);
+            const tableHeight = 140;
+            const tableWidth = 100;
+
+            // Add 20 pixels to the vertical position for the second image
+            const tableVerticalPosition = chartHeight + 10;
+            pdf.addImage(tableImageURI, 'PNG', 10, 150, tableVerticalPosition, tableHeight, tableWidth, null, 'FAST', 0, null, 'center');
+        }
+
+        // Save the PDF
+        pdf.save(`benchmarking_chart_${datasetId.value}.${format}`);
+
     } else if (format === 'json') {
         // Descargar como JSON
         const chartData = chart.data // Obtener datos del gráfico
@@ -1113,6 +1177,8 @@ const downloadChart = (format) => {
         link.href = `data:text/json;charset=utf-8,${encodeURIComponent(jsonData)}`;
         link.download = `${datasetId.value}.json`;
         link.click();
+    } else {
+        console.error('Error downloading chart:', error);
     }
 };
 
@@ -1364,16 +1430,19 @@ function getSymbol() {
 .quartil-zero {
     background-color: rgba(237, 231, 231, 0.5);
 }
+
 .annotationfooter {
-  background-color: #f0f0f0;
-  padding: 8px;
-  margin-top: 20px;
-  border-radius: 5px;
-  color: #666;
-  font-size: 10px;
-  text-align: center;
+    background-color: #f0f0f0;
+    padding: 8px;
+    margin-top: 30px;
+    border-radius: 5px;
+    color: #666;
+    font-size: 10px;
+    text-align: center;
 }
+
 .table-secondary {
     background-color: #6c757d;
     color: white;
-}</style>
+}
+</style>
