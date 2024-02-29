@@ -1,7 +1,6 @@
 <template>
     <div>
 
-
         <b-row>
             <b-col cols="8">
                 <!-- ID AND DATE TABLE -->
@@ -22,7 +21,7 @@
                 <div v-if="data" class="butns mr-2 mt-5">
                     <b-button-group class="ml-auto">
                         <!-- Classification -->
-                        <b-dropdown text="Classification" variant="outline-secondary" class=" button-classification">
+                        <b-dropdown :text="classificationButtonText" variant="outline-secondary" class="button-classification">
                             <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
                                     method:</strong></b-dropdown-text>
                             <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
@@ -74,6 +73,7 @@
             <!-- Table -->
             <b-col cols="4">
                 <div>
+                    <!-- Quartile Table -->
                     <div class="table-container" :style="{ maxHeight: viewSquare ? '700px' : '810px' }">
                         <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0" >
                             <thead>
@@ -541,6 +541,16 @@ const toggleView = () => {
 
 const viewButtonText = computed(() => {
     return viewApplied.value ? 'Optimal View' : 'Reset View';
+});
+
+const classificationButtonText = computed(() => {
+    if(viewKmeans.value){
+        return 'K-Means Clustering';
+    }else if(viewSquare.value){
+        return 'Square Quartiles';
+    }else{
+        return 'No Classification'
+    }
 });
 
 // Format Date String
@@ -1253,7 +1263,7 @@ function getSymbol() {
 }
 
 .button-classification {
-    width: 140px;
+    width: 180px;
 }
 
 .button-resetView {
