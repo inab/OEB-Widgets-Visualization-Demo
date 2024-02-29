@@ -9,11 +9,16 @@
                     <b-button-group class="ml-auto">
                         <!-- Classification -->
 <<<<<<< HEAD
+<<<<<<< HEAD
                         <b-dropdown :text="classificationButtonText" variant="outline-secondary"
                             class="button-classification">
 =======
                         <b-dropdown :text="classificationButtonText" variant="outline-secondary" class="button-classification">
 >>>>>>> 33bba23 (Add classification text to dropdown)
+=======
+                        <b-dropdown :text="classificationButtonText" variant="outline-secondary"
+                            class="button-classification">
+>>>>>>> 9d24c78 (Fix download on pdf and add download with table)
                             <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
                                     method:</strong></b-dropdown-text>
                             <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
@@ -84,6 +89,9 @@
             <!-- Table -->
             <b-col cols="4">
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 9d24c78 (Fix download on pdf and add download with table)
                 <div id="benchmarkingTable">
                     <!-- Quartile Table -->
                     <div class="table-container">
@@ -143,8 +151,12 @@
                     <!-- Quartile Table -->
 >>>>>>> 33bba23 (Add classification text to dropdown)
                     <div class="table-container" :style="{ maxHeight: viewSquare ? '700px' : '810px' }">
+<<<<<<< HEAD
                         <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0" >
 >>>>>>> 3ea2494 (Add legend to Square cuartile)
+=======
+                        <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
+>>>>>>> 9d24c78 (Fix download on pdf and add download with table)
                             <thead>
                                 <tr>
                                     <th style="width: 60%;">Tool</th>
@@ -174,8 +186,8 @@
 =======
                     <!-- Annotation -->
                     <div class="annotationfooter" v-if="viewSquare">
-                        The Square quartile labels, 'Top (T)', represent quartiles that are above average. 
-                        'Mid (M)' indicates an average ranking, and 'Bottom (B)' denotes those below average, 
+                        The Square quartile labels, 'Top (T)', represent quartiles that are above average.
+                        'Mid (M)' indicates an average ranking, and 'Bottom (B)' denotes those below average,
                         providing a clear understanding of the rankings.
                     </div>
 >>>>>>> 3ea2494 (Add legend to Square cuartile)
@@ -193,8 +205,11 @@
 import { defineProps } from 'vue';
 import { onMounted, ref, computed } from 'vue';
 import * as statistics from 'simple-statistics';
+<<<<<<< HEAD
 var clusterMaker = require('clusters');
 const pf = require('pareto-frontier');
+=======
+>>>>>>> 9d24c78 (Fix download on pdf and add download with table)
 const html2canvas = require('html2canvas');
 const { jsPDF } = require('jspdf');
 
@@ -787,12 +802,12 @@ const classificationButtonText = computed(() => {
 });
 =======
 const classificationButtonText = computed(() => {
-    if(viewKmeans.value){
+    if (viewKmeans.value) {
         return 'K-Means Clustering';
-    }else if(viewSquare.value){
+    } else if (viewSquare.value) {
         return 'Square Quartiles';
-    }else{
-        return 'No Classification'
+    } else {
+        return 'Classification'
     }
 });
 
@@ -1573,7 +1588,11 @@ const downloadChart = async (format) => {
     Plotly.relayout('scatter-plot', chart.layout);
 
     if (format === 'png') {
+<<<<<<< HEAD
         if (viewSquare.value || viewKmeans.value || viewDiagonal.value) {
+=======
+        if (viewSquare.value || viewKmeans.value) {
+>>>>>>> 9d24c78 (Fix download on pdf and add download with table)
             const toDownloadDiv = document.getElementById('todownload');
             const downloadCanvas = await html2canvas(toDownloadDiv, {
                 scrollX: 0,
@@ -1585,7 +1604,11 @@ const downloadChart = async (format) => {
 
             const link = document.createElement('a');
             link.href = downloadImage;
+<<<<<<< HEAD
             link.download = `benchmarking_chart_${props.datasetId}.${format}`;
+=======
+            link.download = `benchmarking_chart_${datasetId.value}.${format}`;
+>>>>>>> 9d24c78 (Fix download on pdf and add download with table)
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1595,7 +1618,11 @@ const downloadChart = async (format) => {
                 .then((url) => {
                     const link = document.createElement('a');
                     link.href = url;
+<<<<<<< HEAD
                     link.download = `benchmarking_chart_${props.datasetId}.${format}`;
+=======
+                    link.download = `benchmarking_chart_${datasetId.value}.${format}`;
+>>>>>>> 9d24c78 (Fix download on pdf and add download with table)
                     link.click();
                 })
                 .catch((error) => {
@@ -1609,7 +1636,11 @@ const downloadChart = async (format) => {
             .then((url) => {
                 const link = document.createElement('a');
                 link.href = url;
+<<<<<<< HEAD
                 link.download = `benchmarking_chart_${props.datasetId}.${format}`;
+=======
+                link.download = `benchmarking_chart_${datasetId.value}.${format}`;
+>>>>>>> 9d24c78 (Fix download on pdf and add download with table)
                 link.click();
             })
             .catch((error) => {
@@ -1628,7 +1659,11 @@ const downloadChart = async (format) => {
 
         pdf.addImage(chartImageURI, 'PNG', 10, 15, chartWidth, chartHeight, null, 'FAST', 0, null, 'center');
 
+<<<<<<< HEAD
         if (viewSquare.value || viewKmeans.value || viewDiagonal.value) {
+=======
+        if (viewSquare.value || viewKmeans.value) {
+>>>>>>> 9d24c78 (Fix download on pdf and add download with table)
             const table = document.getElementById('benchmarkingTable');
             const downloadCanvas = await html2canvas(table, {
                 scrollX: 0,
@@ -1646,7 +1681,11 @@ const downloadChart = async (format) => {
         }
 
         // Save the PDF
+<<<<<<< HEAD
         pdf.save(`benchmarking_chart_${props.datasetId}.${format}`);
+=======
+        pdf.save(`benchmarking_chart_${datasetId.value}.${format}`);
+>>>>>>> 9d24c78 (Fix download on pdf and add download with table)
 
     } else if (format === 'json') {
         // Descargar como JSON
@@ -1972,6 +2011,7 @@ html {
     background-color: rgba(237, 231, 231, 0.5);
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 .info-icon{
@@ -1983,18 +2023,30 @@ html {
 =======
 >>>>>>> 207eabe (Add styles when tool is hidden)
 =======
+=======
+
+>>>>>>> 9d24c78 (Fix download on pdf and add download with table)
 .annotationfooter {
-  background-color: #f0f0f0;
-  padding: 8px;
-  margin-top: 20px;
-  border-radius: 5px;
-  color: #666;
-  font-size: 10px;
-  text-align: center;
+    background-color: #f0f0f0;
+    padding: 8px;
+    margin-top: 30px;
+    border-radius: 5px;
+    color: #666;
+    font-size: 10px;
+    text-align: center;
 }
+<<<<<<< HEAD
 >>>>>>> 3ea2494 (Add legend to Square cuartile)
 .table-secondary {
     background-color: #6c757d;
     color: white;
 }</style>
 >>>>>>> e1533f4 (Add scroll in table v1)
+=======
+
+.table-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+</style>
+>>>>>>> 9d24c78 (Fix download on pdf and add download with table)
