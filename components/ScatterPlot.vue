@@ -75,8 +75,8 @@
             <!-- Table -->
             <b-col cols="4">
                 <div>
-                    <div class="table-container">
-                        <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
+                    <div class="table-container" :style="{ maxHeight: viewSquare ? '700px' : '810px' }">
+                        <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0" >
                             <thead>
                                 <tr>
                                     <th style="width: 60%;">Tool</th>
@@ -97,8 +97,12 @@
                             </tbody>
                         </table>
                     </div>
-
-
+                    <!-- Annotation -->
+                    <div class="annotationfooter" v-if="viewSquare">
+                        <p>Quartiles 2 and 3 are labeled as 'Mid (M)', indicating an average ranking. Meanwhile, 
+                        'Top (T)' represents quartiles above the average, and 'Bottom (B)' those below, providing 
+                        a clear understanding of the rankings.</p>
+                    </div>
 
                 </div>
             </b-col>
@@ -228,7 +232,7 @@ onMounted(async () => {
                 color: getColor()
             },
             name: participant.tool_id,
-            showlegend: true
+            showlegend: true,
             // error_x: {
             //     type: 'data',
             //     array: [participant.stderr_x],
@@ -1243,10 +1247,8 @@ function getSymbol() {
 
 <style scoped lang="css">
 .butns {
-
     position: absolute;
     top: 14px;
-    /* right: 10px; */
     margin-top: 10px;
     z-index: 1
 }
@@ -1353,7 +1355,15 @@ function getSymbol() {
 .quartil-zero {
     background-color: rgba(237, 231, 231, 0.5);
 }
-
+.annotationfooter {
+  background-color: #f0f0f0;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 5px;
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+}
 .table-secondary {
     background-color: #6c757d;
     color: white;
