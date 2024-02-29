@@ -8,8 +8,12 @@
                 <div v-if="data" class="butns">
                     <b-button-group class="ml-auto">
                         <!-- Classification -->
+<<<<<<< HEAD
                         <b-dropdown :text="classificationButtonText" variant="outline-secondary"
                             class="button-classification">
+=======
+                        <b-dropdown :text="classificationButtonText" variant="outline-secondary" class="button-classification">
+>>>>>>> 33bba23 (Add classification text to dropdown)
                             <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
                                     method:</strong></b-dropdown-text>
                             <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
@@ -115,6 +119,7 @@
                 <div>
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                     <table class="table table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
                         <tr>
                             <th>Tool</th>
@@ -134,6 +139,9 @@
                     <div class="table-container">
                         <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
 =======
+=======
+                    <!-- Quartile Table -->
+>>>>>>> 33bba23 (Add classification text to dropdown)
                     <div class="table-container" :style="{ maxHeight: viewSquare ? '700px' : '810px' }">
                         <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0" >
 >>>>>>> 3ea2494 (Add legend to Square cuartile)
@@ -764,6 +772,7 @@ const viewButtonText = computed(() => {
     return viewApplied.value ? 'Optimal View' : 'Reset View';
 });
 
+<<<<<<< HEAD
 // Text for the Classification Button
 const classificationButtonText = computed(() => {
     if (viewKmeans.value) {
@@ -776,6 +785,27 @@ const classificationButtonText = computed(() => {
         return 'Classification'
     }
 });
+=======
+const classificationButtonText = computed(() => {
+    if(viewKmeans.value){
+        return 'K-Means Clustering';
+    }else if(viewSquare.value){
+        return 'Square Quartiles';
+    }else{
+        return 'No Classification'
+    }
+});
+
+// Format Date String
+const formatDateString = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+};
+>>>>>>> 33bba23 (Add classification text to dropdown)
 
 // Error messages
 const countDownChanged = () => {
@@ -1790,7 +1820,11 @@ html {
 }
 
 .button-classification {
+<<<<<<< HEAD
     width: 190px;
+=======
+    width: 180px;
+>>>>>>> 33bba23 (Add classification text to dropdown)
 }
 
 .button-resetView {
