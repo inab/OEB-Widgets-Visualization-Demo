@@ -6,17 +6,19 @@
           <!-- Buttons -->
           <b-button-group class="ml-auto">
             <!-- Button Sort -->
-            <b-button variant="outline-secondary" v-if="sortOrder === 'raw'" @click="toggleSortOrder" :disabled="loading">
+            <b-button squared variant="outline-secondary" v-if="sortOrder === 'raw'" @click="toggleSortOrder"
+              :disabled="loading">
               Sort & Classify Data
             </b-button>
-            <b-button variant="outline-secondary" v-else @click="toggleSortOrder" :disabled="loading">
+            <b-button squared variant="outline-secondary" v-else @click="toggleSortOrder" :disabled="loading">
               Return To Raw Results
             </b-button>
             <!-- Button Optimal -->
-            <b-button variant="outline-secondary" v-if="optimal === 'no'" :disabled="loading" @click="optimalView">
+            <b-button squared variant="outline-secondary" v-if="optimal === 'no'" :disabled="loading"
+              @click="optimalView">
               Optimal View
             </b-button>
-            <b-button variant="outline-secondary" v-else :disabled="loading" @click="optimalView">
+            <b-button squared variant="outline-secondary" v-else :disabled="loading" @click="optimalView">
               Reset View
             </b-button>
             <!-- Button Download -->
@@ -41,11 +43,18 @@
         <!-- Quartile Table -->
         <b-col cols="4">
           <div :class="{ 'table-container': true, 'fade-in': sortOrder === 'sorted', 'fade-out': sortOrder === 'raw' }">
-            <table class="table table-fixed table-bordered quartile-table-container" id='quartileTable'>
+            <table class="table table-fixed table-bordered  quartile-table-container" id='quartileTable'>
               <thead>
                 <tr>
                   <th style="width: 60%;" class="table-secondary">Tool</th>
-                  <th style="width: 40%;" class="table-secondary">Quartile</th>
+                  <th style="width: 40%;" class="table-secondary">Quartile <font-awesome-icon id="extrainfoquartile"
+                      :icon="['fas', 'question']" style="color: #ffffff;" /></th>
+                  <b-popover target="extrainfoquartile" triggers="hover" placement="bottom">
+                    <template #title><b>How to</b></template>
+
+                   By default, the highest values will be displayed in the first quartile.
+                    Inversely if it is specified.
+                  </b-popover>
                 </tr>
               </thead>
               <tbody>
@@ -65,27 +74,20 @@
         <!-- Column for the ID table -->
         <b-col cols="8">
           <!-- ID AND DATE TABLE -->
-          <div v-if="datasetId && formattedDate">
-            <b-table-simple small bordered caption-top responsive id='idDateTable'>
-              <b-tbody>
-                <b-tr>
-                  <b-th style="border-radius: 10px 0 0 10px;" variant="secondary" class="text-center">Dataset ID</b-th>
-                  <b-td class="text-center">{{ datasetId }}</b-td>
-                  <b-th variant="secondary" class="text-center">Last Update</b-th>
-                  <b-td style="border-radius: 0 10px 10px 0;" class="text-center">{{ formattedDate }}</b-td>
-                </b-tr>
-              </b-tbody>
-            </b-table-simple>
+          <div v-if="datasetId && formattedDate" class="tableid">
+            <table class=" table table-bordered rounded-3" id='idDateTable'>
+              <tbody>
+                <tr>
+                  <th>Dataset ID</th>
+                  <td>{{ datasetId }}</td>
+                  <th>Last Update</th>
+                  <td>{{ formattedDate }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </b-col>
 
-        <!-- Column for the paragraph -->
-        <b-col cols="4">
-          <!-- Annotation -->
-          <div v-if="sortOrder === 'sorted'" class="annotationfooter">
-            * By default, the highest values will be displayed in the first quartile. Inversely if it is specified.
-          </div>
-        </b-col>
       </b-row>
     </div>
   </div>
@@ -797,13 +799,7 @@ function formatDateString(dateString) {
 
 </script>
 <style scoped>
-b-th,
-b-td {
-  border-radius: 10px;
-}
-
 .butns {
-
   position: absolute;
   top: 14px;
   margin-top: 10px;
@@ -813,7 +809,6 @@ b-td {
 .plot-container {
   position: relative;
   margin-bottom: 20px;
-  /* Adjust as needed */
 }
 
 
@@ -822,21 +817,24 @@ b-td {
   color: white;
 }
 
-.annotationfooter {
-  background-color: #f0f0f0;
-  border-radius: 5px;
-  color: #666;
-  font-size: 12px;
+.tableid {
+  font-family: arial, sans-serif;
+  width: 100%;
+  margin: 15px;
   text-align: center;
-  padding: 8px;
-  /* Adjust padding as needed */
 }
 
-#idDateTable {
-  display: flex;
-  align-items: center;
+
+.tableid th {
+  background-color: #6c757d;
+  color: white;
+
 }
 
+.tableid td {
+  background-color: white;
+  color: black;
+}
 
 rect {
   cursor: default !important;
@@ -845,7 +843,7 @@ rect {
 .table-container {
   max-height: 710px;
   overflow-y: auto;
-  border-radius: 10px;
+  margin-top: 100px;
 }
 
 .quartile-table-container {
@@ -883,7 +881,6 @@ rect {
   100% {
     opacity: 0;
     visibility: hidden;
-    /* Ensure element is hidden after fading out */
   }
 }
 
