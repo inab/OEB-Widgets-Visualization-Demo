@@ -66,6 +66,7 @@
                         </b-alert>
                     </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
                     <!-- ID AND DATE TABLE -->
@@ -83,6 +84,8 @@
                     </div>
 
 >>>>>>> 671690b (Add: Tool column linked to the chart legend)
+=======
+>>>>>>> 0d89c68 (Added Popover, delete info table)
                 </div>
             </b-col>
 
@@ -95,6 +98,7 @@
                 <div id="benchmarkingTable">
                     <!-- Quartile Table -->
                     <div class="table-container">
+<<<<<<< HEAD
                         <table class="table table-fixed table-bordered cuartiles-table" v-if="quartileData.length > 0">
                             <thead>
                                 <tr>
@@ -145,6 +149,8 @@
 >>>>>>> 671690b (Add: Tool column linked to the chart legend)
 =======
                     <div class="table-container">
+=======
+>>>>>>> 0d89c68 (Added Popover, delete info table)
                         <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
 =======
 =======
@@ -160,7 +166,14 @@
                             <thead>
                                 <tr>
                                     <th style="width: 60%;">Tool</th>
-                                    <th style="width: 40%;">Quartile</th>
+                                    <th class="d-flex justify-content-between">Quartile <font-awesome-icon id="extrainfoquartile"
+                                        :icon="['fas', 'circle-info']" class="info-icon" v-if="viewSquare" />
+                                    </th>
+                                    <b-popover target="extrainfoquartile" triggers="hover" placement="bottom" v-if="viewSquare">
+                                        <template #title><b>The Square quartile label</b></template>
+                                        Quartiles 2 and 3 are 'Mid (M)', representing average rankings, while 'Top (T)' 
+                                        denotes quartiles above average and 'Bottom (B)' those below, offering clarity in rankin
+                                    </b-popover>
                                 </tr>
                             </thead>
                             <tbody>
@@ -178,6 +191,7 @@
                         </table>
                     </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 <<<<<<< HEAD
@@ -193,6 +207,8 @@
 >>>>>>> 3ea2494 (Add legend to Square cuartile)
 
 >>>>>>> 207eabe (Add styles when tool is hidden)
+=======
+>>>>>>> 0d89c68 (Added Popover, delete info table)
                 </div>
             </b-col>
         </b-row>
@@ -228,7 +244,11 @@ const props = defineProps({
 // GLOBAL CONSTANTES
 // ----------------------------------------------------------------
 const data = ref(null);
+<<<<<<< HEAD
 const dataPoints = ref([]);
+=======
+const datasetId = ref(null);
+>>>>>>> 0d89c68 (Added Popover, delete info table)
 const paretoPoints = ref([]);
 const optimalXaxis = ref(null);
 const optimalYaxis = ref(null);
@@ -269,7 +289,14 @@ const viewDiagonal = ref(false);
 
 onMounted(async () => {
     const Plotly = require('plotly.js-dist');
+<<<<<<< HEAD
     data.value = props.inline_data
+=======
+    const response = await fetch('/raw_data_OEBD00200002UK0.json');
+    dataset.value = await response.json();
+    datasetId.value = dataset.value._id
+    data.value = dataset.value.datalink.inline_data
+>>>>>>> 0d89c68 (Added Popover, delete info table)
     const visualization = data.value.visualization
 
 
@@ -340,19 +367,26 @@ onMounted(async () => {
             name: participant.tool_id,
             showlegend: true,
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 0d89c68 (Added Popover, delete info table)
             error_x: {
                 type: 'data',
                 array: [participant.stderr_x],
                 visible: true,
+<<<<<<< HEAD
                 color: '#000000',
                 width: 2,
                 thickness: 0.3
                 
+=======
+>>>>>>> 0d89c68 (Added Popover, delete info table)
             },
             error_y: {
                 type: 'data',
                 array: [participant.stderr_y],
                 visible: true,
+<<<<<<< HEAD
                 color: '#000000',
                 width: 2,
                 thickness: 0.3
@@ -371,6 +405,9 @@ onMounted(async () => {
             //     visible: true,
             // },
 >>>>>>> 3ea2494 (Add legend to Square cuartile)
+=======
+            },
+>>>>>>> 0d89c68 (Added Popover, delete info table)
         };
         traces.push(trace);
     }
@@ -811,6 +848,7 @@ const classificationButtonText = computed(() => {
     }
 });
 
+<<<<<<< HEAD
 // Format Date String
 const formatDateString = (dateString) => {
     const date = new Date(dateString);
@@ -828,6 +866,8 @@ const countDownChanged = () => {
         dismissCountDown.value -= 1;
     }
 };
+=======
+>>>>>>> 0d89c68 (Added Popover, delete info table)
 
 // PARETO FRONTIER
 // ----------------------------------------------------------------
@@ -1897,6 +1937,7 @@ html {
 .table-container {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     max-height: 700px;
     overflow-y: auto;
     font-size: 1.1rem;
@@ -1925,6 +1966,9 @@ html {
 =======
     max-height: 810px;
 >>>>>>> 207eabe (Add styles when tool is hidden)
+=======
+    max-height: 700px;
+>>>>>>> 0d89c68 (Added Popover, delete info table)
     overflow-y: auto;
 }
 
@@ -2044,6 +2088,11 @@ html {
 >>>>>>> e1533f4 (Add scroll in table v1)
 =======
 
+.info-icon{
+    color: #ffffff;
+    /* margin-left: 55%; */
+    align-content: end;
+}
 .table-secondary {
     background-color: #6c757d;
     color: white;
