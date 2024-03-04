@@ -66,8 +66,7 @@
                             @dismissed="dismissCountDown = 0" @dismiss-count-down="countDownChanged">
                             At least four participants are required for the benchmark!!
                         </b-alert>
-                    </div><br>
-
+                    </div>
                 </div>
             </b-col>
 
@@ -75,12 +74,19 @@
             <b-col cols="4">
                 <div id="benchmarkingTable">
                     <!-- Quartile Table -->
-                    <div class="table-container" :style="{ maxHeight: viewSquare ? '700px' : '810px' }">
+                    <div class="table-container">
                         <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
                             <thead>
                                 <tr>
                                     <th style="width: 60%;">Tool</th>
-                                    <th style="width: 40%;">Quartile</th>
+                                    <th class="d-flex justify-content-between">Quartile <font-awesome-icon id="extrainfoquartile"
+                                        :icon="['fas', 'circle-info']" class="info-icon" v-if="viewSquare" />
+                                    </th>
+                                    <b-popover target="extrainfoquartile" triggers="hover" placement="bottom" v-if="viewSquare">
+                                        <template #title><b>The Square quartile label</b></template>
+                                        Quartiles 2 and 3 are 'Mid (M)', representing average rankings, while 'Top (T)' 
+                                        denotes quartiles above average and 'Bottom (B)' those below, offering clarity in rankin
+                                    </b-popover>
                                 </tr>
                             </thead>
                             <tbody>
@@ -97,13 +103,6 @@
                             </tbody>
                         </table>
                     </div>
-                    <!-- Annotation -->
-                    <div class="annotationfooter" v-if="viewSquare">
-                        The Square quartile labels, 'Top (T)', represent quartiles that are above average.
-                        'Mid (M)' indicates an average ranking, and 'Bottom (B)' denotes those below average,
-                        providing a clear understanding of the rankings.
-                    </div>
-
                 </div>
             </b-col>
         </b-row>
@@ -122,7 +121,6 @@ const { jsPDF } = require('jspdf');
 const dataset = ref(null);
 const data = ref(null);
 const datasetId = ref(null);
-const modificationDate = ref(null);
 const paretoPoints = ref([]);
 // 
 const optimalXaxis = ref(null);
@@ -164,7 +162,6 @@ onMounted(async () => {
     const response = await fetch('/raw_data_OEBD00200002UK0.json');
     dataset.value = await response.json();
     datasetId.value = dataset.value._id
-    modificationDate.value = formatDateString(dataset.value.dates.modification)
     data.value = dataset.value.datalink.inline_data
     const visualization = data.value.visualization
 
@@ -235,16 +232,16 @@ onMounted(async () => {
             },
             name: participant.tool_id,
             showlegend: true,
-            // error_x: {
-            //     type: 'data',
-            //     array: [participant.stderr_x],
-            //     visible: true,
-            // },
-            // error_y: {
-            //     type: 'data',
-            //     array: [participant.stderr_y],
-            //     visible: true,
-            // },
+            error_x: {
+                type: 'data',
+                array: [participant.stderr_x],
+                visible: true,
+            },
+            error_y: {
+                type: 'data',
+                array: [participant.stderr_y],
+                visible: true,
+            },
         };
         traces.push(trace);
     }
@@ -294,7 +291,7 @@ onMounted(async () => {
     };
 
     const config = {
-        displayModeBar: false,
+        // displayModeBar: false,
         responsive: true,
         hovermode: false
     }
@@ -555,16 +552,6 @@ const classificationButtonText = computed(() => {
         return 'Classification'
     }
 });
-
-// Format Date String
-const formatDateString = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
-};
 
 
 // PARETO FRONTIER
@@ -1361,7 +1348,7 @@ function getSymbol() {
 }
 
 .table-container {
-    max-height: 810px;
+    max-height: 700px;
     overflow-y: auto;
 }
 
@@ -1441,6 +1428,11 @@ function getSymbol() {
     text-align: center;
 }
 
+.info-icon{
+    color: #ffffff;
+    /* margin-left: 55%; */
+    align-content: end;
+}
 .table-secondary {
     background-color: #6c757d;
     color: white;
