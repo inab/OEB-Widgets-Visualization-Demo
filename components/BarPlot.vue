@@ -48,7 +48,7 @@
                 <tr>
                   <th style="width: 60%;" class="table-secondary">Tool</th>
                   <th style="width: 40%;" class="table-secondary">Quartile <font-awesome-icon id="extrainfoquartile"
-                      :icon="['fas', 'question']" style="color: #ffffff;" /></th>
+                      :icon="['fas', 'question']" style="color: #ffffff;  float: right; margin-left: 5px;margin-top: 3px;" /></th>
                   <b-popover target="extrainfoquartile" triggers="hover" placement="bottom">
                     <template #title><b>How to</b></template>
 
