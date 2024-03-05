@@ -33,64 +33,58 @@
         </div>
       </b-col>
     </b-row>
-    <div id="todownload">
-      <b-row class="mt-4">
-        <!-- Chart -->
-        <b-col cols="8">
-          <div id="barPlot"></div>
-        </b-col>
 
-        <!-- Quartile Table -->
-        <b-col cols="4" v-if="sortOrder === 'sorted'">
-          <div  :class="{ 'table-container': true, 'fade-in': sortOrder === 'sorted', 'fade-out': sortOrder === 'raw' }">
-            <table class="table table-bordered  quartile-table-container" id='quartileTable'>
-              <thead>
-                <tr>
-                  <th style="width: 60%;" class="table-secondary">Tool</th>
-                  <th style="width: 40%;" class="table-secondary">Quartile <font-awesome-icon id="extrainfoquartile"
-                      :icon="['fas', 'question']"
-                      style="color: #ffffff;  float: right; margin-left: 5px;margin-top: 3px;" /></th>
-                  <b-popover target="extrainfoquartile" triggers="hover" placement="bottom">
-                    <template #title><b>How to</b></template>
+    <b-row class="mt-4">
+      <!-- Chart -->
+      <b-col cols="8">
+        <div id="barPlot"></div>
+        <br>
+        <!-- ID AND DATE TABLE -->
+        <div v-if="datasetId && formattedDate" class="tableid">
+          <table class=" table table-bordered rounded-3" id='idDateTable'>
+            <tbody>
+              <tr>
+                <th>Dataset ID</th>
+                <td>{{ datasetId }}</td>
+                <th>Last Update</th>
+                <td>{{ formattedDate }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </b-col>
 
-                    By default, the highest values will be displayed in the first quartile.
-                    Inversely if it is specified.
-                  </b-popover>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(quartile, index) in quartileDataArray" :key="index">
-                  <td>{{ quartile.tool }}</td>
-                  <td :style="{ backgroundColor: quartile.quartile.bgColor }">{{ quartile.quartile.quartile }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </b-col>
-      </b-row>
+      <!-- Quartile Table -->
+      <b-col cols="4" v-if="sortOrder === 'sorted'"
+        :class="{ 'fade-in': sortOrder === 'sorted', 'fade-out': sortOrder === 'raw' }">
+        <div class="table-container">
+          <table class="table table-bordered  quartile-table-container" id='quartileTable'>
+            <thead>
+              <tr>
+                <th style="width: 60%;" class="table-secondary">Tool</th>
+                <th style="width: 40%;" class="table-secondary">Quartile <font-awesome-icon id="extrainfoquartile"
+                    :icon="['fas', 'question']"
+                    style="color: #ffffff;  float: right; margin-left: 5px;margin-top: 3px;" /></th>
+                <b-popover target="extrainfoquartile" triggers="hover" placement="bottom">
+                  <template #title><b>How to</b></template>
 
-      <!-- Row for the paragraph -->
-      <b-row class="mt-4">
-        <!-- Column for the ID table -->
-        <b-col cols="8">
-          <!-- ID AND DATE TABLE -->
-          <div v-if="datasetId && formattedDate" class="tableid">
-            <table class=" table table-bordered rounded-3" id='idDateTable'>
-              <tbody>
-                <tr>
-                  <th>Dataset ID</th>
-                  <td>{{ datasetId }}</td>
-                  <th>Last Update</th>
-                  <td>{{ formattedDate }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </b-col>
+                  By default, the highest values will be displayed in the first quartile.
+                  Inversely if it is specified.
+                </b-popover>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(quartile, index) in quartileDataArray" :key="index">
+                <td>{{ quartile.tool }}</td>
+                <td :style="{ backgroundColor: quartile.quartile.bgColor }">{{ quartile.quartile.quartile }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </b-col>
+    </b-row>
 
-      </b-row>
-    </div>
   </div>
 </template>
 
@@ -790,21 +784,17 @@ async function downloadChart(format) {
 
 
     } else if (format === 'svg') {
-      const Plotly = require('plotly.js-dist');
-      const chart = document.getElementById('barPlot');
-      const options = { format: 'svg', width: 800, height: 600 };
 
-      Plotly.toImage(chart, options)
-        .then((svg) => {
-          const link = document.createElement('a');
-          link.href = 'data:image/svg+xml;base64,' + btoa(svg);
-          link.download = `benchmarking_chart_${datasetId.value}.${format}`;
-          link.click();
-        })
-        .catch((error) => {
-          console.error(`Error downloading the chart as ${format}`, error);
-        });
+      const Plotly = require('plotly.js-dist');
+      layout.value.images[0].opacity = 0.5;
+      Plotly.relayout('barPlot', layout.value);
+      const graphDiv = document.getElementById('barPlot')
+      Plotly.downloadImage(graphDiv, {format: 'svg', width: 800, height: 600, filename: `benchmarking_chart_${datasetId.value}.${format}`});
+      layout.value.images[0].opacity = 0;
+      Plotly.relayout('barPlot', layout.value);
+
     } else {
+      //TODO
       const Plotly = require('plotly.js-dist');
       layout.value.images[0].opacity = 0.5;
       Plotly.relayout('barPlot', layout.value);
