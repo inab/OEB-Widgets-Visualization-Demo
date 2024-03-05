@@ -165,8 +165,8 @@
 >>>>>>> 9d24c78 (Fix download on pdf and add download with table)
                             <thead>
                                 <tr>
-                                    <th style="width: 60%;">Tool</th>
-                                    <th class="d-flex justify-content-between">Quartile <font-awesome-icon id="extrainfoquartile"
+                                    <th class="toolHeader">Tool</th>
+                                    <th>Quartile <font-awesome-icon id="extrainfoquartile"
                                         :icon="['fas', 'circle-info']" class="info-icon" v-if="viewSquare" />
                                     </th>
                                     <b-popover target="extrainfoquartile" triggers="hover" placement="bottom" v-if="viewSquare">
@@ -1971,6 +1971,9 @@ html {
 >>>>>>> 0d89c68 (Added Popover, delete info table)
     overflow-y: auto;
 }
+.cuartiles-table tbody tr:first-child {
+    margin-top: 40px; /* Ajusta el margen superior del primer elemento de la tabla */
+}
 
 .cuartiles-table {
     width: 100%;
@@ -1978,14 +1981,25 @@ html {
 }
 
 .cuartiles-table th {
+    position: -webkit-sticky;
     position: sticky;
+<<<<<<< HEAD
     top: 0;
 >>>>>>> e1533f4 (Add scroll in table v1)
+=======
+    top: -1px;
+>>>>>>> 073b737 (Fix table header)
     z-index: 1;
     background-color: #6c757d;
     color: white;
     border: solid 1px #6c757d;
 }
+<<<<<<< HEAD
+=======
+.toolHeader{
+    width: 60%;
+}
+>>>>>>> 073b737 (Fix table header)
 .cuartiles-table td {
 <<<<<<< HEAD
     padding: 8px;
@@ -2058,6 +2072,7 @@ html {
 <<<<<<< HEAD
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 .info-icon{
     color: #ffffff;
     margin-left: 5px;
@@ -2088,14 +2103,11 @@ html {
 >>>>>>> e1533f4 (Add scroll in table v1)
 =======
 
+=======
+>>>>>>> 073b737 (Fix table header)
 .info-icon{
     color: #ffffff;
-    /* margin-left: 55%; */
-    align-content: end;
-}
-.table-secondary {
-    background-color: #6c757d;
-    color: white;
+    margin-left: 5px;
 }
 </style>
 >>>>>>> 9d24c78 (Fix download on pdf and add download with table)
