@@ -78,8 +78,8 @@
                         <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
                             <thead>
                                 <tr>
-                                    <th style="width: 60%;">Tool</th>
-                                    <th class="d-flex justify-content-between">Quartile <font-awesome-icon id="extrainfoquartile"
+                                    <th class="toolHeader">Tool</th>
+                                    <th>Quartile <font-awesome-icon id="extrainfoquartile"
                                         :icon="['fas', 'circle-info']" class="info-icon" v-if="viewSquare" />
                                     </th>
                                     <b-popover target="extrainfoquartile" triggers="hover" placement="bottom" v-if="viewSquare">
@@ -1351,6 +1351,9 @@ function getSymbol() {
     max-height: 700px;
     overflow-y: auto;
 }
+.cuartiles-table tbody tr:first-child {
+    margin-top: 40px; /* Ajusta el margen superior del primer elemento de la tabla */
+}
 
 .cuartiles-table {
     width: 100%;
@@ -1358,13 +1361,16 @@ function getSymbol() {
 }
 
 .cuartiles-table th {
+    position: -webkit-sticky;
     position: sticky;
-    top: 0;
+    top: -1px;
     z-index: 1;
     background-color: #6c757d;
     color: white;
 }
-
+.toolHeader{
+    width: 60%;
+}
 .cuartiles-table td {
     padding-top: 8px;
     padding-bottom: 8px;
@@ -1418,23 +1424,8 @@ function getSymbol() {
     background-color: rgba(237, 231, 231, 0.5);
 }
 
-.annotationfooter {
-    background-color: #f0f0f0;
-    padding: 8px;
-    margin-top: 30px;
-    border-radius: 5px;
-    color: #666;
-    font-size: 10px;
-    text-align: center;
-}
-
 .info-icon{
     color: #ffffff;
-    /* margin-left: 55%; */
-    align-content: end;
-}
-.table-secondary {
-    background-color: #6c757d;
-    color: white;
+    margin-left: 5px;
 }
 </style>
