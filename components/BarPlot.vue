@@ -41,9 +41,9 @@
         </b-col>
 
         <!-- Quartile Table -->
-        <b-col cols="4">
-          <div :class="{ 'table-container': true, 'fade-in': sortOrder === 'sorted', 'fade-out': sortOrder === 'raw' }">
-            <table class="table table-fixed table-bordered  quartile-table-container" id='quartileTable'>
+        <b-col cols="4" v-if="sortOrder === 'sorted'">
+          <div  :class="{ 'table-container': true, 'fade-in': sortOrder === 'sorted', 'fade-out': sortOrder === 'raw' }">
+            <table class="table table-bordered  quartile-table-container" id='quartileTable'>
               <thead>
                 <tr>
                   <th style="width: 60%;" class="table-secondary">Tool</th>
@@ -776,10 +776,18 @@ async function downloadChart(format) {
         });
       }
 
-      // Save the PDF
-      pdf.save(`benchmarking_chart_${datasetId.value}.${format}`);
-      layout.value.images[0].opacity = 0;
-      Plotly.relayout('barPlot', layout.value);
+      if (showAdditionalTable.value) {
+        // Save the PDF
+        pdf.save(`benchmarking_chart__quartiles_${datasetId.value}.${format}`);
+        layout.value.images[0].opacity = 0;
+        Plotly.relayout('barPlot', layout.value);
+      } else {
+        // Save the PDF
+        pdf.save(`benchmarking_chart_${datasetId.value}.${format}`);
+        layout.value.images[0].opacity = 0;
+        Plotly.relayout('barPlot', layout.value);
+      }
+
 
     } else if (format === 'svg') {
       const Plotly = require('plotly.js-dist');
@@ -889,7 +897,6 @@ rect {
 
 .quartile-table-container {
   width: 100%;
-  table-layout: fixed;
 }
 
 .quartile-table-container th {
@@ -921,7 +928,6 @@ rect {
 
   100% {
     opacity: 0;
-    visibility: hidden;
   }
 }
 
@@ -934,14 +940,15 @@ rect {
   animation: fadeOut 0.5s ease-in-out;
 }
 
-/* Ensure table headers are affected by animation */
+/* Ensure table headers are affected by animation 
 .fade-out table th,
 .fade-out table td {
   opacity: 0;
 }
-
-/* Hide borders of table headers during fade-out */
+*/
+/* Hide borders of table headers during fade-out 
 .fade-out table th {
   border-color: transparent;
 }
+*/
 </style>
