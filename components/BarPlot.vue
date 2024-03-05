@@ -48,11 +48,12 @@
                 <tr>
                   <th style="width: 60%;" class="table-secondary">Tool</th>
                   <th style="width: 40%;" class="table-secondary">Quartile <font-awesome-icon id="extrainfoquartile"
-                      :icon="['fas', 'question']" style="color: #ffffff;  float: right; margin-left: 5px;margin-top: 3px;" /></th>
+                      :icon="['fas', 'question']"
+                      style="color: #ffffff;  float: right; margin-left: 5px;margin-top: 3px;" /></th>
                   <b-popover target="extrainfoquartile" triggers="hover" placement="bottom">
                     <template #title><b>How to</b></template>
 
-                   By default, the highest values will be displayed in the first quartile.
+                    By default, the highest values will be displayed in the first quartile.
                     Inversely if it is specified.
                   </b-popover>
                 </tr>
@@ -106,7 +107,7 @@ import 'jspdf-autotable';
 // DATA RETRIEVE
 const props = defineProps(['jsonData'])
 
-
+const layout = ref(null)
 const loading = ref(false);
 const dataset = ref(null);
 const originalData = ref(null);
@@ -165,7 +166,7 @@ onBeforeMount(async () => {
   };
 
 
-  const layout = {
+  layout.value = {
     title: '',
     autosize: true,
     height: 800,
@@ -209,7 +210,7 @@ onBeforeMount(async () => {
         sizey: 0.3,
         xanchor: "right",
         yanchor: "top",
-        opacity: 0.5,
+        opacity: 0,
       }
     ],
   };
@@ -221,7 +222,7 @@ onBeforeMount(async () => {
   }
 
   // Create the bar chart with the initial trace and layout
-  Plotly.newPlot('barPlot', [initialTrace], layout, config);
+  Plotly.newPlot('barPlot', [initialTrace], layout.value, config);
 
 
   const myPlot = document.getElementById('barPlot');
@@ -693,11 +694,13 @@ async function downloadChart(format) {
     if (format === 'pdf') {
       const Plotly = require('plotly.js-dist');
       const pdf = new jsPDF();
+      layout.value.images[0].opacity = 0.5;
+      Plotly.relayout('barPlot', layout.value);
 
       // Get chart image as base64 data URI
       const chartImageURI = await Plotly.toImage(document.getElementById('barPlot'), { format: 'png' });
-      const chartHeight = 110;
-      const chartWidth = 175;
+      const chartHeight = 150;
+      const chartWidth = 190;
 
       pdf.addImage(chartImageURI, 'JPEG', 10, 10, chartWidth, chartHeight, null, 'FAST', 0, 0, { dpi: 600 });
 
@@ -710,9 +713,20 @@ async function downloadChart(format) {
         styles: {
           cellPadding: 1,
           fontSize: 8,
-          overflow: 'linebreak'
+          overflow: 'linebreak',
+          halign: 'center'
         },
-        margin: { top: 10 }
+        margin: { top: 10 },
+        willDrawCell: function (data) {
+          if (data.row.section === 'body') {
+            if (data.column.dataKey === 0 || data.column.dataKey === 2) {
+              pdf.setFillColor(108, 117, 125)
+              pdf.setTextColor(250, 250, 250)
+              pdf.setFont("helvetica", "bold");
+            }
+
+          }
+        },
       });
 
 
@@ -721,7 +735,7 @@ async function downloadChart(format) {
         const columns = ["Tool", "Quartile"]; // Define your columns
 
         // Extract data from quartileDataArray
-        const rows = quartileDataArray.value.map(quartile => [quartile.tool, quartile.quartile.quartile]);
+        const rows = quartileDataArray.value.map(q => [q.tool, q.quartile.quartile]);
 
         // Generate autoTable with custom styles
         pdf.autoTable({
@@ -733,19 +747,39 @@ async function downloadChart(format) {
           styles: {
             cellPadding: 1,
             fontSize: 8,
-            overflow: 'linebreak'
+            overflow: 'linebreak',
+            halign: 'center'
           },
-          didParseCell: function (cell, rows) {
-            if (rows.column.dataKey === 'quartile') {
-              cell.styles.halign = 'right';
+          headStyles: {
+            fillColor: [108, 117, 125]
+          },
+          willDrawCell: function (data) {
+
+            if (data.row.section === 'body') {
+              // Check if the column header matches 'Quartile'
+              if (data.column.dataKey === 1) {
+                // Access the raw value of the cell
+                const quartileValue = data.cell.raw;
+                if (quartileValue === 1) {
+                  pdf.setFillColor(237, 248, 233)
+                } else if (quartileValue === 2) {
+                  pdf.setFillColor(186, 228, 179)
+                } else if (quartileValue === 3) {
+                  pdf.setFillColor(116, 196, 118)
+                } else if (quartileValue === 4) {
+                  pdf.setFillColor(35, 139, 69)
+                }
+              }
 
             }
-          }
+          },
         });
       }
 
       // Save the PDF
       pdf.save(`benchmarking_chart_${datasetId.value}.${format}`);
+      layout.value.images[0].opacity = 0;
+      Plotly.relayout('barPlot', layout.value);
 
     } else if (format === 'svg') {
       const Plotly = require('plotly.js-dist');
@@ -763,6 +797,9 @@ async function downloadChart(format) {
           console.error(`Error downloading the chart as ${format}`, error);
         });
     } else {
+      const Plotly = require('plotly.js-dist');
+      layout.value.images[0].opacity = 0.5;
+      Plotly.relayout('barPlot', layout.value);
       const toDownloadDiv = document.getElementById('todownload');
       const downloadCanvas = await html2canvas(toDownloadDiv, {
         scrollX: 0,
@@ -778,6 +815,9 @@ async function downloadChart(format) {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      layout.value.images[0].opacity = 0;
+      Plotly.relayout('barPlot', layout.value);
     }
   } catch (error) {
     console.error('Error downloading chart:', error);
@@ -798,6 +838,7 @@ function formatDateString(dateString) {
 }
 
 </script>
+
 <style scoped>
 .butns {
   position: absolute;
