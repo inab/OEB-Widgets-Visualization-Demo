@@ -75,7 +75,7 @@
                 <div id="benchmarkingTable">
                     <!-- Quartile Table -->
                     <div class="table-container">
-                        <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
+                        <table class="table table-fixed table-bordered cuartiles-table" v-if="quartileData.length > 0">
                             <thead>
                                 <tr>
                                     <th class="toolHeader">Tool</th>
@@ -90,7 +90,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(item, index) in cuartilesData" :key="item.tool_id"
+                                <tr v-for="(item, index) in quartileData" :key="item.tool_id"
                                     :class="{ 'quartil-zero': item.cuartil === 0 }">
                                     <td class="toolColumn" @click="handleTableRowClick(index)">
                                         <div class="color-box"
@@ -111,47 +111,57 @@
 </template>
 
 <script setup>
-const pf = require('pareto-frontier');
-var clusterMaker = require('clusters');
+// IMPORTS 
+import { defineProps } from 'vue';
 import { onMounted, ref, computed } from 'vue';
 import * as statistics from 'simple-statistics';
+var clusterMaker = require('clusters');
+const pf = require('pareto-frontier');
 const html2canvas = require('html2canvas');
 const { jsPDF } = require('jspdf');
 
-const dataset = ref(null);
+// PROPS
+const props = defineProps({
+    inline_data: {
+    type: Object,
+    required: true
+  },
+  datasetId: {
+    type: String,
+    required: true
+  }
+});
+
+// GLOBAL CONSTANTES
+// ----------------------------------------------------------------
 const data = ref(null);
-const datasetId = ref(null);
+const dataPoints = ref([]);
 const paretoPoints = ref([]);
-// 
 const optimalXaxis = ref(null);
 const optimalYaxis = ref(null);
+const toolID = ref([]);
+const allToolID = ref([]);
+const xAxis = ref([]);
+const yAxis = ref([]);
+
+// Data for the table
+const quartileData = ref([]);
 
 // K-means Clustering
 const showShapesKmeans = ref(false);
 let shapes = [];
 let annotationKmeans = [];
 
-// Error messages
-const showMessageError = ref(false);
-const dismissCountDown = ref(0);
-const countDownChanged = () => {
-    if (dismissCountDown.value > 0) {
-        dismissCountDown.value -= 1;
-    }
-};
-
 // Square Quartiles
 const showShapesSquare = ref(false);
 const showAnnotationSquare = ref(false);
-const cuartilesData = ref([]);
-const toolID = ref([]);
-const allToolID = ref([]);
-const xAxis = ref([]);
-const yAxis = ref([]);
-const dataPoints = ref([]);
-// view
-const viewApplied = ref(false);
 
+// Error messages
+const showMessageError = ref(false);
+const dismissCountDown = ref(0);
+
+// Reset/Optimal View
+const viewApplied = ref(false);
 // Views by Classification
 const viewKmeans = ref(false);
 const viewSquare = ref(false);
@@ -159,10 +169,7 @@ const viewSquare = ref(false);
 
 onMounted(async () => {
     const Plotly = require('plotly.js-dist');
-    const response = await fetch('/raw_data_OEBD00200002UK0.json');
-    dataset.value = await response.json();
-    datasetId.value = dataset.value._id
-    data.value = dataset.value.datalink.inline_data
+    data.value = props.inline_data
     const visualization = data.value.visualization
 
 
@@ -248,7 +255,6 @@ onMounted(async () => {
 
     // Create the chart layout
     const layout = {
-        // title: visualization.x_axis + ' + ' + visualization.y_axis,
         autosize: true,
         height: 700,
         annotations: getOptimizationArrow(visualization.optimization, paretoPoints.value),
@@ -336,7 +342,10 @@ onMounted(async () => {
 })
 
 // ----------------------------------------------------------------
-// Functions
+// FUNCTIONS
+// ----------------------------------------------------------------
+
+// ACTIONS FOR TABLE
 // ----------------------------------------------------------------
 // Handle the click on the table
 const handleTableRowClick = (index) => {
@@ -473,7 +482,7 @@ const resetView = () => {
         xaxis: {
             range: [0, Math.max(...xAxis.value) + 5000],
             title: {
-                text: dataset.value.datalink.inline_data.visualization.x_axis,
+                text: data.value.visualization.x_axis,
                 font: {
                     family: 'Arial, sans-serif',
                     size: 14,
@@ -485,7 +494,7 @@ const resetView = () => {
         yaxis: {
             range: [0, Math.max(...yAxis.value) + 0.05],
             title: {
-                text: dataset.value.datalink.inline_data.visualization.y_axis,
+                text: data.value.visualization.y_axis,
                 font: {
                     family: 'Arial, sans-serif',
                     size: 14,
@@ -505,7 +514,7 @@ const optimalView = () => {
         xaxis: {
             range: [optimalXaxis.value[0], optimalXaxis.value[1]],
             title: {
-                text: dataset.value.datalink.inline_data.visualization.x_axis,
+                text: data.value.visualization.x_axis,
                 font: {
                     family: 'Arial, sans-serif',
                     size: 14,
@@ -517,7 +526,7 @@ const optimalView = () => {
         yaxis: {
             range: [optimalYaxis.value[0], optimalYaxis.value[1]],
             title: {
-                text: dataset.value.datalink.inline_data.visualization.y_axis,
+                text: data.value.visualization.y_axis,
                 font: {
                     family: 'Arial, sans-serif',
                     size: 14,
@@ -553,6 +562,12 @@ const classificationButtonText = computed(() => {
     }
 });
 
+// Error messages
+const countDownChanged = () => {
+    if (dismissCountDown.value > 0) {
+        dismissCountDown.value -= 1;
+    }
+};
 
 // PARETO FRONTIER
 // ----------------------------------------------------------------
@@ -570,7 +585,7 @@ const formatOptimalDisplay = (optimization) => {
 // NO CLASSIFICATION
 // ----------------------------------------------------------------
 const noClassification = () => {
-    cuartilesData.value = [];
+    quartileData.value = [];
     viewKmeans.value = false;
     viewSquare.value = false;
     showShapesKmeans.value = false;
@@ -640,14 +655,14 @@ const toggleQuartilesVisibility = () => {
     optimalView();
 };
 
-
+// Calculate square quartiles
 const calculateQuartiles = (xAxis, yAxis, toolID) => {
 
     const cuartilesX = statistics.quantile(xAxis, 0.5);
     const cuartilesY = statistics.quantile(yAxis, 0.5);
 
     let better = data.value.visualization.optimization
-    squareClassificationTools(better, toolID, cuartilesX, cuartilesY, xAxis, yAxis)
+    sortToolsForSquare(better, toolID, cuartilesX, cuartilesY, xAxis, yAxis)
 
     const shapes = [
         {
@@ -685,10 +700,10 @@ const calculateQuartiles = (xAxis, yAxis, toolID) => {
     Plotly.relayout('scatter-plot', layout);
 };
 
-// 
-const squareClassificationTools = (better, visibleToolID, cuartilesX, cuartilesY, xAxis, yAxis) => {
-    cuartilesData.value = [];
-    allToolID.value.forEach((tool) => { // Iterar sobre todas las herramientas
+// Sort tools for Square Quartiles
+const sortToolsForSquare = (better, visibleToolID, cuartilesX, cuartilesY, xAxis, yAxis) => {
+    quartileData.value = [];
+    allToolID.value.forEach((tool) => { // Iterate over all tools
         const index = visibleToolID.indexOf(tool);
         const x = index !== -1 ? xAxis[index] : null; // Get index and values x, y
         const y = index !== -1 ? yAxis[index] : null; // Get index and values x, y
@@ -741,10 +756,9 @@ const squareClassificationTools = (better, visibleToolID, cuartilesX, cuartilesY
                 }
             }
         }
-        cuartilesData.value.push({ tool_id: tool, cuartil: cuartil, label: label });
+        quartileData.value.push({ tool_id: tool, cuartil: cuartil, label: label });
     });
 }
-
 
 // Annotation for Square Quartiles
 const annotationSquareQuartile = (better) => {
@@ -974,7 +988,7 @@ const createShapeClustering = (dataPoints, toolIDVisible) => {
 
 
 const createDataPointForTables = (visibleTools, groupedDataPoints) => {
-    cuartilesData.value = [];
+    quartileData.value = [];
     allToolID.value.forEach((tool) => {
         const index = visibleTools.indexOf(tool);
         let cuartil = 0;
@@ -984,7 +998,7 @@ const createDataPointForTables = (visibleTools, groupedDataPoints) => {
             label = cuartil.toString();
         }
 
-        cuartilesData.value.push({ tool_id: tool, cuartil: cuartil, label: label });
+        quartileData.value.push({ tool_id: tool, cuartil: cuartil, label: label });
     })
 
 }
@@ -1091,7 +1105,7 @@ const downloadChart = async (format) => {
 
             const link = document.createElement('a');
             link.href = downloadImage;
-            link.download = `benchmarking_chart_${datasetId.value}.${format}`;
+            link.download = `benchmarking_chart_${props.datasetId}.${format}`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1101,7 +1115,7 @@ const downloadChart = async (format) => {
                 .then((url) => {
                     const link = document.createElement('a');
                     link.href = url;
-                    link.download = `benchmarking_chart_${datasetId.value}.${format}`;
+                    link.download = `benchmarking_chart_${props.datasetId}.${format}`;
                     link.click();
                 })
                 .catch((error) => {
@@ -1115,7 +1129,7 @@ const downloadChart = async (format) => {
             .then((url) => {
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `benchmarking_chart_${datasetId.value}.${format}`;
+                link.download = `benchmarking_chart_${props.datasetId}.${format}`;
                 link.click();
             })
             .catch((error) => {
@@ -1152,7 +1166,7 @@ const downloadChart = async (format) => {
         }
 
         // Save the PDF
-        pdf.save(`benchmarking_chart_${datasetId.value}.${format}`);
+        pdf.save(`benchmarking_chart_${props.datasetId}.${format}`);
 
     } else if (format === 'json') {
         // Descargar como JSON
@@ -1162,7 +1176,7 @@ const downloadChart = async (format) => {
 
         const link = document.createElement('a');
         link.href = `data:text/json;charset=utf-8,${encodeURIComponent(jsonData)}`;
-        link.download = `${datasetId.value}.json`;
+        link.download = `${props.datasetId}.json`;
         link.click();
     } else {
         console.error('Error downloading chart:', error);

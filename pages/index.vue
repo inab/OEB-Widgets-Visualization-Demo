@@ -26,7 +26,7 @@
       <!-- Scatter plot -->
       <b-col cols="12" sm="10" md="12">
         <transition name="fade">
-          <ScatterPlot v-if="!loading" />
+          <ScatterPlot v-if="isScatterPlotType" :inline_data="inline_data" :datasetId="datasetId" />
         </transition>
       </b-col>
 
@@ -57,13 +57,35 @@ export default {
   data() {
     return {
       loading: true, // Initial loading state
+      fetchedData: null,
+      inline_data: null,
+      isBarPlotType: null,
+      isScatterPlotType: null,
+      datasetId: null
     }
   },
-  mounted() {
-    // Simulate an asynchronous operation (e.g., fetching data)
+  async mounted() {
+    // Simulate an asynchronous operation to better layout
     setTimeout(() => {
-      this.loading = false; // Set loading to false when the operation is complete
-    }, 1000); // Adjust the time according to your needs
+      this.loading = false;
+    }, 1000);
+
+    // Fetch your data
+    const response = await fetch('/raw_data_OEBD00200002UK0.json'); //endpoint to db rest to cofigure
+    this.fetchedData = await response.json();
+    this.inline_data = this.fetchedData.datalink.inline_data
+    this.datasetId = this.fetchedData._id
+    let visualization = this.fetchedData.datalink.inline_data.visualization
+    let type = this.fetchedData.datalink.inline_data.visualization.type
+
+    if (this.fetchedData) {
+      if (visualization && type === 'bar-plot') {
+        this.isBarPlotType = true;
+      }else if(visualization && type === '2D-plot'){
+        this.isScatterPlotType = true;
+      }
+    }
+
   },
 
 }
