@@ -99,6 +99,7 @@
                     <!-- Quartile Table -->
                     <div class="table-container">
 <<<<<<< HEAD
+<<<<<<< HEAD
                         <table class="table table-fixed table-bordered cuartiles-table" v-if="quartileData.length > 0">
                             <thead>
                                 <tr>
@@ -163,6 +164,9 @@
 =======
                         <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
 >>>>>>> 9d24c78 (Fix download on pdf and add download with table)
+=======
+                        <table class="table table-fixed table-bordered cuartiles-table" v-if="quartileData.length > 0">
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
                             <thead>
                                 <tr>
                                     <th class="toolHeader">Tool</th>
@@ -177,7 +181,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(item, index) in cuartilesData" :key="item.tool_id"
+                                <tr v-for="(item, index) in quartileData" :key="item.tool_id"
                                     :class="{ 'quartil-zero': item.cuartil === 0 }">
                                     <td class="toolColumn" @click="handleTableRowClick(index)">
                                         <div class="color-box"
@@ -222,10 +226,15 @@ import { defineProps } from 'vue';
 import { onMounted, ref, computed } from 'vue';
 import * as statistics from 'simple-statistics';
 <<<<<<< HEAD
+<<<<<<< HEAD
 var clusterMaker = require('clusters');
 const pf = require('pareto-frontier');
 =======
 >>>>>>> 9d24c78 (Fix download on pdf and add download with table)
+=======
+var clusterMaker = require('clusters');
+const pf = require('pareto-frontier');
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 const html2canvas = require('html2canvas');
 const { jsPDF } = require('jspdf');
 
@@ -245,18 +254,27 @@ const props = defineProps({
 // ----------------------------------------------------------------
 const data = ref(null);
 <<<<<<< HEAD
+<<<<<<< HEAD
 const dataPoints = ref([]);
 =======
 const datasetId = ref(null);
 >>>>>>> 0d89c68 (Added Popover, delete info table)
+=======
+const dataPoints = ref([]);
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 const paretoPoints = ref([]);
 const optimalXaxis = ref(null);
 const optimalYaxis = ref(null);
 const toolID = ref([]);
 const allToolID = ref([]);
+<<<<<<< HEAD
 // 
 const xValues = ref([]);
 const yValues = ref([]);
+=======
+const xAxis = ref([]);
+const yAxis = ref([]);
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 
 // Data for the table
 const quartileData = ref([]);
@@ -270,10 +288,13 @@ let annotationKmeans = [];
 const showShapesSquare = ref(false);
 const showAnnotationSquare = ref(false);
 
+<<<<<<< HEAD
 // Diagonal Quartiles
 const showShapesDiagonal = ref(false);
 
 
+=======
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 // Error messages
 const showMessageError = ref(false);
 const dismissCountDown = ref(0);
@@ -290,6 +311,7 @@ const viewDiagonal = ref(false);
 onMounted(async () => {
     const Plotly = require('plotly.js-dist');
 <<<<<<< HEAD
+<<<<<<< HEAD
     data.value = props.inline_data
 =======
     const response = await fetch('/raw_data_OEBD00200002UK0.json');
@@ -297,6 +319,9 @@ onMounted(async () => {
     datasetId.value = dataset.value._id
     data.value = dataset.value.datalink.inline_data
 >>>>>>> 0d89c68 (Added Popover, delete info table)
+=======
+    data.value = props.inline_data
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
     const visualization = data.value.visualization
 
 
@@ -521,6 +546,12 @@ onMounted(async () => {
 
 // ----------------------------------------------------------------
 // FUNCTIONS
+<<<<<<< HEAD
+=======
+// ----------------------------------------------------------------
+
+// ACTIONS FOR TABLE
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 // ----------------------------------------------------------------
 <<<<<<< HEAD
 
@@ -849,6 +880,7 @@ const classificationButtonText = computed(() => {
 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // Format Date String
 const formatDateString = (dateString) => {
     const date = new Date(dateString);
@@ -860,14 +892,19 @@ const formatDateString = (dateString) => {
 };
 >>>>>>> 33bba23 (Add classification text to dropdown)
 
+=======
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 // Error messages
 const countDownChanged = () => {
     if (dismissCountDown.value > 0) {
         dismissCountDown.value -= 1;
     }
 };
+<<<<<<< HEAD
 =======
 >>>>>>> 0d89c68 (Added Popover, delete info table)
+=======
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 
 // PARETO FRONTIER
 // ----------------------------------------------------------------
@@ -958,6 +995,7 @@ const toggleQuartilesVisibility = () => {
 };
 
 // Calculate square quartiles
+<<<<<<< HEAD
 const calculateQuartiles = (xValues, yValues, toolID) => {
 
     const cuartilesX = statistics.quantile(xValues, 0.5);
@@ -965,6 +1003,15 @@ const calculateQuartiles = (xValues, yValues, toolID) => {
 
     let better = data.value.visualization.optimization
     sortToolsForSquare(better, toolID, cuartilesX, cuartilesY, xValues, yValues)
+=======
+const calculateQuartiles = (xAxis, yAxis, toolID) => {
+
+    const cuartilesX = statistics.quantile(xAxis, 0.5);
+    const cuartilesY = statistics.quantile(yAxis, 0.5);
+
+    let better = data.value.visualization.optimization
+    sortToolsForSquare(better, toolID, cuartilesX, cuartilesY, xAxis, yAxis)
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 
     // Lines 
     const shapes = [
@@ -1004,7 +1051,11 @@ const calculateQuartiles = (xValues, yValues, toolID) => {
 };
 
 // Sort tools for Square Quartiles
+<<<<<<< HEAD
 const sortToolsForSquare = (better, visibleToolID, cuartilesX, cuartilesY, xValues, yValues) => {
+=======
+const sortToolsForSquare = (better, visibleToolID, cuartilesX, cuartilesY, xAxis, yAxis) => {
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
     quartileData.value = [];
     allToolID.value.forEach((tool) => { // Iterate over all tools
         const index = visibleToolID.indexOf(tool);
@@ -1645,10 +1696,14 @@ const downloadChart = async (format) => {
             const link = document.createElement('a');
             link.href = downloadImage;
 <<<<<<< HEAD
+<<<<<<< HEAD
             link.download = `benchmarking_chart_${props.datasetId}.${format}`;
 =======
             link.download = `benchmarking_chart_${datasetId.value}.${format}`;
 >>>>>>> 9d24c78 (Fix download on pdf and add download with table)
+=======
+            link.download = `benchmarking_chart_${props.datasetId}.${format}`;
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1659,10 +1714,14 @@ const downloadChart = async (format) => {
                     const link = document.createElement('a');
                     link.href = url;
 <<<<<<< HEAD
+<<<<<<< HEAD
                     link.download = `benchmarking_chart_${props.datasetId}.${format}`;
 =======
                     link.download = `benchmarking_chart_${datasetId.value}.${format}`;
 >>>>>>> 9d24c78 (Fix download on pdf and add download with table)
+=======
+                    link.download = `benchmarking_chart_${props.datasetId}.${format}`;
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
                     link.click();
                 })
                 .catch((error) => {
@@ -1677,10 +1736,14 @@ const downloadChart = async (format) => {
                 const link = document.createElement('a');
                 link.href = url;
 <<<<<<< HEAD
+<<<<<<< HEAD
                 link.download = `benchmarking_chart_${props.datasetId}.${format}`;
 =======
                 link.download = `benchmarking_chart_${datasetId.value}.${format}`;
 >>>>>>> 9d24c78 (Fix download on pdf and add download with table)
+=======
+                link.download = `benchmarking_chart_${props.datasetId}.${format}`;
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
                 link.click();
             })
             .catch((error) => {
@@ -1722,10 +1785,14 @@ const downloadChart = async (format) => {
 
         // Save the PDF
 <<<<<<< HEAD
+<<<<<<< HEAD
         pdf.save(`benchmarking_chart_${props.datasetId}.${format}`);
 =======
         pdf.save(`benchmarking_chart_${datasetId.value}.${format}`);
 >>>>>>> 9d24c78 (Fix download on pdf and add download with table)
+=======
+        pdf.save(`benchmarking_chart_${props.datasetId}.${format}`);
+>>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 
     } else if (format === 'json') {
         // Descargar como JSON
