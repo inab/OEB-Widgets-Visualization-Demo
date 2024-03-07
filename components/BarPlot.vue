@@ -692,16 +692,14 @@ async function downloadChart(format) {
       Plotly.relayout('barPlot', layout.value);
 
       // Get chart image as base64 data URI
-      const chartImageURI = await Plotly.toImage(document.getElementById('barPlot'), { format: 'png' });
-      const chartHeight = 150;
-      const chartWidth = 190;
+      const chartImageURI = await Plotly.toImage(document.getElementById('barPlot'), { format: 'png', width: 750, height: 600 });
 
-      pdf.addImage(chartImageURI, 'JPEG', 10, 10, chartWidth, chartHeight, null, 'FAST', 0, 0, { dpi: 600 });
+      pdf.addImage(chartImageURI, 'PNG', 10, 10);
 
       // Add table as text to the PDF
       pdf.autoTable({
         html: '#idDateTable',
-        startY: chartHeight + 20, // Start table below chart with 20mm margin
+        startY: 170, 
         theme: 'grid',
         tableWidth: 'auto',
         styles: {
@@ -789,7 +787,7 @@ async function downloadChart(format) {
       layout.value.images[0].opacity = 0.5;
       Plotly.relayout('barPlot', layout.value);
       const graphDiv = document.getElementById('barPlot')
-      Plotly.downloadImage(graphDiv, {format: 'svg', width: 800, height: 600, filename: `benchmarking_chart_${datasetId.value}.${format}`});
+      Plotly.downloadImage(graphDiv, {format: 'svg', width: 800, height: 600, filename: `benchmarking_chart_${datasetId.value}`});
       layout.value.images[0].opacity = 0;
       Plotly.relayout('barPlot', layout.value);
 
@@ -805,17 +803,6 @@ async function downloadChart(format) {
         width: toDownloadDiv.offsetWidth,
         height: toDownloadDiv.offsetHeight,
       });
-      const downloadImage = downloadCanvas.toDataURL(`image/${format}`);
-
-      const link = document.createElement('a');
-      link.href = downloadImage;
-      link.download = `benchmarking_chart_${datasetId.value}.${format}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      layout.value.images[0].opacity = 0;
-      Plotly.relayout('barPlot', layout.value);
     }
   } catch (error) {
     console.error('Error downloading chart:', error);
