@@ -36,7 +36,9 @@
 
     <b-row class="mt-4">
       <!-- Chart -->
-      <b-col cols="8">
+
+      <b-col cols="8" id="chartCapture">
+
         <div id="barPlot"></div>
         <br>
         <!-- ID AND DATE TABLE -->
@@ -55,10 +57,9 @@
       </b-col>
 
       <!-- Quartile Table -->
-      <b-col cols="4" v-if="sortOrder === 'sorted'"
-        :class="{ 'fade-in': sortOrder === 'sorted', 'fade-out': sortOrder === 'raw' }">
+      <b-col id="quartileCapture" cols="4" v-if="sortOrder === 'sorted'">
         <div class="table-container">
-          <table class="table table-bordered  quartile-table-container" id='quartileTable'>
+          <table :class="{ 'fade-in': sortOrder === 'sorted', 'fade-out': sortOrder === 'raw' }"class="table table-bordered  quartile-table-container" id='quartileTable'>
             <thead>
               <tr>
                 <th style="width: 60%;" class="table-secondary">Tool</th>
@@ -83,6 +84,7 @@
           </table>
         </div>
       </b-col>
+
     </b-row>
 
   </div>
@@ -120,6 +122,7 @@ const quartileDataArray = computed(() => {
 });
 
 const showAdditionalTable = ref(false);
+
 
 // ----------------------------------------------------------------
 // CREATE PLOT
@@ -699,7 +702,7 @@ async function downloadChart(format) {
       // Add table as text to the PDF
       pdf.autoTable({
         html: '#idDateTable',
-        startY: 170, 
+        startY: 170,
         theme: 'grid',
         tableWidth: 'auto',
         styles: {
@@ -787,22 +790,73 @@ async function downloadChart(format) {
       layout.value.images[0].opacity = 0.5;
       Plotly.relayout('barPlot', layout.value);
       const graphDiv = document.getElementById('barPlot')
-      Plotly.downloadImage(graphDiv, {format: 'svg', width: 800, height: 600, filename: `benchmarking_chart_${datasetId.value}`});
+      Plotly.downloadImage(graphDiv, { format: 'svg', width: 800, height: 600, filename: `benchmarking_chart_${datasetId.value}` });
       layout.value.images[0].opacity = 0;
       Plotly.relayout('barPlot', layout.value);
 
     } else {
-      //TODO
       const Plotly = require('plotly.js-dist');
       layout.value.images[0].opacity = 0.5;
       Plotly.relayout('barPlot', layout.value);
-      const toDownloadDiv = document.getElementById('todownload');
-      const downloadCanvas = await html2canvas(toDownloadDiv, {
+
+      const toDownloadChart = document.getElementById('chartCapture');
+      const downloadChart = await html2canvas(toDownloadChart, {
         scrollX: 0,
         scrollY: 0,
-        width: toDownloadDiv.offsetWidth,
-        height: toDownloadDiv.offsetHeight,
+        width: toDownloadChart.offsetWidth,
+        height: toDownloadChart.offsetHeight,
       });
+
+
+
+      if (showAdditionalTable.value) {
+
+        const element = document.getElementById('quartileCapture');
+        // Trigger download after 2 seconds (adjust the delay as needed)
+        setTimeout(async function () {
+          const downloadTable = await html2canvas(element, {
+            scrollX: 0,
+            scrollY: 0,
+            width: element.offsetWidth,
+            height: element.offsetHeight,
+          });
+         
+          const chartDownloadImage = downloadChart.toDataURL(`image/${format}`);
+          const tableDownloadImage = downloadTable.toDataURL(`image/${format}`);
+          const chartLink = document.createElement('a');
+          const tableLink = document.createElement('a');
+          chartLink.href = chartDownloadImage;
+          tableLink.href = tableDownloadImage;
+          chartLink.download = `benchmarking_chart__quartiles_chart_${datasetId.value}.${format}`;
+          tableLink.download = `benchmarking_chart__quartiles_table_${datasetId.value}.${format}`;
+          // Append links to the document
+          document.body.appendChild(chartLink);
+          document.body.appendChild(tableLink);
+
+          // Trigger the download
+          chartLink.click();
+          tableLink.click();
+
+          // Remove links from the document
+          document.body.removeChild(chartLink);
+          document.body.removeChild(tableLink);
+        }, 2000); // 2000 milliseconds = 2 seconds
+
+      } else {
+        const chartDownloadImage = downloadChart.toDataURL(`image/${format}`);
+        const chartLink = document.createElement('a');
+        chartLink.href = chartDownloadImage;
+        chartLink.download = `benchmarking_chart_${datasetId.value}.${format}`;
+        document.body.appendChild(chartLink); // Append link to the document
+        chartLink.click();
+        document.body.removeChild(chartLink); // Remove link after download
+
+      }
+
+
+      layout.value.images[0].opacity = 0;
+      Plotly.relayout('barPlot', layout.value);
+
     }
   } catch (error) {
     console.error('Error downloading chart:', error);
@@ -876,6 +930,8 @@ rect {
   width: 100%;
 }
 
+
+
 .quartile-table-container th {
   position: sticky;
   top: 0;
@@ -895,6 +951,7 @@ rect {
 
   100% {
     opacity: 1;
+    visibility: visible;
   }
 }
 
@@ -916,16 +973,4 @@ rect {
 .fade-out {
   animation: fadeOut 0.5s ease-in-out;
 }
-
-/* Ensure table headers are affected by animation 
-.fade-out table th,
-.fade-out table td {
-  opacity: 0;
-}
-*/
-/* Hide borders of table headers during fade-out 
-.fade-out table th {
-  border-color: transparent;
-}
-*/
 </style>
