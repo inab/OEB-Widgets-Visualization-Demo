@@ -13,8 +13,9 @@
                             <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
                                     method:</strong></b-dropdown-text>
                             <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
-                            <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item>
+                            <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item> 
                             <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
+                            <b-dropdown-item @click="toggleDiagonalQuartile"> Diagonal Quartiles </b-dropdown-item>
                         </b-dropdown>
 
                         <!-- Reset View / optimal view -->
@@ -128,8 +129,9 @@ const optimalXaxis = ref(null);
 const optimalYaxis = ref(null);
 const toolID = ref([]);
 const allToolID = ref([]);
-const xAxis = ref([]);
-const yAxis = ref([]);
+// 
+const xValues = ref([]);
+const yValues = ref([]);
 
 // Data for the table
 const quartileData = ref([]);
@@ -142,6 +144,10 @@ let annotationKmeans = [];
 // Square Quartiles
 const showShapesSquare = ref(false);
 const showAnnotationSquare = ref(false);
+
+// Diagonal Quartiles
+const showShapesDiagonal = ref(false);
+
 
 // Error messages
 const showMessageError = ref(false);
@@ -165,8 +171,8 @@ onMounted(async () => {
 
     // Data for the Pareto frontier and Quartile
     // ----------------------------------------------------------------
-    xAxis.value = data.value.challenge_participants.map((participant) => participant.metric_x);
-    yAxis.value = data.value.challenge_participants.map((participant) => participant.metric_y);
+    xValues.value = data.value.challenge_participants.map((participant) => participant.metric_x);
+    yValues.value = data.value.challenge_participants.map((participant) => participant.metric_y);
     toolID.value = data.value.challenge_participants.map((participant) => participant.tool_id);
     allToolID.value = data.value.challenge_participants.map((participant) => participant.tool_id);
 
@@ -467,7 +473,7 @@ const resetView = () => {
     const Plotly = require('plotly.js-dist');
     const layout = {
         xaxis: {
-            range: [0, Math.max(...xAxis.value) + 5000],
+            range: [0, Math.max(...xValues.value) + 5000],
             title: {
                 text: data.value.visualization.x_axis,
                 font: {
@@ -479,7 +485,7 @@ const resetView = () => {
             }
         },
         yaxis: {
-            range: [0, Math.max(...yAxis.value) + 0.05],
+            range: [0, Math.max(...yValues.value) + 0.05],
             title: {
                 text: data.value.visualization.y_axis,
                 font: {
@@ -638,19 +644,20 @@ const toggleQuartilesVisibility = () => {
     Plotly.update('scatter-plot', newTraces, layout, 1);
     Plotly.update('scatter-plot', { visible: visibleArray });
 
-    calculateQuartiles(xAxis.value, yAxis.value, toolID.value);
+    calculateQuartiles(xValues.value, yValues.value, toolID.value);
     optimalView();
 };
 
 // Calculate square quartiles
-const calculateQuartiles = (xAxis, yAxis, toolID) => {
+const calculateQuartiles = (xValues, yValues, toolID) => {
 
-    const cuartilesX = statistics.quantile(xAxis, 0.5);
-    const cuartilesY = statistics.quantile(yAxis, 0.5);
+    const cuartilesX = statistics.quantile(xValues, 0.5);
+    const cuartilesY = statistics.quantile(yValues, 0.5);
 
     let better = data.value.visualization.optimization
-    sortToolsForSquare(better, toolID, cuartilesX, cuartilesY, xAxis, yAxis)
+    sortToolsForSquare(better, toolID, cuartilesX, cuartilesY, xValues, yValues)
 
+    // Lines 
     const shapes = [
         {
             type: 'line',
@@ -688,12 +695,12 @@ const calculateQuartiles = (xAxis, yAxis, toolID) => {
 };
 
 // Sort tools for Square Quartiles
-const sortToolsForSquare = (better, visibleToolID, cuartilesX, cuartilesY, xAxis, yAxis) => {
+const sortToolsForSquare = (better, visibleToolID, cuartilesX, cuartilesY, xValues, yValues) => {
     quartileData.value = [];
     allToolID.value.forEach((tool) => { // Iterate over all tools
         const index = visibleToolID.indexOf(tool);
-        const x = index !== -1 ? xAxis[index] : null; // Get index and values x, y
-        const y = index !== -1 ? yAxis[index] : null; // Get index and values x, y
+        const x = index !== -1 ? xValues[index] : null; // Get index and values x, y
+        const y = index !== -1 ? yValues[index] : null; // Get index and values x, y
 
         let cuartil = 0;
         let label = '--';
@@ -752,6 +759,7 @@ const annotationSquareQuartile = (better) => {
 
     // Create Annotation
     let position = asignaPositionCuartil(better)
+    // Add label to the position (T, M, B)
     const newAnnotation = position.map(({ position, numCuartil }) => {
         let annotation = {};
         switch (position) {
@@ -864,6 +872,17 @@ const asignaPositionCuartil = (better) => {
 
     return positions
 };
+
+// ----------------------------------------------------------------
+// DIAGONAL QUARTILES
+// ----------------------------------------------------------------
+const toggleDiagonalQuartile = () => {
+    showShapesKmeans.value = false;
+    showShapesSquare.value = false;
+    showShapesDiagonal.value = true;
+    // calculateDiagonalQuartiles(xValues.value, yValues.value, dataPoints.value)
+}
+
 
 
 // ----------------------------------------------------------------
@@ -1010,7 +1029,6 @@ const assignGroupToDataPoints = (dataPoints, sortedResults) => {
 const isEqual = (point1, point2) => {
     return point1[0] === point2[0] && point1[1] === point2[1];
 }
-
 
 // Sorted Results K-means
 const orderResultKMeans = (sortedResults, better) => {
