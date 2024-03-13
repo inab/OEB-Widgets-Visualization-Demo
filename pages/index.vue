@@ -30,12 +30,15 @@
 <<<<<<< HEAD
           <ScatterPlot v-if="isScatterPlotType" :inline_data="inline_data" :datasetId="datasetId" />
           <BarPlot v-if="isBarPlotType" :jsonData="fetchedData" />
+<<<<<<< HEAD
 =======
           <ScatterPlot v-if="!loading" />
 >>>>>>> cf2dca4 (Add:  spinner to Scatter Plot)
 =======
           <ScatterPlot v-if="isScatterPlotType" :inline_data="inline_data" :datasetId="datasetId" />
 >>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
+=======
+>>>>>>> 38cf049 (Add Loader test)
         </transition>
       </b-col>
 
@@ -75,6 +78,7 @@ export default {
       isBarPlotType: null,
       isScatterPlotType: null,
 <<<<<<< HEAD
+<<<<<<< HEAD
       datasetId: null,
       titlePlot: null,
     }
@@ -107,6 +111,10 @@ export default {
 =======
       datasetId: null
 >>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
+=======
+      datasetId: null,
+      titlePlot: null,
+>>>>>>> 38cf049 (Add Loader test)
     }
   },
   async mounted() {
@@ -126,10 +134,14 @@ export default {
     if (this.fetchedData) {
       if (visualization && type === 'bar-plot') {
         this.isBarPlotType = true;
+        this.titlePlot = 'BAR PLOT'
       }else if(visualization && type === '2D-plot'){
         this.isScatterPlotType = true;
+        this.titlePlot = 'SCATTER PLOT'
       }
     }
+
+  
 
   },
 

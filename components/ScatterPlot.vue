@@ -22,10 +22,16 @@
                             <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
                                     method:</strong></b-dropdown-text>
                             <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
+<<<<<<< HEAD
                             <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
                             <b-dropdown-item @click="toggleDiagonalQuartile"> Diagonal Quartiles </b-dropdown-item>
                             <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item> 
 
+=======
+                            <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item> 
+                            <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
+                            <b-dropdown-item @click="toggleDiagonalQuartile"> Diagonal Quartiles </b-dropdown-item>
+>>>>>>> 38cf049 (Add Loader test)
                         </b-dropdown>
 
                         <!-- Reset View / optimal view -->
@@ -268,6 +274,7 @@ const optimalYaxis = ref(null);
 const toolID = ref([]);
 const allToolID = ref([]);
 <<<<<<< HEAD
+<<<<<<< HEAD
 // 
 const xValues = ref([]);
 const yValues = ref([]);
@@ -275,6 +282,11 @@ const yValues = ref([]);
 const xAxis = ref([]);
 const yAxis = ref([]);
 >>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
+=======
+// 
+const xValues = ref([]);
+const yValues = ref([]);
+>>>>>>> 38cf049 (Add Loader test)
 
 // Data for the table
 const quartileData = ref([]);
@@ -289,12 +301,18 @@ const showShapesSquare = ref(false);
 const showAnnotationSquare = ref(false);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 38cf049 (Add Loader test)
 // Diagonal Quartiles
 const showShapesDiagonal = ref(false);
 
 
+<<<<<<< HEAD
 =======
 >>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
+=======
+>>>>>>> 38cf049 (Add Loader test)
 // Error messages
 const showMessageError = ref(false);
 const dismissCountDown = ref(0);
@@ -780,7 +798,11 @@ const resetView = () => {
     const Plotly = require('plotly.js-dist');
     const layout = {
         xaxis: {
+<<<<<<< HEAD
             range: [0, Math.max(...xValues.value) + (Math.min(...xValues.value) / 3)],
+=======
+            range: [0, Math.max(...xValues.value) + 5000],
+>>>>>>> 38cf049 (Add Loader test)
             title: {
                 text: data.value.visualization.x_axis,
                 font: {
@@ -996,6 +1018,7 @@ const toggleQuartilesVisibility = () => {
 
 // Calculate square quartiles
 <<<<<<< HEAD
+<<<<<<< HEAD
 const calculateQuartiles = (xValues, yValues, toolID) => {
 
     const cuartilesX = statistics.quantile(xValues, 0.5);
@@ -1005,13 +1028,20 @@ const calculateQuartiles = (xValues, yValues, toolID) => {
     sortToolsForSquare(better, toolID, cuartilesX, cuartilesY, xValues, yValues)
 =======
 const calculateQuartiles = (xAxis, yAxis, toolID) => {
+=======
+const calculateQuartiles = (xValues, yValues, toolID) => {
+>>>>>>> 38cf049 (Add Loader test)
 
-    const cuartilesX = statistics.quantile(xAxis, 0.5);
-    const cuartilesY = statistics.quantile(yAxis, 0.5);
+    const cuartilesX = statistics.quantile(xValues, 0.5);
+    const cuartilesY = statistics.quantile(yValues, 0.5);
 
     let better = data.value.visualization.optimization
+<<<<<<< HEAD
     sortToolsForSquare(better, toolID, cuartilesX, cuartilesY, xAxis, yAxis)
 >>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
+=======
+    sortToolsForSquare(better, toolID, cuartilesX, cuartilesY, xValues, yValues)
+>>>>>>> 38cf049 (Add Loader test)
 
     // Lines 
     const shapes = [
@@ -1052,10 +1082,14 @@ const calculateQuartiles = (xAxis, yAxis, toolID) => {
 
 // Sort tools for Square Quartiles
 <<<<<<< HEAD
+<<<<<<< HEAD
 const sortToolsForSquare = (better, visibleToolID, cuartilesX, cuartilesY, xValues, yValues) => {
 =======
 const sortToolsForSquare = (better, visibleToolID, cuartilesX, cuartilesY, xAxis, yAxis) => {
 >>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
+=======
+const sortToolsForSquare = (better, visibleToolID, cuartilesX, cuartilesY, xValues, yValues) => {
+>>>>>>> 38cf049 (Add Loader test)
     quartileData.value = [];
     allToolID.value.forEach((tool) => { // Iterate over all tools
         const index = visibleToolID.indexOf(tool);
@@ -1237,6 +1271,7 @@ const asignaPositionCuartil = (better) => {
 // DIAGONAL QUARTILES
 // ----------------------------------------------------------------
 const toggleDiagonalQuartile = () => {
+<<<<<<< HEAD
     // Classification
     
     viewDiagonal.value = true;
@@ -1462,6 +1497,15 @@ const createTableDiagonal = (visibleTool) => {
     });
 };
 
+=======
+    showShapesKmeans.value = false;
+    showShapesSquare.value = false;
+    showShapesDiagonal.value = true;
+    // calculateDiagonalQuartiles(xValues.value, yValues.value, dataPoints.value)
+}
+
+
+>>>>>>> 38cf049 (Add Loader test)
 
 // ----------------------------------------------------------------
 // K-MEANS CLUSTERING
