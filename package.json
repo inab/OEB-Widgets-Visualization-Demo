@@ -16,6 +16,7 @@
     "core-js": "^3.25.3",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
     "lodash": "^4.17.21",
     "nuxt": "^2.15.8",
     "pareto-frontier": "^1.1.1",
