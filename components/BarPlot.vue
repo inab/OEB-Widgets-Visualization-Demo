@@ -1,130 +1,151 @@
 <template>
   <div>
+    <b-row>
+      <b-col cols="8">
+        <div class="butns">
+          <!-- Buttons -->
+          <b-button-group class="ml-auto">
+            <!-- Button Sort -->
+            <b-button squared variant="outline-secondary" v-if="sortOrder === 'raw'" @click="toggleSortOrder"
+              :disabled="loading">
+              Sort & Classify Data
+            </b-button>
+            <b-button squared variant="outline-secondary" v-else @click="toggleSortOrder" :disabled="loading">
+              Return To Raw Results
+            </b-button>
+            <!-- Button Optimal -->
+            <b-button squared variant="outline-secondary" v-if="optimal === 'no'" :disabled="loading"
+              @click="optimalView">
+              Optimal View
+            </b-button>
+            <b-button squared variant="outline-secondary" v-else :disabled="loading" @click="optimalView">
+              Reset View
+            </b-button>
+            <!-- Button Download -->
+            <b-dropdown variant="outline-secondary" right text="Download" :disabled="loading">
+              <b-dropdown-header id="dropdown-header-label">Select a format</b-dropdown-header>
+              <b-dropdown-item @click="downloadChart('png')">PNG</b-dropdown-item>
+              <b-dropdown-item @click="downloadChart('svg')">SVG (only plot)</b-dropdown-item>
+              <b-dropdown-divider></b-dropdown-divider>
+              <b-dropdown-item @click="downloadChart('pdf')">PDF</b-dropdown-item>
+            </b-dropdown>
+          </b-button-group>
+        </div>
+      </b-col>
+    </b-row>
 
-    <div class="butns">
-      <!-- Buttons -->
-      <b-button-group class="ml-auto">
-        <!-- Button Sort -->
-        <b-button variant="outline-secondary" v-if="sortOrder === 'raw'" @click="toggleSortOrder" :disabled="loading">
-          Sort & Classify Data
-        </b-button>
-        <b-button variant="outline-secondary" v-else @click="toggleSortOrder" :disabled="loading">
-          Return To Raw Results
-        </b-button>
-        <!-- Button Optimal -->
-        <b-button variant="outline-secondary" :disabled="loading">
-          Optimal View
-        </b-button>
-        <!-- Button Download -->
-        <b-dropdown variant="outline-secondary" right text="Download" :disabled="loading">
-          <b-dropdown-header id="dropdown-header-label">Select a format</b-dropdown-header>
-          <b-dropdown-item @click="downloadChart('png')">PNG</b-dropdown-item>
-          <b-dropdown-item @click="downloadChart('svg')">SVG (only plot)</b-dropdown-item>
-          <b-dropdown-divider></b-dropdown-divider>
-          <b-dropdown-item @click="downloadChart('pdf')">PDF</b-dropdown-item>
-        </b-dropdown>
-      </b-button-group>
-
-    </div>
-    <br>
-    <div id="todownload">
+    <b-row class="mt-4">
       <!-- Chart -->
-      <div id="barPlot" style="position: relative;">
-      </div>
-      <br>
-      <!-- ID AND DATE TABLE -->
-      <div v-if="datasetId && formattedDate">
-        <b-table-simple bordered small caption-top responsive id='idDateTable'>
-          <b-tbody>
-            <b-tr>
-              <b-th variant="secondary" class="text-center">Dataset ID</b-th>
-              <b-td class="text-center">{{ datasetId }}</b-td>
-              <b-th variant="secondary" class="text-center">Last Update</b-th>
-              <b-td class="text-center">{{ formattedDate }}</b-td>
-            </b-tr>
-          </b-tbody>
-        </b-table-simple>
-      </div>
 
+      <b-col cols="8" id="chartCapture">
 
-      <br>
+        <div id="barPlot"></div>
+        <br>
+        <!-- ID AND DATE TABLE -->
+        <div v-if="datasetId && formattedDate" class="tableid">
+          <table class=" table table-bordered rounded-3" id='idDateTable'>
+            <tbody>
+              <tr>
+                <th>Dataset ID</th>
+                <td>{{ datasetId }}</td>
+                <th>Last Update</th>
+                <td>{{ formattedDate }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </b-col>
+
       <!-- Quartile Table -->
-      <transition name="slide" mode="out-in">
-        <b-container v-if="sortOrder === 'sorted'">
-          <b-row>
-            <b-col>
-              <b-card title="Quartile Data" class="mt-3">
-                <div class="table-responsive">
-                  <table class="table table-bordered" id='quartileTable'>
-                    <thead>
-                      <tr>
-                        <th scope="col" class="table-secondary">Tool</th>
-                        <th scope="col" class="table-secondary">Quartile</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="(quartile, index) in quartileDataArray" :key="index">
-                        <td>{{ quartile.tool }}</td>
-                        <td :style="{ backgroundColor: quartile.quartile.bgColor }">{{ quartile.quartile.quartile }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </b-card>
-              <!-- Annotation -->
-              <div class="annotationfooter">
-                <p>* To calculate the quartiles, the values are first ordered from lowest to highest. Thus, the first
-                  quartile is the grouping of the minimum values, and the last quartile, the fourth, is the grouping of
-                  the
-                  maximum values.</p>
-              </div>
-            </b-col>
-          </b-row>
-        </b-container>
-      </transition>
-    </div>
+      <b-col id="quartileCapture" cols="4" v-if="sortOrder === 'sorted'">
+        <div class="table-container">
+          <table :class="{ 'fade-in': sortOrder === 'sorted', 'fade-out': sortOrder === 'raw' }"class="table table-bordered  quartile-table-container" id='quartileTable'>
+            <thead>
+              <tr>
+                <th style="width: 60%;" class="table-secondary">Tool</th>
+                <th style="width: 40%;" class="table-secondary">Quartile <font-awesome-icon id="extrainfoquartile"
+                    :icon="['fas', 'circle-info']"
+                    style="color: #ffffff;  float: right; margin-left: 5px;margin-top: 3px;" /></th>
+                <b-popover target="extrainfoquartile" triggers="hover" placement="bottom">
+                  <template #title><b>How to</b></template>
 
+                  By default, the highest values will be displayed in the first quartile.
+                  Inversely if it is specified.
+                </b-popover>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(quartile, index) in quartileDataArray" :key="index">
+                <td>{{ quartile.tool }}</td>
+                <td :style="{ backgroundColor: quartile.quartile.bgColor }">{{ quartile.quartile.quartile }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </b-col>
 
+    </b-row>
 
   </div>
 </template>
 
 <script setup>
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, ref, watch } from 'vue';
 import { computed } from 'vue';
-import { sortBy } from 'lodash';
-const { jsPDF } = require('jspdf');
+
+
 const html2canvas = require('html2canvas');
+const { jsPDF } = require('jspdf');
 
+import 'jspdf-autotable';
 
-const loading = ref(false); // Loading state
+// DATA RETRIEVE
+const props = defineProps(['jsonData'])
+
+const layout = ref(null)
+const loading = ref(false);
 const dataset = ref(null);
 const originalData = ref(null);
 const datasetId = ref(null);
 const datasetDate = ref(null);
+const datasetPolarity = ref(null);
 const formattedDate = ref(null);
 const sortOrder = ref('raw');
+const optimal = ref('no');
 const quartileData = ref({});
 const quartileDataArray = computed(() => {
   // Convert quartileData object into an array of objects
   const array = Object.entries(quartileData.value).map(([tool, quartile]) => ({ tool, quartile }));
-  // Sort the array alphabetically by the 'tool' property
+  // Sort the array alphabetically
   return array.sort((a, b) => a.tool.localeCompare(b.tool));
 });
 
+const showAdditionalTable = ref(false);
 
+
+// ----------------------------------------------------------------
+// CREATE PLOT
+// ----------------------------------------------------------------
 onBeforeMount(async () => {
   const Plotly = require('plotly.js-dist');
   loading.value = true;
-  const response = await fetch('/OEBD00700000NI.json');
-  dataset.value = await response.json();
+
+  // Dataset values
+  dataset.value = await props.jsonData
+  const data = dataset.value.datalink.inline_data;
+
+  const visualization = data.visualization
   datasetId.value = dataset.value._id;
   datasetDate.value = dataset.value.dates.modification;
-  formattedDate.value = formatDateString(datasetDate.value); // Format
-  const data = dataset.value.datalink.inline_data;
+  datasetPolarity.value = dataset.value.datalink.inline_data.visualization.better;
+  formattedDate.value = formatDateString(datasetDate.value); // Format the date
+
   // Save original data for future use
   originalData.value = data;
 
+  // Calculate maximum value for y-axis range
+  const maxMetricValue = Math.max(...data.challenge_participants.map(entry => entry.metric_value));
 
   const x = data.challenge_participants.map(entry => entry.tool_id);
   const y = data.challenge_participants.map(() => 0);
@@ -142,35 +163,51 @@ onBeforeMount(async () => {
   };
 
 
-  const layout = {
+  layout.value = {
     title: '',
+    autosize: true,
+    height: 800,
     xaxis: {
       title: {
-        text: '<b>TOOLS</b>',
+        text: 'TOOLS',
         standoff: 30,
+        font: {
+          family: 'Arial, sans-serif',
+          size: 18,
+          color: 'black',
+          weight: 'bold',
+        },
       },
       fixedrange: true,
       tickangle: -45,
-      tickfont: { size: 10 },
+      tickfont: { size: 12 },
     },
     yaxis: {
-      title: '<b>' + data.visualization.metric + '</b>',
+      title: {
+        text: visualization.metric,
+        font: {
+          family: 'Arial, sans-serif',
+          size: 18,
+          color: 'black',
+          weight: 'bold',
+        },
+      },
       fixedrange: true,
-      range: [0, Math.max(...data.challenge_participants.map(entry => entry.metric_value)) + 1],
+      range: [0, maxMetricValue + 0.1],
     },
-    margin: { t: 90, l: 100 },
+    margin: { l: 50, r: 50, t: 100, b: 110, pad: 4 },
     images: [
       {
         source: "/2018.OpenEBench.logo.Manual_page2.png",
         xref: "paper",
         yref: "paper",
-        x: -0.02,
-        y: 1.3,
-        sizex: 0.2,
-        sizey: 0.2,
-        xanchor: "left",
+        x: 0.95,
+        y: 1.17,
+        sizex: 0.1,
+        sizey: 0.3,
+        xanchor: "right",
         yanchor: "top",
-        opacity: 0.5,
+        opacity: 0,
       }
     ],
   };
@@ -182,12 +219,12 @@ onBeforeMount(async () => {
   }
 
   // Create the bar chart with the initial trace and layout
-  Plotly.newPlot('barPlot', [initialTrace], layout, config);
+  Plotly.newPlot('barPlot', [initialTrace], layout.value, config);
 
 
   const myPlot = document.getElementById('barPlot');
 
-
+  // Change the color of tghe bars on hover.
   myPlot.on('plotly_hover', function (event) {
     const pn = event.points[0].pointNumber;
     const hoverColors = Array(x.length).fill('#0b579f'); // Reset colors
@@ -204,7 +241,7 @@ onBeforeMount(async () => {
     Plotly.restyle('barPlot', update);
   });
 
-  // Simulate fetching data (replace this with your actual data fetching logic)
+  // Simulate fetching data with animation
   setTimeout(() => {
     const actualTrace = {
       y: data.challenge_participants.map(entry => entry.metric_value),
@@ -223,6 +260,8 @@ onBeforeMount(async () => {
 
   }, 500);
 
+
+  // Set up of the cursor inside the plot. Set default.
   // Select all SVG rect elements with class 'cursor-pointer' within the chart container
   const chartContainer = document.getElementById('barPlot');
   // Add a mouseover event listener to the chart container
@@ -235,10 +274,14 @@ onBeforeMount(async () => {
       event.target.style.cursor = 'default';
     }
   });
+
 })
 
-
-
+// ----------------------------------------------------------------
+// FUNCTIONS
+// ----------------------------------------------------------------
+// ANIMATIONS
+// ----------------------------------------------------------------
 
 function animateBars(data) {
   const Plotly = require('plotly.js-dist');
@@ -267,13 +310,109 @@ function animateBars(data) {
   });
 }
 
+function animateLine(shapeIndex) {
+  const Plotly = require('plotly.js-dist');
+  const layout = document.getElementById('barPlot').layout;
+  const shape = layout.shapes[shapeIndex];
+  const yTarget = 1; // End at the top
+
+  let y = 0; // Start from the bottom
+
+  const animateStep = () => {
+    if (y <= yTarget) {
+      // Update the y-coordinate of the line shape
+      shape.y1 = y;
+
+      // Update the layout with the modified shape
+      Plotly.relayout('barPlot', { shapes: layout.shapes });
+
+      // Increment y and trigger the next animation step
+      y += 0.03; // Adjust the speed as needed
+      requestAnimationFrame(animateStep);
+    }
+  };
+
+  // Start the animation
+  animateStep();
+}
 
 
+// BUTTON OPTIMAL VIEW
+// ----------------------------------------------------------------
+async function optimalView() {
+  try {
+    if (optimal.value === 'no') {
+      const Plotly = require('plotly.js-dist');
+
+      // Fetch current data and calculate metric range
+      let data;
+      if (sortOrder.value !== 'raw') {
+        // If data has been sorted, use the sorted data
+        data = originalData.value.challenge_participants.slice().sort((a, b) => b.metric_value - a.metric_value);
+      } else {
+        // Otherwise, use the original data
+        data = originalData.value.challenge_participants;
+      }
+
+      const metricValues = data.map(entry => entry.metric_value);
+      const minMetric = Math.min(...metricValues);
+      const maxMetric = Math.max(...metricValues);
+
+      // Calculate range between min and max metrics
+      const metricRange = maxMetric - minMetric;
+
+      // Calculate new y-axis range with a slight buffer based on metric range
+      const minY = Math.max(0, minMetric - metricRange * 0.2);
+      const maxY = maxMetric + metricRange * 0.08;
+
+      // Update plot layout with new y-axis range
+      Plotly.relayout('barPlot', { 'yaxis.range': [minY, maxY] });
+
+      // Animate the bars
+      animateBars(data);
+
+      // Update optimal value to indicate optimal view is active
+      optimal.value = 'yes';
+    } else {
+      const Plotly = require('plotly.js-dist');
+      let data;
+      if (sortOrder.value !== 'raw') {
+        // If data has been sorted, use the sorted data
+        data = originalData.value.challenge_participants.slice().sort((a, b) => b.metric_value - a.metric_value);
+      } else {
+        // Otherwise, use the original data
+        data = originalData.value.challenge_participants;
+      }
+      // Return to original data view by restoring the original y-axis range
+      const originalLayout = {
+        'yaxis.range': [0, Math.max(...data.map(entry => entry.metric_value)) + 0.1]
+      };
+
+      // Update plot layout with original y-axis range
+      Plotly.relayout('barPlot', originalLayout);
+
+      // Animate the bars after adjusting the y-axis range
+      animateBars(data);
+
+      // Update optimal value to indicate original view is active
+      optimal.value = 'no';
+    }
+  } catch (error) {
+    console.error('Error in optimalView:', error);
+  }
+}
+
+
+
+// BUTTON SORT & CLASSIFY
+// ----------------------------------------------------------------
 async function toggleSortOrder() {
   try {
     if (sortOrder.value === 'raw') {
+      showAdditionalTable.value = !showAdditionalTable.value;
       // Sort logic (descending order)
-      const sortedData = sortBy(originalData.value.challenge_participants, entry => entry.metric_value).reverse();
+      const sortedData = originalData.value.challenge_participants.slice().sort((a, b) => b.metric_value - a.metric_value);
+
       updateChart(sortedData);
       // Call the animateBars function after updating the chart
       animateBars(sortedData);
@@ -307,6 +446,9 @@ async function toggleSortOrder() {
   }
 }
 
+
+// PLOT LAYOUT
+// ----------------------------------------------------------------
 function addLinesBetweenQuartiles() {
   const Plotly = require('plotly.js-dist');
   const layout = document.getElementById('barPlot').layout;
@@ -351,31 +493,6 @@ function addLinesBetweenQuartiles() {
   Plotly.relayout('barPlot', { shapes: layout.shapes });
 }
 
-function animateLine(shapeIndex) {
-  const Plotly = require('plotly.js-dist');
-  const layout = document.getElementById('barPlot').layout;
-  const shape = layout.shapes[shapeIndex];
-  const yTarget = 1.1; // End at the top
-
-  let y = 0; // Start from the bottom
-
-  const animateStep = () => {
-    if (y <= yTarget) {
-      // Update the y-coordinate of the line shape
-      shape.y1 = y;
-
-      // Update the layout with the modified shape
-      Plotly.relayout('barPlot', { shapes: layout.shapes });
-
-      // Increment y and trigger the next animation step
-      y += 0.025; // Adjust the speed as needed
-      requestAnimationFrame(animateStep);
-    }
-  };
-
-  // Start the animation
-  animateStep();
-}
 
 function removeLinesBetweenQuartiles() {
   const Plotly = require('plotly.js-dist');
@@ -387,6 +504,8 @@ function removeLinesBetweenQuartiles() {
   // Update the plotly layout
   Plotly.update('barPlot', {}, layout);
 }
+
+
 
 function addQuartileLabels() {
   const Plotly = require('plotly.js-dist');
@@ -407,6 +526,9 @@ function addQuartileLabels() {
 
   // Identify quartiles with only one tool
   uniqueQuartiles = Object.keys(quartileCounts).filter(quartile => quartileCounts[quartile] === 1);
+
+  // Set to keep track of added label positions
+  const addedLabelPositions = new Set();
 
   // Iterate over the tools to add quartile labels
   tools.forEach(tool => {
@@ -430,30 +552,31 @@ function addQuartileLabels() {
       labelPosition = sum / positions.length;
     }
 
-    // Add a label annotation to the layout
-    const annotation = {
-      x: labelPosition,
-      y: 1.1, // Top of the chart
-      xref: 'x',
-      yref: 'paper',
-      text: `${quartile}Q`,
-      showarrow: false,
-      font: {
-        size: 16,
-        color: 'rgba(11, 87, 159, 0.5)'
-      }
-    };
+    // Add label only if it hasn't been added at this position
+    if (!addedLabelPositions.has(labelPosition)) {
+      // Add a label annotation to the layout
+      layout.annotations.push({
+        x: labelPosition,
+        y: 1.03, // Top of the chart
+        xref: 'x',
+        yref: 'paper',
+        text: `Q${quartile}`,
+        showarrow: false,
+        font: {
+          size: 16,
+          color: 'rgba(11, 87, 159, 0.5)'
+        }
+      });
 
-    // Log the font of the annotation
-    console.log('Font of label:', annotation.font);
-
-    // Add the annotation to the layout
-    layout.annotations.push(annotation);
+      // Add the label position to the set of added positions
+      addedLabelPositions.add(labelPosition);
+    }
   });
 
   // Update the layout with the new annotations
   Plotly.relayout('barPlot', { annotations: layout.annotations });
 }
+
 
 
 function clearQuartileLabels() {
@@ -466,6 +589,8 @@ function clearQuartileLabels() {
   // Update the layout with the cleared annotations
   Plotly.relayout('barPlot', { annotations: layout.annotations });
 }
+
+
 
 function updateChart(data) {
   const Plotly = require('plotly.js-dist');
@@ -480,7 +605,8 @@ function updateChart(data) {
   Plotly.update('barPlot', update);
 }
 
-
+// CALCULATE QUARTILES
+// ----------------------------------------------------------------
 // Function to calculate medians in odd or even arrays.
 function calculateMedians(inputArray) {
   const sortedArray = [...inputArray].sort((a, b) => a - b);
@@ -522,85 +648,215 @@ function calculateQuartiles(data) {
   // Create an object to store metric positions
   const metricPositions = {};
 
-  // Assign positions to metrics based on quartiles
+  // Assign positions to metrics based on quartiles with the polarity of the dataset
+
+
   data.forEach(entry => {
     const metricValue = entry.metric_value;
 
-    if (metricValue <= q1) {
-      metricPositions[entry.tool_id] = { quartile: 1, bgColor: 'rgb(237, 248, 233)' };
-    } else if (metricValue > q1 && metricValue <= q2) {
-      metricPositions[entry.tool_id] = { quartile: 2, bgColor: 'rgb(186, 228, 179)' };
-    } else if (metricValue > q2 && metricValue < q3) {
-      metricPositions[entry.tool_id] = { quartile: 3, bgColor: 'rgb(116, 196, 118)' };
-    } else if (metricValue >= q3) {
-      metricPositions[entry.tool_id] = { quartile: 4, bgColor: 'rgb(35, 139, 69)' };
+    if (datasetPolarity.value === "minimum") {
+      if (metricValue <= q1) {
+        metricPositions[entry.tool_id] = { quartile: 1, bgColor: 'rgb(237, 248, 233)' };
+      } else if (metricValue > q1 && metricValue <= q2) {
+        metricPositions[entry.tool_id] = { quartile: 2, bgColor: 'rgb(186, 228, 179)' };
+      } else if (metricValue > q2 && metricValue < q3) {
+        metricPositions[entry.tool_id] = { quartile: 3, bgColor: 'rgb(116, 196, 118)' };
+      } else if (metricValue >= q3) {
+        metricPositions[entry.tool_id] = { quartile: 4, bgColor: 'rgb(35, 139, 69)' };
+      }
+    } else {
+      if (metricValue <= q1) {
+        metricPositions[entry.tool_id] = { quartile: 4, bgColor: 'rgb(35, 139, 69)' };
+      } else if (metricValue > q1 && metricValue <= q2) {
+        metricPositions[entry.tool_id] = { quartile: 3, bgColor: 'rgb(116, 196, 118)' };
+      } else if (metricValue > q2 && metricValue < q3) {
+        metricPositions[entry.tool_id] = { quartile: 2, bgColor: 'rgb(186, 228, 179)' };
+      } else if (metricValue >= q3) {
+        metricPositions[entry.tool_id] = { quartile: 1, bgColor: 'rgb(237, 248, 233)' };
+      }
     }
+
+
   });
 
   return metricPositions;
 }
 
 
-
+// DOWNLOAD BUTTON
+// ----------------------------------------------------------------
 async function downloadChart(format) {
+  console.log('Downloading chart as', format);
   try {
-    const htmlToCanvas = async (element, options) => {
-      return await html2canvas(element, options);
-    };
-
-    const canvasToImage = (canvas, format) => {
-      if (format === 'png') {
-        return canvas.toDataURL('image/png');
-      } else if (format === 'pdf') {
-        return canvas.toDataURL('image/pdf');
-      }
-    };
-
-    const downloadPDF = (content) => {
-      try {
-        const doc = new jsPDF();
-        doc.addImage(content, 'PNG', 10, 10);
-        doc.save(`benchmarking_chart_${datasetId.value}.${format}`);
-      } catch (error) {
-        console.error('Error generating PDF:', error);
-      }
-    };
-
-    const toDownloadDiv = document.getElementById('todownload');
-    const divBounds = toDownloadDiv.getBoundingClientRect();
-
-    const downloadCanvas = await htmlToCanvas(toDownloadDiv, {
-      scrollX: 0,
-      scrollY: 0,
-      width: divBounds.width,
-      height: divBounds.height,
-    });
-    const downloadImage = canvasToImage(downloadCanvas, format);
-
     if (format === 'pdf') {
-      await downloadPDF(downloadCanvas);
-    } else if (format === 'svg') {
       const Plotly = require('plotly.js-dist');
-      const chart = document.getElementById('barPlot');
-      const options = { format };
+      const pdf = new jsPDF();
+      layout.value.images[0].opacity = 0.5;
+      Plotly.relayout('barPlot', layout.value);
 
-      Plotly.toImage(chart, options)
-        .then((url) => {
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `benchmarking_chart_${datasetId.value}.${format}`;
-          link.click();
-        })
-        .catch((error) => {
-          console.error(`Error al descargar el gráfico como ${format}`, error);
+      // Get chart image as base64 data URI
+      const chartImageURI = await Plotly.toImage(document.getElementById('barPlot'), { format: 'png', width: 750, height: 600 });
+
+      pdf.addImage(chartImageURI, 'PNG', 10, 10);
+
+      // Add table as text to the PDF
+      pdf.autoTable({
+        html: '#idDateTable',
+        startY: 170,
+        theme: 'grid',
+        tableWidth: 'auto',
+        styles: {
+          cellPadding: 1,
+          fontSize: 8,
+          overflow: 'linebreak',
+          halign: 'center'
+        },
+        margin: { top: 10 },
+        willDrawCell: function (data) {
+          if (data.row.section === 'body') {
+            if (data.column.dataKey === 0 || data.column.dataKey === 2) {
+              pdf.setFillColor(108, 117, 125)
+              pdf.setTextColor(250, 250, 250)
+              pdf.setFont("helvetica", "bold");
+            }
+
+          }
+        },
+      });
+
+
+      // Add additional table if it is visible
+      if (showAdditionalTable.value) {
+        const columns = ["Tool", "Quartile"]; // Define your columns
+
+        // Extract data from quartileDataArray
+        const rows = quartileDataArray.value.map(q => [q.tool, q.quartile.quartile]);
+
+        // Generate autoTable with custom styles
+        pdf.autoTable({
+          head: [columns],
+          body: rows,
+          startY: pdf.autoTable.previous.finalY + 10,
+          theme: 'grid',
+          tableWidth: 'auto',
+          styles: {
+            cellPadding: 1,
+            fontSize: 8,
+            overflow: 'linebreak',
+            halign: 'center'
+          },
+          headStyles: {
+            fillColor: [108, 117, 125]
+          },
+          willDrawCell: function (data) {
+
+            if (data.row.section === 'body') {
+              // Check if the column header matches 'Quartile'
+              if (data.column.dataKey === 1) {
+                // Access the raw value of the cell
+                const quartileValue = data.cell.raw;
+                if (quartileValue === 1) {
+                  pdf.setFillColor(237, 248, 233)
+                } else if (quartileValue === 2) {
+                  pdf.setFillColor(186, 228, 179)
+                } else if (quartileValue === 3) {
+                  pdf.setFillColor(116, 196, 118)
+                } else if (quartileValue === 4) {
+                  pdf.setFillColor(35, 139, 69)
+                }
+              }
+
+            }
+          },
         });
+      }
+
+      if (showAdditionalTable.value) {
+        // Save the PDF
+        pdf.save(`benchmarking_chart__quartiles_${datasetId.value}.${format}`);
+        layout.value.images[0].opacity = 0;
+        Plotly.relayout('barPlot', layout.value);
+      } else {
+        // Save the PDF
+        pdf.save(`benchmarking_chart_${datasetId.value}.${format}`);
+        layout.value.images[0].opacity = 0;
+        Plotly.relayout('barPlot', layout.value);
+      }
+
+
+    } else if (format === 'svg') {
+
+      const Plotly = require('plotly.js-dist');
+      layout.value.images[0].opacity = 0.5;
+      Plotly.relayout('barPlot', layout.value);
+      const graphDiv = document.getElementById('barPlot')
+      Plotly.downloadImage(graphDiv, { format: 'svg', width: 800, height: 600, filename: `benchmarking_chart_${datasetId.value}` });
+      layout.value.images[0].opacity = 0;
+      Plotly.relayout('barPlot', layout.value);
+
     } else {
-      const link = document.createElement('a');
-      link.href = downloadImage;
-      link.download = `benchmarking_chart_${datasetId.value}.${format}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const Plotly = require('plotly.js-dist');
+      layout.value.images[0].opacity = 0.5;
+      Plotly.relayout('barPlot', layout.value);
+
+      const toDownloadChart = document.getElementById('chartCapture');
+      const downloadChart = await html2canvas(toDownloadChart, {
+        scrollX: 0,
+        scrollY: 0,
+        width: toDownloadChart.offsetWidth,
+        height: toDownloadChart.offsetHeight,
+      });
+
+
+
+      if (showAdditionalTable.value) {
+
+        const element = document.getElementById('quartileCapture');
+        // Trigger download after 2 seconds (adjust the delay as needed)
+        setTimeout(async function () {
+          const downloadTable = await html2canvas(element, {
+            scrollX: 0,
+            scrollY: 0,
+            width: element.offsetWidth,
+            height: element.offsetHeight,
+          });
+         
+          const chartDownloadImage = downloadChart.toDataURL(`image/${format}`);
+          const tableDownloadImage = downloadTable.toDataURL(`image/${format}`);
+          const chartLink = document.createElement('a');
+          const tableLink = document.createElement('a');
+          chartLink.href = chartDownloadImage;
+          tableLink.href = tableDownloadImage;
+          chartLink.download = `benchmarking_chart__quartiles_chart_${datasetId.value}.${format}`;
+          tableLink.download = `benchmarking_chart__quartiles_table_${datasetId.value}.${format}`;
+          // Append links to the document
+          document.body.appendChild(chartLink);
+          document.body.appendChild(tableLink);
+
+          // Trigger the download
+          chartLink.click();
+          tableLink.click();
+
+          // Remove links from the document
+          document.body.removeChild(chartLink);
+          document.body.removeChild(tableLink);
+        }, 2000); // 2000 milliseconds = 2 seconds
+
+      } else {
+        const chartDownloadImage = downloadChart.toDataURL(`image/${format}`);
+        const chartLink = document.createElement('a');
+        chartLink.href = chartDownloadImage;
+        chartLink.download = `benchmarking_chart_${datasetId.value}.${format}`;
+        document.body.appendChild(chartLink); // Append link to the document
+        chartLink.click();
+        document.body.removeChild(chartLink); // Remove link after download
+
+      }
+
+
+      layout.value.images[0].opacity = 0;
+      Plotly.relayout('barPlot', layout.value);
+
     }
   } catch (error) {
     console.error('Error downloading chart:', error);
@@ -609,7 +865,8 @@ async function downloadChart(format) {
 
 
 
-
+// FORMAT DATE
+// ----------------------------------------------------------------
 function formatDateString(dateString) {
   const date = new Date(dateString);
   return date.toLocaleString("en-US", {
@@ -620,57 +877,100 @@ function formatDateString(dateString) {
 }
 
 </script>
+
 <style scoped>
-b-th,
-b-td {
-  border-radius: 10px;
-}
-
 .butns {
-
   position: absolute;
-  top: 20px;
-  right: 10px;
+  top: 14px;
   margin-top: 10px;
-  z-index: 9999
+  z-index: 1
 }
 
 .plot-container {
   position: relative;
   margin-bottom: 20px;
-  /* Adjust as needed */
 }
 
-.slide-enter-active,
-.slide-leave-active {
-  transition: transform 0.5s ease;
-}
-
-.slide-enter,
-.slide-leave-to {
-  transform: translateY(100%);
-}
-
-.table {
-  width: 100%;
-}
 
 .table-secondary {
   background-color: #6c757d;
   color: white;
 }
 
-.annotationfooter {
-  background-color: #f0f0f0;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 5px;
-  color: #666;
-  font-size: 12px;
+.tableid {
+  font-family: arial, sans-serif;
+  width: 100%;
+  margin: 15px;
   text-align: center;
+}
+
+
+.tableid th {
+  background-color: #6c757d;
+  color: white;
+
+}
+
+.tableid td {
+  background-color: white;
+  color: black;
 }
 
 rect {
   cursor: default !important;
+}
+
+.table-container {
+  max-height: 710px;
+  overflow-y: auto;
+  margin-top: 100px;
+}
+
+.quartile-table-container {
+  width: 100%;
+}
+
+
+
+.quartile-table-container th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.quartile-table-container td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Apply animation when table enters and leaves */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.fade-out {
+  animation: fadeOut 0.5s ease-in-out;
 }
 </style>

@@ -1,0 +1,123 @@
+{
+    "_id": "OEBD004000000D",
+    "_schema": "https://www.elixir-europe.org/excelerate/WP2/json-schemas/1.0/Dataset",
+    "challenge_ids": [
+        "OEBX0040000000"
+    ],
+    "community_ids": [
+        "OEBC004"
+    ],
+    "datalink": {
+        "inline_data": {
+            "challenge_participants": [
+                {
+                    "metric_value": 0.932,
+                    "tool_id": "group12"
+                },
+                {
+                    "metric_value": 0.9279,
+                    "tool_id": "group02"
+                },
+                {
+                    "metric_value": 0.9013,
+                    "tool_id": "group06"
+                },
+                {
+                    "metric_value": 0.9338,
+                    "tool_id": "group04"
+                },
+                {
+                    "metric_value": 0.936,
+                    "tool_id": "group01"
+                },
+                {
+                    "metric_value": 0.922,
+                    "tool_id": "group07"
+                },
+                {
+                    "metric_value": 0.9047,
+                    "tool_id": "group09"
+                },
+                {
+                    "metric_value": 0.9111,
+                    "tool_id": "group08"
+                },
+                {
+                    "metric_value": 0.9257,
+                    "tool_id": "group11"
+                },
+                {
+                    "metric_value": 0.9215,
+                    "tool_id": "group03"
+                },
+                {
+                    "metric_value": 0.9031,
+                    "tool_id": "group05"
+                },
+                {
+                    "metric_value": 0.8641,
+                    "tool_id": "group10"
+                }
+            ],
+            "visualization": {
+                "metric": "F-Measure",
+                "type": "bar-plot"
+            }
+        },
+        "schema_url": "https://raw.githubusercontent.com/inab/OpenEBench_scientific_visualizer/master/benchmarking_data_model/aggregation_dataset_json_schema.json"
+    },
+    "dataset_contact_ids": [
+        "Daniel.Lopez"
+    ],
+    "dates": {
+        "creation": "2019-04-05T00:00:00Z",
+        "modification": "2019-04-05T14:00:00Z"
+    },
+    "depends_on": {
+        "rel_dataset_ids": [
+            {
+                "dataset_id": "OEBD0040000001"
+            },
+            {
+                "dataset_id": "OEBD0040000002"
+            },
+            {
+                "dataset_id": "OEBD0040000003"
+            },
+            {
+                "dataset_id": "OEBD0040000004"
+            },
+            {
+                "dataset_id": "OEBD0040000005"
+            },
+            {
+                "dataset_id": "OEBD0040000006"
+            },
+            {
+                "dataset_id": "OEBD0040000007"
+            },
+            {
+                "dataset_id": "OEBD0040000008"
+            },
+            {
+                "dataset_id": "OEBD0040000009"
+            },
+            {
+                "dataset_id": "OEBD004000000A"
+            },
+            {
+                "dataset_id": "OEBD004000000B"
+            },
+            {
+                "dataset_id": "OEBD004000000C"
+            }
+        ],
+        "tool_id": "OEBT004000000C"
+    },
+    "description": "Summary dataset with information about SNPs and INDELs Prediction Benchmark - CIBERER (e.g. input/output datasets, participants, metrics...) ",
+    "name": "Summary dataset for Germinal SNPs and INDELs Prediction Benchmark - CIBERER",
+    "type": "aggregation",
+    "version": "unknown",
+    "visibility": "public",
+    "orig_id": "CIBERER-NGS:2019_Aggregation"
+}
