@@ -14,7 +14,7 @@
 
     <b-row>
       <b-col cols="12" sm="10" md="12">
-        <h3>Component Visualization &#8594; SCATTER PLOT</h3>
+        <h3>Component Visualization &#8594; {{titlePlot}}</h3>
       </b-col>
     </b-row>
 
@@ -27,6 +27,7 @@
       <b-col cols="12" sm="10" md="12">
         <transition name="fade">
           <ScatterPlot v-if="isScatterPlotType" :inline_data="inline_data" :datasetId="datasetId" />
+          <BarPlot v-if="isBarPlotType" :jsonData="fetchedData" />
         </transition>
       </b-col>
 
@@ -61,7 +62,8 @@ export default {
       inline_data: null,
       isBarPlotType: null,
       isScatterPlotType: null,
-      datasetId: null
+      datasetId: null,
+      titlePlot: null,
     }
   },
   async mounted() {
@@ -81,10 +83,14 @@ export default {
     if (this.fetchedData) {
       if (visualization && type === 'bar-plot') {
         this.isBarPlotType = true;
+        this.titlePlot = 'BAR PLOT'
       }else if(visualization && type === '2D-plot'){
         this.isScatterPlotType = true;
+        this.titlePlot = 'SCATTER PLOT'
       }
     }
+
+  
 
   },
 
