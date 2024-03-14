@@ -80,6 +80,7 @@ export default {
     let visualization = this.fetchedData.datalink.inline_data.visualization
     let type = this.fetchedData.datalink.inline_data.visualization.type
 
+    // Test Loader
     if (this.fetchedData) {
       if (visualization && type === 'bar-plot') {
         this.isBarPlotType = true;
@@ -89,9 +90,6 @@ export default {
         this.titlePlot = 'SCATTER PLOT'
       }
     }
-
-  
-
   },
 
 }
