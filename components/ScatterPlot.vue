@@ -1109,6 +1109,8 @@ const sortByKey = (array, key) => {
 const downloadChart = async (format) => {
     const Plotly = require('plotly.js-dist');
     const chart = document.getElementById('scatter-plot');
+    chart.layout.images[0].opacity = 0.5;
+    Plotly.relayout('scatter-plot', chart.layout);
 
     if (format === 'png') {
         if (viewSquare.value || viewKmeans.value) {
@@ -1199,6 +1201,9 @@ const downloadChart = async (format) => {
     } else {
         console.error('Error downloading chart:', error);
     }
+
+    chart.layout.images[0].opacity = 0;
+    Plotly.relayout('scatter-plot', chart.layout);
 };
 
 // Image Position
@@ -1241,7 +1246,7 @@ function getImagePosition(optimization) {
         yref: "paper",
         xanchor: "right",
         yanchor: "bottom",
-        "opacity": 0.5,
+        "opacity": 0,
     }
 
     ImagePositions.push(imagesPosition)
