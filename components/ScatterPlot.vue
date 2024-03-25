@@ -158,6 +158,8 @@ const viewApplied = ref(false);
 // Views by Classification
 const viewKmeans = ref(false);
 const viewSquare = ref(false);
+const viewDiagonal = ref(false);
+
 
 
 onMounted(async () => {
@@ -464,6 +466,24 @@ const updatePlotOnSelection = (traceIndex) => {
         optimalView()
     }
 
+    // Diagonal Quartiles
+    if (viewDiagonal.value === true){
+        const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
+        const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
+
+        // Create a list of visible tools with their hiding status
+        const visibleTools = toolID.value.map((tool, index) => ({
+            name: tool,
+            hidden: dataPoints.value[index].hidden
+        })).filter(tool => !tool.hidden);
+
+        // List of visible tools
+        const visibleToolNames = visibleTools.map(tool => tool.name);
+        // Update data with visible tools
+        getDiagonalQuartile(updatedXCoordinates.value, updatedYCoordinates.value);
+        optimalView()
+    }
+
     Plotly.update('scatter-plot', newTraces, {}, 1);
 }
 
@@ -550,6 +570,8 @@ const classificationButtonText = computed(() => {
         return 'K-Means Clustering';
     } else if (viewSquare.value) {
         return 'Square Quartiles';
+    } else if (viewDiagonal.value){
+        return 'Diagonal Quartiles';
     } else {
         return 'Classification'
     }
@@ -581,6 +603,7 @@ const noClassification = () => {
     quartileData.value = [];
     viewKmeans.value = false;
     viewSquare.value = false;
+    viewDiagonal.value = false;
     showShapesKmeans.value = false;
     showShapesSquare.value = false;
     showAnnotationSquare.value = false;
@@ -621,6 +644,7 @@ const toggleQuartilesVisibility = () => {
     // Reset visibilities. Hide the Kmeans and Show the Square
     showShapesKmeans.value = false;
     viewKmeans.value = false;
+    viewDiagonal.value = false;
     viewSquare.value = true;
     showShapesSquare.value = true;
     showAnnotationSquare.value = true;
@@ -877,12 +901,208 @@ const asignaPositionCuartil = (better) => {
 // DIAGONAL QUARTILES
 // ----------------------------------------------------------------
 const toggleDiagonalQuartile = () => {
+    // Classification
+    viewSquare.value = false;
+    viewKmeans.value = false;
+    viewDiagonal.value = true;
+    // 
     showShapesKmeans.value = false;
     showShapesSquare.value = false;
     showShapesDiagonal.value = true;
+    
+    console.log('Toggle Diagonal')
     // calculateDiagonalQuartiles(xValues.value, yValues.value, dataPoints.value)
+    getDiagonalQuartile(xValues.value, yValues.value)
 }
 
+
+// Diagonal Quartile
+const getDiagonalQuartile = (x_values, y_values) =>{
+
+    let tools_not_hidden = x_values.map((x, i) => [x, y_values[i]]);
+
+    let normalizedValues = normalizeData(x_values, y_values);
+    let [x_norm, y_norm] = [normalizedValues[0], normalizedValues[1]];
+
+    let max_x = Math.max.apply(null, x_values);
+    let max_y = Math.max.apply(null, y_values);
+    let better = data.value.visualization.optimization
+
+
+    // # compute the scores for each of the tool. based on their distance to the x and y axis
+    let scores = []
+    let scores_coords = {}; //this object will store the scores and the coordinates
+    for (let i = 0; i < x_norm.length; i++) {
+  
+      if (better == "bottom-right"){
+        scores.push(x_norm[i] + (1 - y_norm[i]));
+        scores_coords[x_norm[i] + (1 - y_norm[i])] =  [x_values[i], y_values[i]];
+        //append the score to the data array
+        tools_not_hidden[i]['score'] = x_norm[i] + (1 - y_norm[i]);
+      } 
+      else if (better == "top-right"){
+        scores.push(x_norm[i] + y_norm[i]);
+        scores_coords[x_norm[i] + y_norm[i]] = [x_values[i], y_values[i]];
+        //append the score to the data array
+        tools_not_hidden[i]['score'] = x_norm[i] + y_norm[i];
+
+      }else if (better == "top-left"){
+        scores.push(1 -x_norm[i] + y_norm[i]);
+        scores_coords[(1 -x_norm[i]) + y_norm[i]] = [x_values[i], y_values[i]];
+        //append the score to the data array
+        tools_not_hidden[i]['score'] = (1 -x_norm[i]) + y_norm[i];
+      }
+    };
+
+    scores.sort(function(a, b){return b-a});
+
+    let first_quartile  = statistics.quantile(scores, 0.25);
+    let second_quartile = statistics.quantile(scores, 0.5);
+    let third_quartile  = statistics.quantile(scores, 0.75);
+
+    let coords = [getDiagonalline(scores, scores_coords, first_quartile,better, max_x, max_y),
+                    getDiagonalline(scores, scores_coords, second_quartile,better, max_x, max_y),
+                    getDiagonalline(scores, scores_coords, third_quartile,better, max_x, max_y)]
+
+    // Create shapes
+    const shapes = [];
+    for (let i = 0; i < coords.length; i++) {
+        let [x_coords, y_coords] = [coords[i][0], coords[i][1]];
+        const shape = {
+            type: 'line',
+            x0: x_coords[0],
+            y0: y_coords[0],
+            x1: x_coords[1],
+            y1: y_coords[1],
+            line: {
+                color: '#C0D4E8',
+                width: 2,
+                dash: 'dash'
+            }
+        };
+
+        shapes.push(shape);
+    }
+
+    // Create Annotations
+
+    // Diagonal Q. Table
+
+    const layout = {
+        shapes: showShapesDiagonal.value ? shapes : [],
+    };
+
+    const Plotly = require('plotly.js-dist');
+    Plotly.relayout('scatter-plot', layout);
+}
+
+// Get coordinates for line
+const getDiagonalline = (scores, scores_coords, quartile, better, max_x, max_y) =>{
+    let target;
+    for(let i = 0; i < scores.length; i++){
+        if(scores[i] <= quartile){
+            target = [[scores_coords[scores[i - 1]][0], scores_coords[scores[i - 1]][1]],
+                    [scores_coords[scores[i]][0], scores_coords[scores[i]][1]]];
+          break;
+        }
+    }
+
+    let half_point = [(target[0][0] + target[1][0]) /2, (target[0][1] + target[1][1]) / 2]
+
+    // # draw the line depending on which is the optimal corner
+    let x_coords;
+    let y_coords;
+    if (better == "bottom-right"){
+         x_coords = [half_point[0] - 2*max_x, half_point[0] + 2*max_x];
+         y_coords = [half_point[1] - 2*max_y, half_point[1] + 2*max_y];
+    } else if (better == "top-right"){
+         x_coords = [half_point[0] + 2*max_x, half_point[0] - 2*max_x];
+         y_coords = [half_point[1] - 2*max_y, half_point[1] + 2*max_y];   
+    } else if (better == "top-left"){
+       x_coords = [half_point[0] + 2*max_x, half_point[0] - 2*max_x];
+       y_coords = [half_point[1] + 2*max_y, half_point[1] - 2*max_y];   
+    };
+  
+    return [x_coords, y_coords];
+
+}
+
+// Normalize data
+const normalizeData = (xValues, yValues) => {
+    let maxX = Math.max.apply(null, xValues);
+    let maxY = Math.max.apply(null, yValues);
+
+    let xNorm = xValues.map(function(e) {  
+    return e / maxX;
+    });
+
+    let yNorm = yValues.map(function(e) {  
+    return e / maxY;
+    });
+
+    return [xNorm, yNorm];
+}
+
+
+
+
+
+// 
+const calculateDiagonalQuartiles = (xValues, yValues, toolID) => {
+    // Calculate quartiles along the diagonal
+    const diagonalValues = xValues.map((x, i) => x + yValues[i]);
+    const diagonalQuartile = statistics.quantile(diagonalValues, 0.5);
+    let better = data.value.visualization.optimization
+
+    // Call sort function with diagonal quartile
+    sortToolsForDiagonal(better, dataPoints.value, diagonalQuartile, xValues, yValues);
+
+    // Lines
+    const shapes = [
+        {
+            type: 'line',
+            x0: 100000,
+            y0: 0,
+            x1: diagonalQuartile,
+            y1: Math.max(yValues) + 10,
+            line: {
+                color: '#C0D4E8',
+                width: 2,
+                dash: 'dash'
+            }
+        },
+    ];
+
+    // Add Quartiles
+    const layout = {
+        shapes: showShapesDiagonal.value ? shapes : [],
+    };
+    const Plotly = require('plotly.js-dist');
+    Plotly.relayout('scatter-plot', layout);
+};
+
+const sortToolsForDiagonal = (better, visibleToolID, diagonalQuartile, xValues, yValues) => {
+    quartileData.value = [];
+    allToolID.value.forEach((tool) => { // Iterate over all tools
+        const index = visibleToolID.indexOf(tool);
+        const x = index !== -1 ? xValues[index] : null; // Get index and values x, y
+        const y = index !== -1 ? yValues[index] : null; // Get index and values x, y
+
+        let quartile = 0;
+        let label = '--';
+
+        if (index !== -1) { // If the tool is present in visibleToolID
+            if (x + y >= diagonalQuartile) {
+                quartile = 1;
+                label = 'T';
+            } else {
+                quartile = 2;
+                label = 'B';
+            }
+        }
+        quartileData.value.push({ tool_id: tool, quartile: quartile, label: label });
+    });
+};
 
 
 // ----------------------------------------------------------------
@@ -897,6 +1117,7 @@ const toggleKmeansVisibility = () => {
     showShapesSquare.value = false;
     showAnnotationSquare.value = false;
     viewSquare.value = false;
+    viewDiagonal.value = false;
     showShapesKmeans.value = true;
     viewKmeans.value = true;
 
@@ -1100,7 +1321,7 @@ const downloadChart = async (format) => {
     Plotly.relayout('scatter-plot', chart.layout);
 
     if (format === 'png') {
-        if (viewSquare.value || viewKmeans.value) {
+        if (viewSquare.value || viewKmeans.value || viewDiagonal.value) {
             const toDownloadDiv = document.getElementById('todownload');
             const downloadCanvas = await html2canvas(toDownloadDiv, {
                 scrollX: 0,
@@ -1155,7 +1376,7 @@ const downloadChart = async (format) => {
 
         pdf.addImage(chartImageURI, 'PNG', 10, 15, chartWidth, chartHeight, null, 'FAST', 0, null, 'center');
 
-        if (viewSquare.value || viewKmeans.value) {
+        if (viewSquare.value || viewKmeans.value || viewDiagonal.value) {
             const table = document.getElementById('benchmarkingTable');
             const downloadCanvas = await html2canvas(table, {
                 scrollX: 0,
