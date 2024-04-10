@@ -111,6 +111,7 @@
                                 <tr>
                                     <th class="toolHeader">Participants</th>
                                     <th>{{ viewKmeans ? 'Clusters' : 'Quartile' }} <font-awesome-icon id="extrainfoquartile"
+<<<<<<< HEAD
                                         :icon="['fas', 'circle-info']" class="info-icon" v-if="viewSquare" />
                                     </th>
                                     <b-popover target="extrainfoquartile" triggers="hover" placement="bottom" v-if="viewSquare">
@@ -177,6 +178,8 @@
                                 <tr>
                                     <th class="toolHeader">Tool</th>
                                     <th>Quartile <font-awesome-icon id="extrainfoquartile"
+=======
+>>>>>>> 831deb3 (change Square Quartile labels)
                                         :icon="['fas', 'circle-info']" class="info-icon" v-if="viewSquare" />
                                     </th>
                                     <b-popover target="extrainfoquartile" triggers="hover" placement="bottom" v-if="viewSquare">
@@ -1181,10 +1184,17 @@ const annotationSquareQuartile = (better) => {
                 annotation = {
                     xref: 'paper',
                     yref: 'paper',
+<<<<<<< HEAD
                     x: 0.01,
                     xanchor: 'left',
                     y: 1,
                     yanchor: 'top',
+=======
+                    x: 0.12,
+                    xanchor: 'right',
+                    y: 0.97,
+                    yanchor: 'bottom',
+>>>>>>> 831deb3 (change Square Quartile labels)
                     text: numCuartil,
                     showarrow: false,
                     font: {
@@ -1197,10 +1207,17 @@ const annotationSquareQuartile = (better) => {
                 annotation = {
                     xref: 'paper',
                     yref: 'paper',
+<<<<<<< HEAD
                     x: 0.91,
                     xanchor: 'left',
                     y: 0.05,
                     yanchor: 'bottom',
+=======
+                    x: 0.90,
+                    xanchor: 'left',
+                    y: 0.05,
+                    yanchor: 'top',
+>>>>>>> 831deb3 (change Square Quartile labels)
                     text: numCuartil,
                     showarrow: false,
                     font: {
@@ -1213,9 +1230,13 @@ const annotationSquareQuartile = (better) => {
                 annotation = {
                     xref: 'paper',
                     yref: 'paper',
-                    x: 0.01,
+                    x: 0.00,
                     xanchor: 'left',
+<<<<<<< HEAD
                     y: 0.10,
+=======
+                    y: 0.05,
+>>>>>>> 831deb3 (change Square Quartile labels)
                     yanchor: 'top',
                     text: numCuartil,
                     showarrow: false,
@@ -1231,7 +1252,11 @@ const annotationSquareQuartile = (better) => {
                     yref: 'paper',
                     x: 0.90,
                     xanchor: 'left',
+<<<<<<< HEAD
                     y: 0.98,
+=======
+                    y: 1.03,
+>>>>>>> 831deb3 (change Square Quartile labels)
                     yanchor: 'top',
                     text: numCuartil,
                     showarrow: false,
@@ -1521,9 +1546,10 @@ const createTableDiagonal = (visibleTool) => {
 =======
 =======
     // Classification
+    
+    viewDiagonal.value = true;
     viewSquare.value = false;
     viewKmeans.value = false;
-    viewDiagonal.value = true;
     // 
 >>>>>>> 179efde (Create  view for diagonal quartiles)
     showShapesKmeans.value = false;
@@ -1531,8 +1557,8 @@ const createTableDiagonal = (visibleTool) => {
     showShapesDiagonal.value = true;
     
     console.log('Toggle Diagonal')
-    // calculateDiagonalQuartiles(xValues.value, yValues.value, dataPoints.value)
     getDiagonalQuartile(xValues.value, yValues.value)
+    optimalView()
 }
 
 
@@ -1587,6 +1613,7 @@ const getDiagonalQuartile = (x_values, y_values) =>{
                     getDiagonalline(scores, scores_coords, second_quartile,better, max_x, max_y),
                     getDiagonalline(scores, scores_coords, third_quartile,better, max_x, max_y)]
 
+
     // Create shapes
     const shapes = [];
     for (let i = 0; i < coords.length; i++) {
@@ -1607,12 +1634,15 @@ const getDiagonalQuartile = (x_values, y_values) =>{
         shapes.push(shape);
     }
 
-    // Create Annotations
+    // Get Annotations
+    let annotationDiagonal = asigneQuartileDiagonal(tools_not_hidden, first_quartile, second_quartile, third_quartile)
+
 
     // Diagonal Q. Table
 
     const layout = {
         shapes: showShapesDiagonal.value ? shapes : [],
+        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationDiagonal),
     };
 
     const Plotly = require('plotly.js-dist');
@@ -1626,7 +1656,7 @@ const getDiagonalline = (scores, scores_coords, quartile, better, max_x, max_y) 
         if(scores[i] <= quartile){
             target = [[scores_coords[scores[i - 1]][0], scores_coords[scores[i - 1]][1]],
                     [scores_coords[scores[i]][0], scores_coords[scores[i]][1]]];
-          break;
+            break;
         }
     }
 
@@ -1666,66 +1696,93 @@ const normalizeData = (xValues, yValues) => {
     return [xNorm, yNorm];
 }
 
+// Asigne the classification by Diagonal Quartile
+const asigneQuartileDiagonal = (dataTools, first_quartile, second_quartile, third_quartile) => {
+    
+    let poly = [[],[],[],[]];
+    dataTools.forEach(element => {
+        
+        if (element.score <= first_quartile) {
+            element.quartile = 1;
+            poly[0].push([element[0], element[1]]);
+        } else if (element.score <= second_quartile) {
+            element.quartile = 2;
+            poly[1].push([element[0], element[1]]);
+        } else if (element.score <= third_quartile) {
+            element.quartile = 3;
+            poly[2].push([element[0], element[1]]);
+        } else {
+            element.quartile = 4;
+            poly[3].push([element[0], element[1]]);
+        }
 
 
+    });
+
+    let quartileNum = []
+    dataTools.forEach(element => {
+        quartileNum.push(element.quartile)
+    })
+    // 
+    createTableDiagonal(dataTools, quartileNum)
 
 
-// 
-const calculateDiagonalQuartiles = (xValues, yValues, toolID) => {
-    // Calculate quartiles along the diagonal
-    const diagonalValues = xValues.map((x, i) => x + yValues[i]);
-    const diagonalQuartile = statistics.quantile(diagonalValues, 0.5);
-    let better = data.value.visualization.optimization
-
-    // Call sort function with diagonal quartile
-    sortToolsForDiagonal(better, dataPoints.value, diagonalQuartile, xValues, yValues);
-
-    // Lines
-    const shapes = [
-        {
-            type: 'line',
-            x0: 100000,
-            y0: 0,
-            x1: diagonalQuartile,
-            y1: Math.max(yValues) + 10,
-            line: {
-                color: '#C0D4E8',
-                width: 2,
-                dash: 'dash'
-            }
-        },
-    ];
-
-    // Add Quartiles
-    const layout = {
-        shapes: showShapesDiagonal.value ? shapes : [],
-    };
-    const Plotly = require('plotly.js-dist');
-    Plotly.relayout('scatter-plot', layout);
-};
-
-const sortToolsForDiagonal = (better, visibleToolID, diagonalQuartile, xValues, yValues) => {
-    quartileData.value = [];
-    allToolID.value.forEach((tool) => { // Iterate over all tools
-        const index = visibleToolID.indexOf(tool);
-        const x = index !== -1 ? xValues[index] : null; // Get index and values x, y
-        const y = index !== -1 ? yValues[index] : null; // Get index and values x, y
-
-        let quartile = 0;
-        let label = '--';
-
-        if (index !== -1) { // If the tool is present in visibleToolID
-            if (x + y >= diagonalQuartile) {
-                quartile = 1;
-                label = 'T';
-            } else {
-                quartile = 2;
-                label = 'B';
+    let i = 4;
+    console.log(poly)
+    let annotationDiagonal = []
+    poly.forEach(function(group) {
+  
+        let center = (getCentroid(group))
+        const centroidX = center[0];
+        const centroidY = center[1];
+        
+        let annotationD = {
+            xref: 'x',
+            yref: 'y',
+            x: centroidX,
+            xanchor: 'right',
+            y: centroidY,
+            yanchor: 'bottom',
+            text: i,
+            showarrow: false,
+            font: {
+                size: 30,
+                color: '#5A88B5'
             }
         }
-        quartileData.value.push({ tool_id: tool, quartile: quartile, label: label });
+        annotationDiagonal.push(annotationD)
+        i--;
     });
-};
+    return annotationDiagonal
+
+}
+
+// Get centroide by annotation
+const getCentroid = (coord) =>{
+    var center = coord.reduce(function (x,y) {
+        return [x[0] + y[0]/coord.length, x[1] + y[1]/coord.length] 
+    }, [0,0])
+    return center;
+}
+
+// Create Table
+const createTableDiagonal = (visibleTool, numQuartile) =>{
+    quartileData.value = [];
+
+    allToolID.value.forEach((tool) => { // Iterate over all tools
+        const index = visibleTool.indexOf(tool);
+
+        let cuartil = 0;
+        let label = '--';
+        // console.log(numQuartile)
+
+
+        // }
+        quartileData.value.push({ tool_id: tool, cuartil: cuartil, label: label });
+
+    })
+}
+
 
 >>>>>>> 179efde (Create  view for diagonal quartiles)
 
