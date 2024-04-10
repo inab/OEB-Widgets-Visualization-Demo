@@ -1,0 +1,93 @@
+{
+  "_id": "OEBD00700001PC",
+  "name": "Summary dataset for challenge: HEK293_siControl_R2.all.hg38. Metrics: Percent_FP_TPM:50nt - Pearson_r:intersection:50nt",
+  "description": "Summary dataset that aggregates all results from participants in challenge: HEK293_siControl_R2.all.hg38. Metrics: Percent_FP_TPM:50nt - Pearson_r:intersection:50nt",
+  "type": "aggregation",
+  "orig_id": "APAeval:absQuant_2021:HEK293_siControl_R2.all.hg38:Aggregation:Percent_FP_TPM:50nt_vs_Pearson_r:intersection:50nt",
+  "community_ids": [
+    "OEBC007"
+  ],
+  "datalink": {
+    "inline_data": {
+      "challenge_participants": [
+        {
+          "tool_id": "APAtrap",
+          "metric_x": 64.02993871682017,
+          "stderr_x": 0,
+          "metric_y": 0.13378716694849996,
+          "stderr_y": 0
+        },
+        {
+          "tool_id": "PAQR",
+          "metric_x": 21.791298207325674,
+          "stderr_x": 0,
+          "metric_y": 0.6718326182683838,
+          "stderr_y": 0
+        },
+        {
+          "tool_id": "QAPA",
+          "metric_x": 18.137246158922157,
+          "stderr_x": 0,
+          "metric_y": 0.6245567069571887,
+          "stderr_y": 0
+        }
+      ],
+      "visualization": {
+        "optimization": "top-left",
+        "type": "2D-plot",
+        "x_axis": "Percent_FP_TPM:50nt",
+        "y_axis": "Pearson_r:intersection:50nt"
+      },
+      "labels": [
+        {
+          "label": "APAtrap",
+          "dataset_orig_id": "APAeval:absQuant_2021:HEK293_siControl_R2.all.hg38:APAtrap_P"
+        },
+        {
+          "label": "PAQR",
+          "dataset_orig_id": "APAeval:absQuant_2021:HEK293_siControl_R2.all.hg38:PAQR_P"
+        },
+        {
+          "label": "QAPA",
+          "dataset_orig_id": "APAeval:absQuant_2021:HEK293_siControl_R2.all.hg38:QAPA_P"
+        }
+      ]
+    }
+  },
+  "challenge_ids": [
+    "OEBX007000002C"
+  ],
+  "dataset_contact_ids": [
+    "Christina.J.Herrmann",
+    "Mihaela.Zavolan"
+  ],
+  "dates": {
+    "creation": "2023-05-26T20:26:29Z",
+    "modification": "2023-05-27T19:18:32Z",
+    "public": null
+  },
+  "depends_on": {
+    "metrics_id": "OEBM007000000Y",
+    "tool_id": "OEBT007000000B",
+    "rel_dataset_ids": [
+      {
+        "dataset_id": "OEBD0070000181"
+      },
+      {
+        "dataset_id": "OEBD00700003ZX"
+      },
+      {
+        "dataset_id": "OEBD00700004Q8"
+      },
+      {
+        "dataset_id": "OEBD0070000186"
+      },
+      {
+        "dataset_id": "OEBD0070000402"
+      },
+      {
+        "dataset_id": "OEBD00700004QD"
+      }
+    ]
+  }
+}
