@@ -1636,9 +1636,10 @@ const getDiagonalQuartile = (x_values, y_values) =>{
 
     // Get Annotations
     let annotationDiagonal = asigneQuartileDiagonal(tools_not_hidden, first_quartile, second_quartile, third_quartile)
-
-
+    
     // Diagonal Q. Table
+    createTableDiagonal(tools_not_hidden)
+
 
     const layout = {
         shapes: showShapesDiagonal.value ? shapes : [],
@@ -1703,32 +1704,21 @@ const asigneQuartileDiagonal = (dataTools, first_quartile, second_quartile, thir
     dataTools.forEach(element => {
         
         if (element.score <= first_quartile) {
-            element.quartile = 1;
+            element.quartile = 4;
             poly[0].push([element[0], element[1]]);
         } else if (element.score <= second_quartile) {
-            element.quartile = 2;
+            element.quartile = 3;
             poly[1].push([element[0], element[1]]);
         } else if (element.score <= third_quartile) {
-            element.quartile = 3;
+            element.quartile = 2;
             poly[2].push([element[0], element[1]]);
         } else {
-            element.quartile = 4;
+            element.quartile = 1;
             poly[3].push([element[0], element[1]]);
         }
-
-
     });
 
-    let quartileNum = []
-    dataTools.forEach(element => {
-        quartileNum.push(element.quartile)
-    })
-    // 
-    createTableDiagonal(dataTools, quartileNum)
-
-
     let i = 4;
-    console.log(poly)
     let annotationDiagonal = []
     poly.forEach(function(group) {
   
@@ -1766,23 +1756,24 @@ const getCentroid = (coord) =>{
 }
 
 // Create Table
-const createTableDiagonal = (visibleTool, numQuartile) =>{
+const createTableDiagonal = (visibleTool) => {
     quartileData.value = [];
 
-    allToolID.value.forEach((tool) => { // Iterate over all tools
-        const index = visibleTool.indexOf(tool);
+    allToolID.value.forEach((tool) => {
+        const toolName = tool;
+        const visibleToolInfo = visibleTool.find(item => item[0] === xValues.value[allToolID.value.indexOf(tool)]);
 
-        let cuartil = 0;
+        let quartile = 0;
         let label = '--';
-        // console.log(numQuartile)
 
+        if (visibleToolInfo) {
+            quartile = visibleToolInfo.quartile;
+            label = quartile.toString();
+        }
 
-        // }
-        quartileData.value.push({ tool_id: tool, cuartil: cuartil, label: label });
-
-    })
-}
-
+        quartileData.value.push({ tool_id: toolName, cuartil: quartile, label: label });
+    });
+};
 
 >>>>>>> 179efde (Create  view for diagonal quartiles)
 
