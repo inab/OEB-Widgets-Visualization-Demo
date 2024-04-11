@@ -600,6 +600,7 @@ const toggleTraceVisibility = (traceIndex) => {
     if (isVisible === undefined) {
         isVisible = true
     }
+<<<<<<< HEAD
 
     // Count the number of currently visible traces
     let visibleCount = 0;
@@ -620,6 +621,8 @@ const toggleTraceVisibility = (traceIndex) => {
 >>>>>>> 9f0c89a (Fix: trace view in legend)
     const isVisible = plotlyData[traceIndex].visible;
 >>>>>>> 671690b (Add: Tool column linked to the chart legend)
+=======
+>>>>>>> 6e9c3df (Fix bug the legend and table Diagonal Quartile)
 
     // Count the number of currently visible traces
     let visibleCount = 0;
@@ -782,6 +785,7 @@ const updatePlotOnSelection = (traceIndex) => {
         const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
         // Create a list of visible tools with their hiding status
         const visibleTools = toolID.value.map((tool, index) => ({
@@ -792,6 +796,8 @@ const updatePlotOnSelection = (traceIndex) => {
         // List of visible tools
         const visibleToolNames = visibleTools.map(tool => tool.name);
 >>>>>>> 179efde (Create  view for diagonal quartiles)
+=======
+>>>>>>> 6e9c3df (Fix bug the legend and table Diagonal Quartile)
         // Update data with visible tools
         getDiagonalQuartile(updatedXCoordinates.value, updatedYCoordinates.value);
         optimalView()
@@ -1328,6 +1334,7 @@ const toggleDiagonalQuartile = () => {
     showShapesSquare.value = false;
     showShapesDiagonal.value = true;
     
+<<<<<<< HEAD
     getDiagonalQuartile(xValues.value, yValues.value)
     optimalView()
 }
@@ -1557,6 +1564,8 @@ const createTableDiagonal = (visibleTool) => {
     showShapesDiagonal.value = true;
     
     console.log('Toggle Diagonal')
+=======
+>>>>>>> 6e9c3df (Fix bug the legend and table Diagonal Quartile)
     getDiagonalQuartile(xValues.value, yValues.value)
     optimalView()
 }
