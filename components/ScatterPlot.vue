@@ -258,7 +258,7 @@ onMounted(async () => {
                 text: visualization.x_axis,
                 font: {
                     family: 'Arial, sans-serif',
-                    size: 14,
+                    size: 16,
                     color: 'black',
                     weight: 'bold',
                 },
@@ -269,7 +269,7 @@ onMounted(async () => {
                 text: visualization.y_axis,
                 font: {
                     family: 'Arial, sans-serif',
-                    size: 14,
+                    size: 16,
                     color: 'black',
                     weight: 'bold',
                 },
@@ -283,7 +283,7 @@ onMounted(async () => {
             xref: 'paper',
             yref: 'paper',
             font: {
-                size: 14,
+                size: 16,
             }
         },
         // plot_bgcolor: '#F8F9F9',
@@ -355,7 +355,10 @@ const toggleTraceVisibility = (traceIndex) => {
     const plotlyLayout = scatterPlotElement.layout;
 
     // Check the visibility state of the trace
-    const isVisible = plotlyData[traceIndex].visible;
+    let isVisible = plotlyData[traceIndex].visible;
+    if (isVisible === undefined) {
+        isVisible = true
+    }
 
     // Count the number of currently visible traces
     let visibleCount = 0;
@@ -470,14 +473,6 @@ const updatePlotOnSelection = (traceIndex) => {
         const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
         const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
 
-        // Create a list of visible tools with their hiding status
-        const visibleTools = toolID.value.map((tool, index) => ({
-            name: tool,
-            hidden: dataPoints.value[index].hidden
-        })).filter(tool => !tool.hidden);
-
-        // List of visible tools
-        const visibleToolNames = visibleTools.map(tool => tool.name);
         // Update data with visible tools
         getDiagonalQuartile(updatedXCoordinates.value, updatedYCoordinates.value);
         optimalView()
@@ -497,7 +492,7 @@ const resetView = () => {
                 text: data.value.visualization.x_axis,
                 font: {
                     family: 'Arial, sans-serif',
-                    size: 14,
+                    size: 16,
                     color: 'black',
                     weight: 'bold',
                 },
@@ -509,7 +504,7 @@ const resetView = () => {
                 text: data.value.visualization.y_axis,
                 font: {
                     family: 'Arial, sans-serif',
-                    size: 14,
+                    size: 16,
                     color: 'black',
                     weight: 'bold',
                 },
@@ -529,7 +524,7 @@ const optimalView = () => {
                 text: data.value.visualization.x_axis,
                 font: {
                     family: 'Arial, sans-serif',
-                    size: 14,
+                    size: 16,
                     color: 'black',
                     weight: 'bold',
                 },
@@ -541,7 +536,7 @@ const optimalView = () => {
                 text: data.value.visualization.y_axis,
                 font: {
                     family: 'Arial, sans-serif',
-                    size: 14,
+                    size: 16,
                     color: 'black',
                     weight: 'bold',
                 },
@@ -910,7 +905,6 @@ const toggleDiagonalQuartile = () => {
     showShapesSquare.value = false;
     showShapesDiagonal.value = true;
     
-    console.log('Toggle Diagonal')
     getDiagonalQuartile(xValues.value, yValues.value)
     optimalView()
 }
