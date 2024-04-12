@@ -238,11 +238,17 @@ onMounted(async () => {
                 type: 'data',
                 array: [participant.stderr_x],
                 visible: true,
+                color: '#C8CBCE',
+                width: 2,
+                
             },
             error_y: {
                 type: 'data',
                 array: [participant.stderr_y],
                 visible: true,
+                color: '#C8CBCE',
+                width: 2,
+
             },
         };
         traces.push(trace);
@@ -785,8 +791,8 @@ const annotationSquareQuartile = (better) => {
                 annotation = {
                     xref: 'paper',
                     yref: 'paper',
-                    x: 0.12,
-                    xanchor: 'right',
+                    x: 0.0,
+                    xanchor: 'left',
                     y: 0.97,
                     yanchor: 'bottom',
                     text: numCuartil,
