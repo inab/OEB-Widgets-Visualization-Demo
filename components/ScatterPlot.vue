@@ -421,22 +421,33 @@ onMounted(async () => {
                 array: [participant.stderr_x],
                 visible: true,
 <<<<<<< HEAD
+<<<<<<< HEAD
                 color: '#000000',
                 width: 2,
                 thickness: 0.3
                 
 =======
 >>>>>>> 0d89c68 (Added Popover, delete info table)
+=======
+                color: '#C8CBCE',
+                width: 2,
+                
+>>>>>>> ad0071a (Add styles for error bars)
             },
             error_y: {
                 type: 'data',
                 array: [participant.stderr_y],
                 visible: true,
 <<<<<<< HEAD
+<<<<<<< HEAD
                 color: '#000000',
                 width: 2,
                 thickness: 0.3
 
+=======
+                color: '#C8CBCE',
+                width: 2,
+>>>>>>> ad0071a (Add styles for error bars)
 
             },
 =======
@@ -1191,6 +1202,7 @@ const annotationSquareQuartile = (better) => {
                     xref: 'paper',
                     yref: 'paper',
 <<<<<<< HEAD
+<<<<<<< HEAD
                     x: 0.01,
                     xanchor: 'left',
                     y: 1,
@@ -1198,6 +1210,10 @@ const annotationSquareQuartile = (better) => {
 =======
                     x: 0.12,
                     xanchor: 'right',
+=======
+                    x: 0.0,
+                    xanchor: 'left',
+>>>>>>> ad0071a (Add styles for error bars)
                     y: 0.97,
                     yanchor: 'bottom',
 >>>>>>> 831deb3 (change Square Quartile labels)
