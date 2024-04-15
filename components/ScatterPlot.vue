@@ -422,6 +422,7 @@ onMounted(async () => {
                 visible: true,
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                 color: '#000000',
                 width: 2,
                 thickness: 0.3
@@ -430,7 +431,11 @@ onMounted(async () => {
 >>>>>>> 0d89c68 (Added Popover, delete info table)
 =======
                 color: '#C8CBCE',
+=======
+                color: '#000000',
+>>>>>>> 1853387 (Fix Details)
                 width: 2,
+                thickness: 0.3
                 
 >>>>>>> ad0071a (Add styles for error bars)
             },
@@ -438,6 +443,7 @@ onMounted(async () => {
                 type: 'data',
                 array: [participant.stderr_y],
                 visible: true,
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
                 color: '#000000',
@@ -448,6 +454,12 @@ onMounted(async () => {
                 color: '#C8CBCE',
                 width: 2,
 >>>>>>> ad0071a (Add styles for error bars)
+=======
+                color: '#000000',
+                width: 2,
+                thickness: 0.3
+
+>>>>>>> 1853387 (Fix Details)
 
             },
 =======
@@ -837,10 +849,14 @@ const resetView = () => {
     const layout = {
         xaxis: {
 <<<<<<< HEAD
+<<<<<<< HEAD
             range: [0, Math.max(...xValues.value) + (Math.min(...xValues.value) / 3)],
 =======
             range: [0, Math.max(...xValues.value) + 5000],
 >>>>>>> 38cf049 (Add Loader test)
+=======
+            range: [0, Math.max(...xValues.value) + (Math.min(...xValues.value) / 3)],
+>>>>>>> 1853387 (Fix Details)
             title: {
                 text: data.value.visualization.x_axis,
                 font: {
@@ -2222,13 +2238,20 @@ function getOptimizationArrow(optimization) {
     switch (optimization) {
         case 'top-left':
             arrowX = 0;
+<<<<<<< HEAD
             arrowY = 0.98;
             axAdjustment = 35;
             ayAdjustment = 30;
+=======
+            arrowY = 0.99;
+            axAdjustment = 25;
+            ayAdjustment = 20;
+>>>>>>> 1853387 (Fix Details)
             break;
 
         case 'top-right':
             arrowX = 0.98;
+<<<<<<< HEAD
             arrowY = 0.98;
             axAdjustment = -30;
             ayAdjustment = 35;
@@ -2239,14 +2262,31 @@ function getOptimizationArrow(optimization) {
             arrowY = 0;
             axAdjustment = -30;
             ayAdjustment = -30;
+=======
+            arrowY = 0.99;
+            axAdjustment = -20;
+            ayAdjustment = 25;
+            break;
+
+        case 'bottom-right':
+            arrowX = 0.99
+            arrowY = 0;
+            axAdjustment = -20;
+            ayAdjustment = -25;
+>>>>>>> 1853387 (Fix Details)
             break;
 
         default:
             // By default, place the arrow in the upper left corner
             arrowX = 0;
             arrowY = 0;
+<<<<<<< HEAD
             axAdjustment = 30;
             ayAdjustment = -35;
+=======
+            axAdjustment = 20;
+            ayAdjustment = -25;
+>>>>>>> 1853387 (Fix Details)
 
     }
 
@@ -2314,10 +2354,14 @@ html {
 
 .button-classification {
 <<<<<<< HEAD
+<<<<<<< HEAD
     width: 190px;
 =======
     width: 180px;
 >>>>>>> 33bba23 (Add classification text to dropdown)
+=======
+    width: 190px;
+>>>>>>> 1853387 (Fix Details)
 }
 
 .button-resetView {
@@ -2355,6 +2399,7 @@ html {
     max-height: 700px;
     overflow-y: auto;
     font-size: 1.1rem;
+<<<<<<< HEAD
 }
 .cuartiles-table tbody tr:first-child {
     margin-top: 40px; 
@@ -2384,14 +2429,17 @@ html {
     max-height: 700px;
 >>>>>>> 0d89c68 (Added Popover, delete info table)
     overflow-y: auto;
+=======
+>>>>>>> 1853387 (Fix Details)
 }
 .cuartiles-table tbody tr:first-child {
-    margin-top: 40px; /* Ajusta el margen superior del primer elemento de la tabla */
+    margin-top: 40px; 
 }
 
 .cuartiles-table {
     width: 100%;
     table-layout: fixed;
+    border-collapse: collapse;
 }
 
 .cuartiles-table th {
@@ -2406,7 +2454,11 @@ html {
     z-index: 1;
     background-color: #6c757d;
     color: white;
+<<<<<<< HEAD
     border: solid 1px #6c757d;
+=======
+    white-space: nowrap;
+>>>>>>> 1853387 (Fix Details)
 }
 <<<<<<< HEAD
 =======
@@ -2416,11 +2468,16 @@ html {
 >>>>>>> 073b737 (Fix table header)
 .cuartiles-table td {
 <<<<<<< HEAD
+<<<<<<< HEAD
     padding: 8px;
     vertical-align: top;
 =======
     padding-top: 8px;
     padding-bottom: 8px;
+=======
+    padding: 8px;
+    vertical-align: top;
+>>>>>>> 1853387 (Fix Details)
 }
 
 <<<<<<< HEAD
@@ -2443,7 +2500,7 @@ html {
 
 .toolColumn span {
     display: inline-block;
-    margin-left: 15px;
+    margin-left: 25px;
     transition: transform 0.3s ease;
 }
 
@@ -2452,13 +2509,24 @@ html {
     font-style: italic;
     color: #0A58A2;
 }
+@media (max-width: 768px) {
+    .toolHeader {
+        width: 30%; /* Ajusta el ancho de la columna de herramientas */
+    }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 
 
 >>>>>>> e1533f4 (Add scroll in table v1)
 =======
 >>>>>>> 207eabe (Add styles when tool is hidden)
+=======
+    .toolColumn span {
+        margin-left: 15px; /* Restaura el margen a su valor original */
+    }
+}
+>>>>>>> 1853387 (Fix Details)
 .quartil-1 {
     background-color: rgb(237, 248, 233);
 }
