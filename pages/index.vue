@@ -73,7 +73,7 @@ export default {
     }, 1000);
 
     // Fetch your data
-    const response = await fetch('/raw_data_OEBD00200002UK0.json'); //endpoint to db rest to cofigure
+    const response = await fetch('/raw_data_OEBD00200002V20.json'); //endpoint to db rest to cofigure
     this.fetchedData = await response.json();
     this.inline_data = this.fetchedData.datalink.inline_data
     this.datasetId = this.fetchedData._id

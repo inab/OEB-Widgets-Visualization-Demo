@@ -238,16 +238,19 @@ onMounted(async () => {
                 type: 'data',
                 array: [participant.stderr_x],
                 visible: true,
-                color: '#C8CBCE',
+                color: '#000000',
                 width: 2,
+                thickness: 0.3
                 
             },
             error_y: {
                 type: 'data',
                 array: [participant.stderr_y],
                 visible: true,
-                color: '#C8CBCE',
+                color: '#000000',
                 width: 2,
+                thickness: 0.3
+
 
             },
         };
@@ -493,7 +496,7 @@ const resetView = () => {
     const Plotly = require('plotly.js-dist');
     const layout = {
         xaxis: {
-            range: [0, Math.max(...xValues.value) + 5000],
+            range: [0, Math.max(...xValues.value) + (Math.min(...xValues.value) / 3)],
             title: {
                 text: data.value.visualization.x_axis,
                 font: {
@@ -688,7 +691,7 @@ const calculateQuartiles = (xValues, yValues, toolID) => {
             x0: cuartilesX,
             x1: cuartilesX,
             y0: 0,
-            y1: Math.max(cuartilesY) + 10,
+            y1: Math.max(...yValues) + Math.max(cuartilesY),
             line: {
                 color: '#C0D4E8',
                 width: 2,
@@ -700,7 +703,7 @@ const calculateQuartiles = (xValues, yValues, toolID) => {
             y0: cuartilesY,
             y1: cuartilesY,
             x0: 0,
-            x1: Math.max(cuartilesX) + 1500000,
+            x1: Math.max(...xValues) + Math.max(cuartilesX),
             line: {
                 color: '#C0D4E8',
                 width: 2,
@@ -1496,43 +1499,32 @@ function getOptimizationArrow(optimization, paretoPoints) {
     // Determine arrow position based on optimization
     switch (optimization) {
         case 'top-left':
-            arrowX = Math.min(...paretoPoints.map(point => point[0]));
-            arrowY = Math.max(...paretoPoints.map(point => point[1]));
-            arrowY = arrowY + 0.01  // margin
-            axAdjustment = 20;
+            arrowX = 0;
+            arrowY = 0.99;
+            axAdjustment = 25;
             ayAdjustment = 20;
             break;
+
         case 'top-right':
-            arrowX = Math.max(...paretoPoints.map(point => point[0]));
-            arrowY = Math.max(...paretoPoints.map(point => point[1]));
-            arrowX = arrowX + 0.009
-            arrowY = arrowY + 0.009
-
+            arrowX = 0.98;
+            arrowY = 0.99;
             axAdjustment = -20;
-            ayAdjustment = 20;
+            ayAdjustment = 25;
             break;
-        case 'bottom-left':
-            arrowX = Math.min(...paretoPoints.map(point => point[0]));
-            arrowY = Math.min(...paretoPoints.map(point => point[1]));
-            arrowY = arrowY - 0.03
 
-            axAdjustment = 20;
-            ayAdjustment = -20;
-            break;
         case 'bottom-right':
-            arrowX = Math.max(...paretoPoints.map(point => point[0]));
-            arrowY = Math.min(...paretoPoints.map(point => point[1]));
-            arrowX = arrowX + 0.03;
-            arrowY = arrowY - 0.03
-
+            arrowX = 0.99
+            arrowY = 0;
             axAdjustment = -20;
-            ayAdjustment = -20;
+            ayAdjustment = -25;
             break;
+
         default:
             // By default, place the arrow in the upper left corner
-            arrowX = Math.min(...paretoPoints.map(point => point[0]));
-            arrowY = Math.max(...paretoPoints.map(point => point[1]));
-            arrowY = arrowY + 0.01  // margin
+            arrowX = 0;
+            arrowY = 0;
+            axAdjustment = 20;
+            ayAdjustment = -25;
 
     }
 
@@ -1540,13 +1532,19 @@ function getOptimizationArrow(optimization, paretoPoints) {
     const arrowAnnotation = {
         x: arrowX,
         y: arrowY,
-        xref: 'x',
-        yref: 'y',
+        xref: 'paper',
+        yref: 'paper',
         text: 'Optimal corner',
+        font: {
+            color: '#6C757D'
+        },
         showarrow: true,
         arrowhead: 3,
         ax: axAdjustment,
         ay: ayAdjustment,
+        arrowsize: 1,
+        arrowcolor: '#6C757D'
+
     };
 
     arrowAnnotations.push(arrowAnnotation);
@@ -1575,15 +1573,18 @@ function getSymbol() {
 
 
 <style scoped lang="css">
+html {
+    font-size: 16px; /* Por ejemplo, 16px */
+}
 .butns {
     position: absolute;
     top: 14px;
     margin-top: 10px;
-    z-index: 1
+    z-index: 1;
 }
 
 .button-classification {
-    width: 180px;
+    width: 190px;
 }
 
 .button-resetView {
@@ -1591,7 +1592,7 @@ function getSymbol() {
 }
 
 .button-download {
-    width: 140px;
+    width: 168px;
 }
 
 .text-download {
@@ -1617,14 +1618,16 @@ function getSymbol() {
 .table-container {
     max-height: 700px;
     overflow-y: auto;
+    font-size: 1.1rem;
 }
 .cuartiles-table tbody tr:first-child {
-    margin-top: 40px; /* Ajusta el margen superior del primer elemento de la tabla */
+    margin-top: 40px; 
 }
 
 .cuartiles-table {
     width: 100%;
     table-layout: fixed;
+    border-collapse: collapse;
 }
 
 .cuartiles-table th {
@@ -1634,13 +1637,14 @@ function getSymbol() {
     z-index: 1;
     background-color: #6c757d;
     color: white;
+    white-space: nowrap;
 }
 .toolHeader{
     width: 60%;
 }
 .cuartiles-table td {
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding: 8px;
+    vertical-align: top;
 }
 
 .toolColumn {
@@ -1661,7 +1665,7 @@ function getSymbol() {
 
 .toolColumn span {
     display: inline-block;
-    margin-left: 15px;
+    margin-left: 25px;
     transition: transform 0.3s ease;
 }
 
@@ -1670,7 +1674,15 @@ function getSymbol() {
     font-style: italic;
     color: #0A58A2;
 }
+@media (max-width: 768px) {
+    .toolHeader {
+        width: 30%; /* Ajusta el ancho de la columna de herramientas */
+    }
 
+    .toolColumn span {
+        margin-left: 15px; /* Restaura el margen a su valor original */
+    }
+}
 .quartil-1 {
     background-color: rgb(237, 248, 233);
 }
