@@ -8,37 +8,15 @@
                 <div v-if="data" class="butns">
                     <b-button-group class="ml-auto">
                         <!-- Classification -->
-<<<<<<< HEAD
-<<<<<<< HEAD
                         <b-dropdown :text="classificationButtonText" variant="outline-secondary"
                             class="button-classification">
-=======
-                        <b-dropdown :text="classificationButtonText" variant="outline-secondary" class="button-classification">
->>>>>>> 33bba23 (Add classification text to dropdown)
-=======
-                        <b-dropdown :text="classificationButtonText" variant="outline-secondary"
-                            class="button-classification">
->>>>>>> 9d24c78 (Fix download on pdf and add download with table)
                             <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
                                     method:</strong></b-dropdown-text>
                             <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
-<<<<<<< HEAD
-<<<<<<< HEAD
                             <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
                             <b-dropdown-item @click="toggleDiagonalQuartile"> Diagonal Quartiles </b-dropdown-item>
                             <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item> 
 
-=======
-                            <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item> 
-                            <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
-                            <b-dropdown-item @click="toggleDiagonalQuartile"> Diagonal Quartiles </b-dropdown-item>
->>>>>>> 38cf049 (Add Loader test)
-=======
-                            <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
-                            <b-dropdown-item @click="toggleDiagonalQuartile"> Diagonal Quartiles </b-dropdown-item>
-                            <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item> 
-
->>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
                         </b-dropdown>
 
                         <!-- Reset View / optimal view -->
@@ -78,47 +56,19 @@
                             At least four participants are required for the benchmark!!
                         </b-alert>
                     </div>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
-                    <!-- ID AND DATE TABLE -->
-                    <div v-if="datasetId && modificationDate">
-                        <b-table-simple bordered small caption-top responsive id='idDateTable'>
-                            <b-tbody>
-                                <b-tr>
-                                    <b-th variant="secondary" class="text-center">Dataset ID</b-th>
-                                    <b-td class="text-center">{{ datasetId }}</b-td>
-                                    <b-th variant="secondary" class="text-center">Last Update</b-th>
-                                    <b-td class="text-center">{{ modificationDate }}</b-td>
-                                </b-tr>
-                            </b-tbody>
-                        </b-table-simple>
-                    </div>
-
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
-=======
->>>>>>> 0d89c68 (Added Popover, delete info table)
                 </div>
             </b-col>
 
             <!-- Table -->
             <b-col cols="4">
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 9d24c78 (Fix download on pdf and add download with table)
                 <div id="benchmarkingTable">
                     <!-- Quartile Table -->
                     <div class="table-container">
-<<<<<<< HEAD
-<<<<<<< HEAD
                         <table class="table table-fixed table-bordered cuartiles-table" v-if="quartileData.length > 0">
                             <thead>
                                 <tr>
                                     <th class="toolHeader">Participants</th>
                                     <th>{{ viewKmeans ? 'Clusters' : 'Quartile' }} <font-awesome-icon id="extrainfoquartile"
-<<<<<<< HEAD
                                         :icon="['fas', 'circle-info']" class="info-icon" v-if="viewSquare" />
                                     </th>
                                     <b-popover target="extrainfoquartile" triggers="hover" placement="bottom" v-if="viewSquare">
@@ -142,93 +92,6 @@
                             </tbody>
                         </table>
                     </div>
-=======
-                <div>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-                    <table class="table table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
-                        <tr>
-                            <th>Tool</th>
-                            <th>Quartile</th>
-                        </tr>
-                        <tr class="toolRow" v-for="(item, index) in cuartilesData" :key="item.tool_id">
-                            <td class="toolColumn" @click="handleTableRowClick(index)">
-                                <div class="color-box"
-                                    :style="{ backgroundColor: markerColors[index % markerColors.length] }"></div>
-                                <span>{{ item.tool_id }}</span>
-                            </td>
-                            <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
-                        </tr>
-                    </table>
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
-=======
-                    <div class="table-container">
-=======
->>>>>>> 0d89c68 (Added Popover, delete info table)
-                        <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
-=======
-=======
-                    <!-- Quartile Table -->
->>>>>>> 33bba23 (Add classification text to dropdown)
-                    <div class="table-container" :style="{ maxHeight: viewSquare ? '700px' : '810px' }">
-<<<<<<< HEAD
-                        <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0" >
->>>>>>> 3ea2494 (Add legend to Square cuartile)
-=======
-                        <table class="table table-fixed table-bordered cuartiles-table" v-if="cuartilesData.length > 0">
->>>>>>> 9d24c78 (Fix download on pdf and add download with table)
-=======
-                        <table class="table table-fixed table-bordered cuartiles-table" v-if="quartileData.length > 0">
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
-                            <thead>
-                                <tr>
-                                    <th class="toolHeader">Tool</th>
-                                    <th>Quartile <font-awesome-icon id="extrainfoquartile"
-=======
->>>>>>> 831deb3 (change Square Quartile labels)
-                                        :icon="['fas', 'circle-info']" class="info-icon" v-if="viewSquare" />
-                                    </th>
-                                    <b-popover target="extrainfoquartile" triggers="hover" placement="bottom" v-if="viewSquare">
-                                        <template #title><b>The Square quartile label</b></template>
-                                        Quartiles 2 and 3 are 'Mid (M)', representing average rankings, while 'Top (T)' 
-                                        denotes quartiles above average and 'Bottom (B)' those below, offering clarity in rankin
-                                    </b-popover>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(item, index) in quartileData" :key="item.tool_id"
-                                    :class="{ 'quartil-zero': item.cuartil === 0 }">
-                                    <td class="toolColumn" @click="handleTableRowClick(index)">
-                                        <div class="color-box"
-                                            :style="{ backgroundColor: markerColors[index % markerColors.length], opacity: (item.cuartil === 0 ? 0.5 : 1) }">
-                                        </div>
-                                        <span>{{ item.tool_id }}</span>
-                                    </td>
-                                    <td :class="'quartil-' + item.cuartil">{{ item.label }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-
-<<<<<<< HEAD
->>>>>>> e1533f4 (Add scroll in table v1)
-=======
-=======
-                    <!-- Annotation -->
-                    <div class="annotationfooter" v-if="viewSquare">
-                        The Square quartile labels, 'Top (T)', represent quartiles that are above average.
-                        'Mid (M)' indicates an average ranking, and 'Bottom (B)' denotes those below average,
-                        providing a clear understanding of the rankings.
-                    </div>
->>>>>>> 3ea2494 (Add legend to Square cuartile)
-
->>>>>>> 207eabe (Add styles when tool is hidden)
-=======
->>>>>>> 0d89c68 (Added Popover, delete info table)
                 </div>
             </b-col>
         </b-row>
@@ -241,16 +104,8 @@
 import { defineProps } from 'vue';
 import { onMounted, ref, computed } from 'vue';
 import * as statistics from 'simple-statistics';
-<<<<<<< HEAD
-<<<<<<< HEAD
 var clusterMaker = require('clusters');
 const pf = require('pareto-frontier');
-=======
->>>>>>> 9d24c78 (Fix download on pdf and add download with table)
-=======
-var clusterMaker = require('clusters');
-const pf = require('pareto-frontier');
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 const html2canvas = require('html2canvas');
 const { jsPDF } = require('jspdf');
 
@@ -269,34 +124,15 @@ const props = defineProps({
 // GLOBAL CONSTANTES
 // ----------------------------------------------------------------
 const data = ref(null);
-<<<<<<< HEAD
-<<<<<<< HEAD
 const dataPoints = ref([]);
-=======
-const datasetId = ref(null);
->>>>>>> 0d89c68 (Added Popover, delete info table)
-=======
-const dataPoints = ref([]);
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 const paretoPoints = ref([]);
 const optimalXaxis = ref(null);
 const optimalYaxis = ref(null);
 const toolID = ref([]);
 const allToolID = ref([]);
-<<<<<<< HEAD
-<<<<<<< HEAD
 // 
 const xValues = ref([]);
 const yValues = ref([]);
-=======
-const xAxis = ref([]);
-const yAxis = ref([]);
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
-=======
-// 
-const xValues = ref([]);
-const yValues = ref([]);
->>>>>>> 38cf049 (Add Loader test)
 
 // Data for the table
 const quartileData = ref([]);
@@ -310,19 +146,10 @@ let annotationKmeans = [];
 const showShapesSquare = ref(false);
 const showAnnotationSquare = ref(false);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 38cf049 (Add Loader test)
 // Diagonal Quartiles
 const showShapesDiagonal = ref(false);
 
 
-<<<<<<< HEAD
-=======
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
-=======
->>>>>>> 38cf049 (Add Loader test)
 // Error messages
 const showMessageError = ref(false);
 const dismissCountDown = ref(0);
@@ -338,18 +165,7 @@ const viewDiagonal = ref(false);
 
 onMounted(async () => {
     const Plotly = require('plotly.js-dist');
-<<<<<<< HEAD
-<<<<<<< HEAD
     data.value = props.inline_data
-=======
-    const response = await fetch('/raw_data_OEBD00200002UK0.json');
-    dataset.value = await response.json();
-    datasetId.value = dataset.value._id
-    data.value = dataset.value.datalink.inline_data
->>>>>>> 0d89c68 (Added Popover, delete info table)
-=======
-    data.value = props.inline_data
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
     const visualization = data.value.visualization
 
 
@@ -419,71 +235,25 @@ onMounted(async () => {
             },
             name: participant.tool_id,
             showlegend: true,
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 0d89c68 (Added Popover, delete info table)
             error_x: {
                 type: 'data',
                 array: [participant.stderr_x],
                 visible: true,
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
                 color: '#000000',
                 width: 2,
                 thickness: 0.3
                 
-=======
->>>>>>> 0d89c68 (Added Popover, delete info table)
-=======
-                color: '#C8CBCE',
-=======
-                color: '#000000',
->>>>>>> 1853387 (Fix Details)
-                width: 2,
-                thickness: 0.3
-                
->>>>>>> ad0071a (Add styles for error bars)
             },
             error_y: {
                 type: 'data',
                 array: [participant.stderr_y],
                 visible: true,
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
                 color: '#000000',
                 width: 2,
                 thickness: 0.3
 
-=======
-                color: '#C8CBCE',
-                width: 2,
->>>>>>> ad0071a (Add styles for error bars)
-=======
-                color: '#000000',
-                width: 2,
-                thickness: 0.3
-
->>>>>>> 1853387 (Fix Details)
 
             },
-=======
-            // error_x: {
-            //     type: 'data',
-            //     array: [participant.stderr_x],
-            //     visible: true,
-            // },
-            // error_y: {
-            //     type: 'data',
-            //     array: [participant.stderr_y],
-            //     visible: true,
-            // },
->>>>>>> 3ea2494 (Add legend to Square cuartile)
-=======
-            },
->>>>>>> 0d89c68 (Added Popover, delete info table)
         };
         traces.push(trace);
     }
@@ -552,19 +322,9 @@ onMounted(async () => {
         optimalYaxis.value = layoutObj.yaxis.range;
     });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 
     // Capture legend event
     // ----------------------------------------------------------------
-=======
-    // Capture legend event
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
-=======
-
-    // Capture legend event
-    // ----------------------------------------------------------------
->>>>>>> a49b958 (Add coments)
     scatterPlot.then((gd) => {
         gd.on('plotly_legendclick', (event) => {
             let traceIndex = event.curveNumber;
@@ -578,23 +338,11 @@ onMounted(async () => {
             }
             else {
                 // Update the graph based on the selected trace
-<<<<<<< HEAD
-<<<<<<< HEAD
                 // Si response es false la trace no se oculta de la legend
                 let response = updatePlotOnSelection(traceIndex)
                 if (response == false) {
                     return false;
                 }
-=======
-                updatePlotOnSelection(traceIndex)
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
-=======
-                // Si response es false la trace no se oculta de la legend
-                let response = updatePlotOnSelection(traceIndex)
-                if (response == false) {
-                    return false;
-                }
->>>>>>> 9f0c89a (Fix: trace view in legend)
             }
 
         });
@@ -603,19 +351,10 @@ onMounted(async () => {
 
 // ----------------------------------------------------------------
 // FUNCTIONS
-<<<<<<< HEAD
-=======
 // ----------------------------------------------------------------
 
 // ACTIONS FOR TABLE
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 // ----------------------------------------------------------------
-<<<<<<< HEAD
-
-// ACTIONS FOR TABLE
-// ----------------------------------------------------------------
-=======
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
 // Handle the click on the table
 const handleTableRowClick = (index) => {
     const traceIndex = index + 2; // Adjust the index
@@ -629,36 +368,11 @@ const toggleTraceVisibility = (traceIndex) => {
     const plotlyData = scatterPlotElement.data;
     const plotlyLayout = scatterPlotElement.layout;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     // Check the visibility state of the trace
     let isVisible = plotlyData[traceIndex].visible;
     if (isVisible === undefined) {
         isVisible = true
     }
-<<<<<<< HEAD
-
-    // Count the number of currently visible traces
-    let visibleCount = 0;
-    plotlyData.forEach(trace => {
-        if (trace.visible !== 'legendonly') {
-            visibleCount++;
-        }
-    });
-
-    // If there are only four visible traces and the trace being toggled is currently visible, return without changing its visibility
-    if (visibleCount === 6 && isVisible !== 'legendonly') {
-        return;
-    }
-=======
-    // Check whether the trace is visible or not
-=======
-    // Check the visibility state of the trace
->>>>>>> 9f0c89a (Fix: trace view in legend)
-    const isVisible = plotlyData[traceIndex].visible;
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
-=======
->>>>>>> 6e9c3df (Fix bug the legend and table Diagonal Quartile)
 
     // Count the number of currently visible traces
     let visibleCount = 0;
@@ -699,15 +413,7 @@ const updatePlotOnSelection = (traceIndex) => {
             // Show Message Error
             showMessageError.value = true;
             dismissCountDown.value = 5;
-<<<<<<< HEAD
-<<<<<<< HEAD
             // Start timer to hide alert after 5 seconds
-=======
-            // Iniciar el temporizador para ocultar el alerta después de 5 segundos
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
-=======
-            // Start timer to hide alert after 5 seconds
->>>>>>> 9f0c89a (Fix: trace view in legend)
             const timer = setInterval(() => {
                 if (dismissCountDown.value > 0) {
                     dismissCountDown.value -= 1;
@@ -716,13 +422,6 @@ const updatePlotOnSelection = (traceIndex) => {
                     clearInterval(timer);
                 }
             }, 1000);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
-=======
->>>>>>> 9f0c89a (Fix: trace view in legend)
             return false;
         }
     } else {
@@ -742,25 +441,12 @@ const updatePlotOnSelection = (traceIndex) => {
     // Update the trace of the Pareto frontier
     const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> a49b958 (Add coments)
 
 
     // Update Kmeans Clustering
     // ----------------------------------------------------------------
-<<<<<<< HEAD
     if (viewKmeans.value === true) {
         // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
-=======
-    // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
-    if (viewKmeans.value === true) {
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
-=======
-    if (viewKmeans.value === true) {
-        // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
->>>>>>> a49b958 (Add coments)
 
         // Create a list of visible tools with their hiding status
         const visibleTools = toolID.value.map((tool, index) => ({
@@ -775,46 +461,18 @@ const updatePlotOnSelection = (traceIndex) => {
         showShapesKmeans.value = true;
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> a49b958 (Add coments)
         // Create a new layout
         const layout = {
             shapes: showShapesKmeans.value ? shapes : [],
             annotations: getOptimizationArrow(data.value.visualization.optimization).concat(annotationKmeans)
-=======
-        const layout = {
-            shapes: showShapesKmeans.value ? shapes : [],
-<<<<<<< HEAD
-            annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans)
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
-=======
-            annotations: getOptimizationArrow(data.value.visualization.optimization).concat(annotationKmeans)
->>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
         };
         Plotly.update('scatter-plot', newTraces, layout, 1);
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-    // Update Square Quartiles
-    // ----------------------------------------------------------------
-=======
-    // If the Square view is active, the quartiles are calculated with the visible traces
->>>>>>> 9f0c89a (Fix: trace view in legend)
-    if (viewSquare.value === true) {
-        // If the Square view is active, the quartiles are calculated with the visible traces
-=======
-    if (viewSquare.value === true) {
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
-=======
     // Update Square Quartiles
     // ----------------------------------------------------------------
     if (viewSquare.value === true) {
         // If the Square view is active, the quartiles are calculated with the visible traces
->>>>>>> a49b958 (Add coments)
         const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
         const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
 
@@ -831,42 +489,17 @@ const updatePlotOnSelection = (traceIndex) => {
         optimalView()
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     // Update Diagonal Quartiles
     // ----------------------------------------------------------------
-=======
-    // Diagonal Quartiles
->>>>>>> 179efde (Create  view for diagonal quartiles)
-=======
-    // Update Diagonal Quartiles
-    // ----------------------------------------------------------------
->>>>>>> a49b958 (Add coments)
     if (viewDiagonal.value === true){
         const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
         const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-        // Create a list of visible tools with their hiding status
-        const visibleTools = toolID.value.map((tool, index) => ({
-            name: tool,
-            hidden: dataPoints.value[index].hidden
-        })).filter(tool => !tool.hidden);
-
-        // List of visible tools
-        const visibleToolNames = visibleTools.map(tool => tool.name);
->>>>>>> 179efde (Create  view for diagonal quartiles)
-=======
->>>>>>> 6e9c3df (Fix bug the legend and table Diagonal Quartile)
         // Update data with visible tools
         getDiagonalQuartile(updatedXCoordinates.value, updatedYCoordinates.value);
         optimalView()
     }
 
-<<<<<<< HEAD
     Plotly.update('scatter-plot', newTraces, {}, 1);
 }
 
@@ -875,34 +508,11 @@ const updatePlotOnSelection = (traceIndex) => {
 // ----------------------------------------------------------------
 
 // Reset View (Real dimensions)
-=======
-=======
->>>>>>> 179efde (Create  view for diagonal quartiles)
-    Plotly.update('scatter-plot', newTraces, {}, 1);
-}
-
-// ----------------------------------------------------------------
-// Scatter Plot Views
-// ----------------------------------------------------------------
-<<<<<<< HEAD
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
-=======
-
-// Reset View (Real dimensions)
->>>>>>> a49b958 (Add coments)
 const resetView = () => {
     const Plotly = require('plotly.js-dist');
     const layout = {
         xaxis: {
-<<<<<<< HEAD
-<<<<<<< HEAD
             range: [0, Math.max(...xValues.value) + (Math.min(...xValues.value) / 3)],
-=======
-            range: [0, Math.max(...xValues.value) + 5000],
->>>>>>> 38cf049 (Add Loader test)
-=======
-            range: [0, Math.max(...xValues.value) + (Math.min(...xValues.value) / 3)],
->>>>>>> 1853387 (Fix Details)
             title: {
                 text: data.value.visualization.x_axis,
                 font: {
@@ -977,8 +587,6 @@ const viewButtonText = computed(() => {
     return viewApplied.value ? 'Optimal View' : 'Reset View';
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 // Text for the Classification Button
 const classificationButtonText = computed(() => {
     if (viewKmeans.value) {
@@ -991,48 +599,13 @@ const classificationButtonText = computed(() => {
         return 'Classification'
     }
 });
-=======
-=======
-// Text for the Classification Button
->>>>>>> a49b958 (Add coments)
-const classificationButtonText = computed(() => {
-    if (viewKmeans.value) {
-        return 'K-Means Clustering';
-    } else if (viewSquare.value) {
-        return 'Square Quartiles';
-    } else if (viewDiagonal.value){
-        return 'Diagonal Quartiles';
-    } else {
-        return 'Classification'
-    }
-});
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-// Format Date String
-const formatDateString = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
-};
->>>>>>> 33bba23 (Add classification text to dropdown)
-
-=======
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 // Error messages
 const countDownChanged = () => {
     if (dismissCountDown.value > 0) {
         dismissCountDown.value -= 1;
     }
 };
-<<<<<<< HEAD
-=======
->>>>>>> 0d89c68 (Added Popover, delete info table)
-=======
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 
 // PARETO FRONTIER
 // ----------------------------------------------------------------
@@ -1123,8 +696,6 @@ const toggleQuartilesVisibility = () => {
 };
 
 // Calculate square quartiles
-<<<<<<< HEAD
-<<<<<<< HEAD
 const calculateQuartiles = (xValues, yValues, toolID) => {
 
     const cuartilesX = statistics.quantile(xValues, 0.5);
@@ -1132,22 +703,6 @@ const calculateQuartiles = (xValues, yValues, toolID) => {
 
     let better = data.value.visualization.optimization
     sortToolsForSquare(better, toolID, cuartilesX, cuartilesY, xValues, yValues)
-=======
-const calculateQuartiles = (xAxis, yAxis, toolID) => {
-=======
-const calculateQuartiles = (xValues, yValues, toolID) => {
->>>>>>> 38cf049 (Add Loader test)
-
-    const cuartilesX = statistics.quantile(xValues, 0.5);
-    const cuartilesY = statistics.quantile(yValues, 0.5);
-
-    let better = data.value.visualization.optimization
-<<<<<<< HEAD
-    sortToolsForSquare(better, toolID, cuartilesX, cuartilesY, xAxis, yAxis)
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
-=======
-    sortToolsForSquare(better, toolID, cuartilesX, cuartilesY, xValues, yValues)
->>>>>>> 38cf049 (Add Loader test)
 
     // Lines 
     const shapes = [
@@ -1187,15 +742,7 @@ const calculateQuartiles = (xValues, yValues, toolID) => {
 };
 
 // Sort tools for Square Quartiles
-<<<<<<< HEAD
-<<<<<<< HEAD
 const sortToolsForSquare = (better, visibleToolID, cuartilesX, cuartilesY, xValues, yValues) => {
-=======
-const sortToolsForSquare = (better, visibleToolID, cuartilesX, cuartilesY, xAxis, yAxis) => {
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
-=======
-const sortToolsForSquare = (better, visibleToolID, cuartilesX, cuartilesY, xValues, yValues) => {
->>>>>>> 38cf049 (Add Loader test)
     quartileData.value = [];
     allToolID.value.forEach((tool) => { // Iterate over all tools
         const index = visibleToolID.indexOf(tool);
@@ -1267,29 +814,10 @@ const annotationSquareQuartile = (better) => {
                 annotation = {
                     xref: 'paper',
                     yref: 'paper',
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
                     x: 0.01,
                     xanchor: 'left',
                     y: 1,
                     yanchor: 'top',
-=======
-                    x: 0.12,
-                    xanchor: 'right',
-=======
-                    x: 0.0,
-                    xanchor: 'left',
->>>>>>> ad0071a (Add styles for error bars)
-                    y: 0.97,
-                    yanchor: 'bottom',
->>>>>>> 831deb3 (change Square Quartile labels)
-=======
-                    x: 0.01,
-                    xanchor: 'left',
-                    y: 1,
-                    yanchor: 'top',
->>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
                     text: numCuartil,
                     showarrow: false,
                     font: {
@@ -1302,24 +830,10 @@ const annotationSquareQuartile = (better) => {
                 annotation = {
                     xref: 'paper',
                     yref: 'paper',
-<<<<<<< HEAD
-<<<<<<< HEAD
                     x: 0.91,
                     xanchor: 'left',
                     y: 0.05,
                     yanchor: 'bottom',
-=======
-                    x: 0.90,
-                    xanchor: 'left',
-                    y: 0.05,
-                    yanchor: 'top',
->>>>>>> 831deb3 (change Square Quartile labels)
-=======
-                    x: 0.91,
-                    xanchor: 'left',
-                    y: 0.05,
-                    yanchor: 'bottom',
->>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
                     text: numCuartil,
                     showarrow: false,
                     font: {
@@ -1334,15 +848,7 @@ const annotationSquareQuartile = (better) => {
                     yref: 'paper',
                     x: 0.01,
                     xanchor: 'left',
-<<<<<<< HEAD
-<<<<<<< HEAD
                     y: 0.10,
-=======
-                    y: 0.05,
->>>>>>> 831deb3 (change Square Quartile labels)
-=======
-                    y: 0.10,
->>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
                     yanchor: 'top',
                     text: numCuartil,
                     showarrow: false,
@@ -1358,15 +864,7 @@ const annotationSquareQuartile = (better) => {
                     yref: 'paper',
                     x: 0.90,
                     xanchor: 'left',
-<<<<<<< HEAD
-<<<<<<< HEAD
                     y: 0.98,
-=======
-                    y: 1.03,
->>>>>>> 831deb3 (change Square Quartile labels)
-=======
-                    y: 0.98,
->>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
                     yanchor: 'top',
                     text: numCuartil,
                     showarrow: false,
@@ -1426,8 +924,6 @@ const asignaPositionCuartil = (better) => {
 // DIAGONAL QUARTILES
 // ----------------------------------------------------------------
 const toggleDiagonalQuartile = () => {
-<<<<<<< HEAD
-<<<<<<< HEAD
     // Classification
     
     viewDiagonal.value = true;
@@ -1438,7 +934,6 @@ const toggleDiagonalQuartile = () => {
     showShapesSquare.value = false;
     showShapesDiagonal.value = true;
     
-<<<<<<< HEAD
     getDiagonalQuartile(xValues.value, yValues.value)
     optimalView()
 }
@@ -1523,7 +1018,6 @@ const getDiagonalQuartile = (x_values, y_values) =>{
     const layout = {
         shapes: showShapesDiagonal.value ? shapes : [],
         annotations: getOptimizationArrow(data.value.visualization.optimization).concat(annotationDiagonal),
-<<<<<<< HEAD
     };
 
     const Plotly = require('plotly.js-dist');
@@ -1655,243 +1149,6 @@ const createTableDiagonal = (visibleTool) => {
     });
 };
 
-=======
-=======
-    // Classification
-    
-    viewDiagonal.value = true;
-    viewSquare.value = false;
-    viewKmeans.value = false;
-    // 
->>>>>>> 179efde (Create  view for diagonal quartiles)
-    showShapesKmeans.value = false;
-    showShapesSquare.value = false;
-    showShapesDiagonal.value = true;
-    
-    console.log('Toggle Diagonal')
-=======
->>>>>>> 6e9c3df (Fix bug the legend and table Diagonal Quartile)
-    getDiagonalQuartile(xValues.value, yValues.value)
-    optimalView()
-}
-
-
-<<<<<<< HEAD
->>>>>>> 38cf049 (Add Loader test)
-=======
-// Diagonal Quartile
-const getDiagonalQuartile = (x_values, y_values) =>{
-
-    let tools_not_hidden = x_values.map((x, i) => [x, y_values[i]]);
-
-    let normalizedValues = normalizeData(x_values, y_values);
-    let [x_norm, y_norm] = [normalizedValues[0], normalizedValues[1]];
-
-    let max_x = Math.max.apply(null, x_values);
-    let max_y = Math.max.apply(null, y_values);
-    let better = data.value.visualization.optimization
-
-
-    // # compute the scores for each of the tool. based on their distance to the x and y axis
-    let scores = []
-    let scores_coords = {}; //this object will store the scores and the coordinates
-    for (let i = 0; i < x_norm.length; i++) {
-  
-      if (better == "bottom-right"){
-        scores.push(x_norm[i] + (1 - y_norm[i]));
-        scores_coords[x_norm[i] + (1 - y_norm[i])] =  [x_values[i], y_values[i]];
-        //append the score to the data array
-        tools_not_hidden[i]['score'] = x_norm[i] + (1 - y_norm[i]);
-      } 
-      else if (better == "top-right"){
-        scores.push(x_norm[i] + y_norm[i]);
-        scores_coords[x_norm[i] + y_norm[i]] = [x_values[i], y_values[i]];
-        //append the score to the data array
-        tools_not_hidden[i]['score'] = x_norm[i] + y_norm[i];
-
-      }else if (better == "top-left"){
-        scores.push(1 -x_norm[i] + y_norm[i]);
-        scores_coords[(1 -x_norm[i]) + y_norm[i]] = [x_values[i], y_values[i]];
-        //append the score to the data array
-        tools_not_hidden[i]['score'] = (1 -x_norm[i]) + y_norm[i];
-      }
-    };
-
-    scores.sort(function(a, b){return b-a});
-
-    let first_quartile  = statistics.quantile(scores, 0.25);
-    let second_quartile = statistics.quantile(scores, 0.5);
-    let third_quartile  = statistics.quantile(scores, 0.75);
-
-    let coords = [getDiagonalline(scores, scores_coords, first_quartile,better, max_x, max_y),
-                    getDiagonalline(scores, scores_coords, second_quartile,better, max_x, max_y),
-                    getDiagonalline(scores, scores_coords, third_quartile,better, max_x, max_y)]
-
-
-    // Create shapes
-    const shapes = [];
-    for (let i = 0; i < coords.length; i++) {
-        let [x_coords, y_coords] = [coords[i][0], coords[i][1]];
-        const shape = {
-            type: 'line',
-            x0: x_coords[0],
-            y0: y_coords[0],
-            x1: x_coords[1],
-            y1: y_coords[1],
-            line: {
-                color: '#C0D4E8',
-                width: 2,
-                dash: 'dash'
-            }
-        };
-
-        shapes.push(shape);
-    }
-
-    // Get Annotations
-    let annotationDiagonal = asigneQuartileDiagonal(tools_not_hidden, first_quartile, second_quartile, third_quartile)
-    
-    // Diagonal Q. Table
-    createTableDiagonal(tools_not_hidden)
-
-
-    const layout = {
-        shapes: showShapesDiagonal.value ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationDiagonal),
-=======
->>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
-    };
-
-    const Plotly = require('plotly.js-dist');
-    Plotly.relayout('scatter-plot', layout);
-}
-
-// Get coordinates for line
-const getDiagonalline = (scores, scores_coords, quartile, better, max_x, max_y) =>{
-    let target;
-    for(let i = 0; i < scores.length; i++){
-        if(scores[i] <= quartile){
-            target = [[scores_coords[scores[i - 1]][0], scores_coords[scores[i - 1]][1]],
-                    [scores_coords[scores[i]][0], scores_coords[scores[i]][1]]];
-            break;
-        }
-    }
-
-    let half_point = [(target[0][0] + target[1][0]) /2, (target[0][1] + target[1][1]) / 2]
-
-    // # draw the line depending on which is the optimal corner
-    let x_coords;
-    let y_coords;
-    if (better == "bottom-right"){
-         x_coords = [half_point[0] - 2*max_x, half_point[0] + 2*max_x];
-         y_coords = [half_point[1] - 2*max_y, half_point[1] + 2*max_y];
-    } else if (better == "top-right"){
-         x_coords = [half_point[0] + 2*max_x, half_point[0] - 2*max_x];
-         y_coords = [half_point[1] - 2*max_y, half_point[1] + 2*max_y];   
-    } else if (better == "top-left"){
-       x_coords = [half_point[0] + 2*max_x, half_point[0] - 2*max_x];
-       y_coords = [half_point[1] + 2*max_y, half_point[1] - 2*max_y];   
-    };
-  
-    return [x_coords, y_coords];
-
-}
-
-// Normalize data
-const normalizeData = (xValues, yValues) => {
-    let maxX = Math.max.apply(null, xValues);
-    let maxY = Math.max.apply(null, yValues);
-
-    let xNorm = xValues.map(function(e) {  
-    return e / maxX;
-    });
-
-    let yNorm = yValues.map(function(e) {  
-    return e / maxY;
-    });
-
-    return [xNorm, yNorm];
-}
-
-// Asigne the classification by Diagonal Quartile
-const asigneQuartileDiagonal = (dataTools, first_quartile, second_quartile, third_quartile) => {
-    
-    let poly = [[],[],[],[]];
-    dataTools.forEach(element => {
-        
-        if (element.score <= first_quartile) {
-            element.quartile = 4;
-            poly[0].push([element[0], element[1]]);
-        } else if (element.score <= second_quartile) {
-            element.quartile = 3;
-            poly[1].push([element[0], element[1]]);
-        } else if (element.score <= third_quartile) {
-            element.quartile = 2;
-            poly[2].push([element[0], element[1]]);
-        } else {
-            element.quartile = 1;
-            poly[3].push([element[0], element[1]]);
-        }
-    });
-
-    let i = 4;
-    let annotationDiagonal = []
-    poly.forEach(function(group) {
-  
-        let center = (getCentroid(group))
-        const centroidX = center[0];
-        const centroidY = center[1];
-        
-        let annotationD = {
-            xref: 'x',
-            yref: 'y',
-            x: centroidX,
-            xanchor: 'right',
-            y: centroidY,
-            yanchor: 'bottom',
-            text: i,
-            showarrow: false,
-            font: {
-                size: 30,
-                color: '#5A88B5'
-            }
-        }
-        annotationDiagonal.push(annotationD)
-        i--;
-    });
-    return annotationDiagonal
-
-}
-
-// Get centroide by annotation
-const getCentroid = (coord) =>{
-    var center = coord.reduce(function (x,y) {
-        return [x[0] + y[0]/coord.length, x[1] + y[1]/coord.length] 
-    }, [0,0])
-    return center;
-}
-
-// Create Table
-const createTableDiagonal = (visibleTool) => {
-    quartileData.value = [];
-
-    allToolID.value.forEach((tool) => {
-        const toolName = tool;
-        const visibleToolInfo = visibleTool.find(item => item[0] === xValues.value[allToolID.value.indexOf(tool)]);
-
-        let quartile = 0;
-        let label = '--';
-
-        if (visibleToolInfo) {
-            quartile = visibleToolInfo.quartile;
-            label = quartile.toString();
-        }
-
-        quartileData.value.push({ tool_id: toolName, cuartil: quartile, label: label });
-    });
-};
-
->>>>>>> 179efde (Create  view for diagonal quartiles)
 
 // ----------------------------------------------------------------
 // K-MEANS CLUSTERING
@@ -2109,15 +1366,7 @@ const downloadChart = async (format) => {
     Plotly.relayout('scatter-plot', chart.layout);
 
     if (format === 'png') {
-<<<<<<< HEAD
-<<<<<<< HEAD
         if (viewSquare.value || viewKmeans.value || viewDiagonal.value) {
-=======
-        if (viewSquare.value || viewKmeans.value) {
->>>>>>> 9d24c78 (Fix download on pdf and add download with table)
-=======
-        if (viewSquare.value || viewKmeans.value || viewDiagonal.value) {
->>>>>>> 179efde (Create  view for diagonal quartiles)
             const toDownloadDiv = document.getElementById('todownload');
             const downloadCanvas = await html2canvas(toDownloadDiv, {
                 scrollX: 0,
@@ -2129,15 +1378,7 @@ const downloadChart = async (format) => {
 
             const link = document.createElement('a');
             link.href = downloadImage;
-<<<<<<< HEAD
-<<<<<<< HEAD
             link.download = `benchmarking_chart_${props.datasetId}.${format}`;
-=======
-            link.download = `benchmarking_chart_${datasetId.value}.${format}`;
->>>>>>> 9d24c78 (Fix download on pdf and add download with table)
-=======
-            link.download = `benchmarking_chart_${props.datasetId}.${format}`;
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -2147,15 +1388,7 @@ const downloadChart = async (format) => {
                 .then((url) => {
                     const link = document.createElement('a');
                     link.href = url;
-<<<<<<< HEAD
-<<<<<<< HEAD
                     link.download = `benchmarking_chart_${props.datasetId}.${format}`;
-=======
-                    link.download = `benchmarking_chart_${datasetId.value}.${format}`;
->>>>>>> 9d24c78 (Fix download on pdf and add download with table)
-=======
-                    link.download = `benchmarking_chart_${props.datasetId}.${format}`;
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
                     link.click();
                 })
                 .catch((error) => {
@@ -2169,15 +1402,7 @@ const downloadChart = async (format) => {
             .then((url) => {
                 const link = document.createElement('a');
                 link.href = url;
-<<<<<<< HEAD
-<<<<<<< HEAD
                 link.download = `benchmarking_chart_${props.datasetId}.${format}`;
-=======
-                link.download = `benchmarking_chart_${datasetId.value}.${format}`;
->>>>>>> 9d24c78 (Fix download on pdf and add download with table)
-=======
-                link.download = `benchmarking_chart_${props.datasetId}.${format}`;
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
                 link.click();
             })
             .catch((error) => {
@@ -2196,15 +1421,7 @@ const downloadChart = async (format) => {
 
         pdf.addImage(chartImageURI, 'PNG', 10, 15, chartWidth, chartHeight, null, 'FAST', 0, null, 'center');
 
-<<<<<<< HEAD
-<<<<<<< HEAD
         if (viewSquare.value || viewKmeans.value || viewDiagonal.value) {
-=======
-        if (viewSquare.value || viewKmeans.value) {
->>>>>>> 9d24c78 (Fix download on pdf and add download with table)
-=======
-        if (viewSquare.value || viewKmeans.value || viewDiagonal.value) {
->>>>>>> 179efde (Create  view for diagonal quartiles)
             const table = document.getElementById('benchmarkingTable');
             const downloadCanvas = await html2canvas(table, {
                 scrollX: 0,
@@ -2222,15 +1439,7 @@ const downloadChart = async (format) => {
         }
 
         // Save the PDF
-<<<<<<< HEAD
-<<<<<<< HEAD
         pdf.save(`benchmarking_chart_${props.datasetId}.${format}`);
-=======
-        pdf.save(`benchmarking_chart_${datasetId.value}.${format}`);
->>>>>>> 9d24c78 (Fix download on pdf and add download with table)
-=======
-        pdf.save(`benchmarking_chart_${props.datasetId}.${format}`);
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
 
     } else if (format === 'json') {
         // Descargar como JSON
@@ -2313,27 +1522,13 @@ function getOptimizationArrow(optimization) {
     switch (optimization) {
         case 'top-left':
             arrowX = 0;
-<<<<<<< HEAD
-<<<<<<< HEAD
             arrowY = 0.98;
             axAdjustment = 35;
             ayAdjustment = 30;
-=======
-            arrowY = 0.99;
-            axAdjustment = 25;
-            ayAdjustment = 20;
->>>>>>> 1853387 (Fix Details)
-=======
-            arrowY = 0.98;
-            axAdjustment = 35;
-            ayAdjustment = 30;
->>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
             break;
 
         case 'top-right':
             arrowX = 0.98;
-<<<<<<< HEAD
-<<<<<<< HEAD
             arrowY = 0.98;
             axAdjustment = -30;
             ayAdjustment = 35;
@@ -2344,46 +1539,14 @@ function getOptimizationArrow(optimization) {
             arrowY = 0;
             axAdjustment = -30;
             ayAdjustment = -30;
-=======
-            arrowY = 0.99;
-            axAdjustment = -20;
-            ayAdjustment = 25;
-=======
-            arrowY = 0.98;
-            axAdjustment = -30;
-            ayAdjustment = 35;
->>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
-            break;
-
-        case 'bottom-right':
-            arrowX = 1
-            arrowY = 0;
-<<<<<<< HEAD
-            axAdjustment = -20;
-            ayAdjustment = -25;
->>>>>>> 1853387 (Fix Details)
-=======
-            axAdjustment = -30;
-            ayAdjustment = -30;
->>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
             break;
 
         default:
             // By default, place the arrow in the upper left corner
             arrowX = 0;
             arrowY = 0;
-<<<<<<< HEAD
-<<<<<<< HEAD
             axAdjustment = 30;
             ayAdjustment = -35;
-=======
-            axAdjustment = 20;
-            ayAdjustment = -25;
->>>>>>> 1853387 (Fix Details)
-=======
-            axAdjustment = 30;
-            ayAdjustment = -35;
->>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
 
     }
 
@@ -2438,27 +1601,12 @@ html {
 .butns {
     position: absolute;
     top: 14px;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    /* right: 10px; */
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
-=======
->>>>>>> 3ea2494 (Add legend to Square cuartile)
     margin-top: 10px;
     z-index: 1;
 }
 
 .button-classification {
-<<<<<<< HEAD
-<<<<<<< HEAD
     width: 190px;
-=======
-    width: 180px;
->>>>>>> 33bba23 (Add classification text to dropdown)
-=======
-    width: 190px;
->>>>>>> 1853387 (Fix Details)
 }
 
 .button-resetView {
@@ -2490,44 +1638,9 @@ html {
 }
 
 .table-container {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     max-height: 700px;
     overflow-y: auto;
     font-size: 1.1rem;
-<<<<<<< HEAD
-}
-.cuartiles-table tbody tr:first-child {
-    margin-top: 40px; 
-}
-
-.cuartiles-table {
-<<<<<<< HEAD
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-=======
-    margin: 0 auto;
-    width: 90%;
->>>>>>> 671690b (Add: Tool column linked to the chart legend)
-}
-
-.cuartiles-table th {
-    position: -webkit-sticky;
-    position: sticky;
-    top: -1px;
-=======
-    max-height: 788px;
-=======
-    max-height: 810px;
->>>>>>> 207eabe (Add styles when tool is hidden)
-=======
-    max-height: 700px;
->>>>>>> 0d89c68 (Added Popover, delete info table)
-    overflow-y: auto;
-=======
->>>>>>> 1853387 (Fix Details)
 }
 .cuartiles-table tbody tr:first-child {
     margin-top: 40px; 
@@ -2542,43 +1655,20 @@ html {
 .cuartiles-table th {
     position: -webkit-sticky;
     position: sticky;
-<<<<<<< HEAD
-    top: 0;
->>>>>>> e1533f4 (Add scroll in table v1)
-=======
     top: -1px;
->>>>>>> 073b737 (Fix table header)
     z-index: 1;
     background-color: #6c757d;
     color: white;
-<<<<<<< HEAD
-    border: solid 1px #6c757d;
-=======
     white-space: nowrap;
->>>>>>> 1853387 (Fix Details)
 }
-<<<<<<< HEAD
-=======
 .toolHeader{
     width: 60%;
 }
->>>>>>> 073b737 (Fix table header)
 .cuartiles-table td {
-<<<<<<< HEAD
-<<<<<<< HEAD
     padding: 8px;
     vertical-align: top;
-=======
-    padding-top: 8px;
-    padding-bottom: 8px;
-=======
-    padding: 8px;
-    vertical-align: top;
->>>>>>> 1853387 (Fix Details)
 }
 
-<<<<<<< HEAD
-=======
 .toolColumn {
     cursor: pointer;
     position: relative;
@@ -2611,19 +1701,10 @@ html {
         width: 30%; /* Ajusta el ancho de la columna de herramientas */
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-
->>>>>>> e1533f4 (Add scroll in table v1)
-=======
->>>>>>> 207eabe (Add styles when tool is hidden)
-=======
     .toolColumn span {
         margin-left: 15px; /* Restaura el margen a su valor original */
     }
 }
->>>>>>> 1853387 (Fix Details)
 .quartil-1 {
     background-color: rgb(237, 248, 233);
 }
@@ -2640,53 +1721,12 @@ html {
     background-color: rgb(35, 139, 69);
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 207eabe (Add styles when tool is hidden)
 .quartil-zero {
     background-color: rgba(237, 231, 231, 0.5);
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 .info-icon{
     color: #ffffff;
     margin-left: 5px;
 }
 </style>
-=======
-=======
->>>>>>> 207eabe (Add styles when tool is hidden)
-=======
-=======
-
->>>>>>> 9d24c78 (Fix download on pdf and add download with table)
-.annotationfooter {
-    background-color: #f0f0f0;
-    padding: 8px;
-    margin-top: 30px;
-    border-radius: 5px;
-    color: #666;
-    font-size: 10px;
-    text-align: center;
-}
-<<<<<<< HEAD
->>>>>>> 3ea2494 (Add legend to Square cuartile)
-.table-secondary {
-    background-color: #6c757d;
-    color: white;
-}</style>
->>>>>>> e1533f4 (Add scroll in table v1)
-=======
-
-=======
->>>>>>> 073b737 (Fix table header)
-.info-icon{
-    color: #ffffff;
-    margin-left: 5px;
-}
-</style>
->>>>>>> 9d24c78 (Fix download on pdf and add download with table)

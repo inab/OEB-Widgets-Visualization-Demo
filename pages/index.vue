@@ -26,19 +26,8 @@
       <!-- Scatter plot -->
       <b-col cols="12" sm="10" md="12">
         <transition name="fade">
-<<<<<<< HEAD
-<<<<<<< HEAD
           <ScatterPlot v-if="isScatterPlotType" :inline_data="inline_data" :datasetId="datasetId" />
           <BarPlot v-if="isBarPlotType" :jsonData="fetchedData" />
-<<<<<<< HEAD
-=======
-          <ScatterPlot v-if="!loading" />
->>>>>>> cf2dca4 (Add:  spinner to Scatter Plot)
-=======
-          <ScatterPlot v-if="isScatterPlotType" :inline_data="inline_data" :datasetId="datasetId" />
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
-=======
->>>>>>> 38cf049 (Add Loader test)
         </transition>
       </b-col>
 
@@ -69,16 +58,10 @@ export default {
   data() {
     return {
       loading: true, // Initial loading state
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
       fetchedData: null,
       inline_data: null,
       isBarPlotType: null,
       isScatterPlotType: null,
-<<<<<<< HEAD
-<<<<<<< HEAD
       datasetId: null,
       titlePlot: null,
     }
@@ -91,43 +74,6 @@ export default {
 
     // Fetch your data
     const response = await fetch('/raw_data_OEBD00200002V20.json'); //endpoint to db rest to cofigure
-<<<<<<< HEAD
-    this.fetchedData = await response.json();
-    this.inline_data = this.fetchedData.datalink.inline_data
-    this.datasetId = this.fetchedData._id
-    let visualization = this.fetchedData.datalink.inline_data.visualization
-    let type = this.fetchedData.datalink.inline_data.visualization.type
-
-    // Test Loader
-    if (this.fetchedData) {
-      if (visualization && type === 'bar-plot') {
-        this.isBarPlotType = true;
-        this.titlePlot = 'BAR PLOT'
-      }else if(visualization && type === '2D-plot'){
-        this.isScatterPlotType = true;
-        this.titlePlot = 'SCATTER PLOT'
-      }
-=======
->>>>>>> cf2dca4 (Add:  spinner to Scatter Plot)
-=======
-      datasetId: null
->>>>>>> 49278f1 (Add: Index obtains the data, displays the correct component and passes it the parameters)
-=======
-      datasetId: null,
-      titlePlot: null,
->>>>>>> 38cf049 (Add Loader test)
-    }
-  },
-  async mounted() {
-    // Simulate an asynchronous operation to better layout
-    setTimeout(() => {
-      this.loading = false;
-    }, 1000);
-
-    // Fetch your data
-    const response = await fetch('/raw_data_OEBD00200002UK0.json'); //endpoint to db rest to cofigure
-=======
->>>>>>> 1853387 (Fix Details)
     this.fetchedData = await response.json();
     this.inline_data = this.fetchedData.datalink.inline_data
     this.datasetId = this.fetchedData._id
