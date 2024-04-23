@@ -307,6 +307,8 @@ onMounted(async () => {
         hovermode: false
     }
 
+
+    
     // ----------------------------------------------------------------
     // CREATE SCATTER PLOT
     const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout, config);
@@ -320,7 +322,9 @@ onMounted(async () => {
         optimalYaxis.value = layoutObj.yaxis.range;
     });
 
+
     // Capture legend event
+    // ----------------------------------------------------------------
     scatterPlot.then((gd) => {
         gd.on('plotly_legendclick', (event) => {
             let traceIndex = event.curveNumber;
@@ -437,8 +441,12 @@ const updatePlotOnSelection = (traceIndex) => {
     // Update the trace of the Pareto frontier
     const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
 
-    // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
+
+
+    // Update Kmeans Clustering
+    // ----------------------------------------------------------------
     if (viewKmeans.value === true) {
+        // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
 
         // Create a list of visible tools with their hiding status
         const visibleTools = toolID.value.map((tool, index) => ({
@@ -453,6 +461,7 @@ const updatePlotOnSelection = (traceIndex) => {
         showShapesKmeans.value = true;
 
 
+        // Create a new layout
         const layout = {
             shapes: showShapesKmeans.value ? shapes : [],
             annotations: getOptimizationArrow(data.value.visualization.optimization).concat(annotationKmeans)
@@ -460,8 +469,10 @@ const updatePlotOnSelection = (traceIndex) => {
         Plotly.update('scatter-plot', newTraces, layout, 1);
     }
 
-    // If the Square view is active, the quartiles are calculated with the visible traces
+    // Update Square Quartiles
+    // ----------------------------------------------------------------
     if (viewSquare.value === true) {
+        // If the Square view is active, the quartiles are calculated with the visible traces
         const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
         const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
 
@@ -478,7 +489,8 @@ const updatePlotOnSelection = (traceIndex) => {
         optimalView()
     }
 
-    // Diagonal Quartiles
+    // Update Diagonal Quartiles
+    // ----------------------------------------------------------------
     if (viewDiagonal.value === true){
         const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
         const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
@@ -491,8 +503,11 @@ const updatePlotOnSelection = (traceIndex) => {
     Plotly.update('scatter-plot', newTraces, {}, 1);
 }
 
+// ----------------------------------------------------------------
 // Scatter Plot Views
 // ----------------------------------------------------------------
+
+// Reset View (Real dimensions)
 const resetView = () => {
     const Plotly = require('plotly.js-dist');
     const layout = {
@@ -525,6 +540,7 @@ const resetView = () => {
     viewApplied.value = true;
 };
 
+// Optimal View (Optimal dimensions)
 const optimalView = () => {
     const Plotly = require('plotly.js-dist');
     const layout = {
@@ -557,6 +573,7 @@ const optimalView = () => {
     viewApplied.value = false; // Optimal view is applied
 };
 
+// Toggle Visibility
 const toggleView = () => {
     if (viewApplied.value) {
         optimalView();
@@ -565,10 +582,12 @@ const toggleView = () => {
     }
 };
 
+// Text for the View Button
 const viewButtonText = computed(() => {
     return viewApplied.value ? 'Optimal View' : 'Reset View';
 });
 
+// Text for the Classification Button
 const classificationButtonText = computed(() => {
     if (viewKmeans.value) {
         return 'K-Means Clustering';
