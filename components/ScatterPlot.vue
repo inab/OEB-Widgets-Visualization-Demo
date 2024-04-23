@@ -23,6 +23,7 @@
                                     method:</strong></b-dropdown-text>
                             <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
 <<<<<<< HEAD
+<<<<<<< HEAD
                             <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
                             <b-dropdown-item @click="toggleDiagonalQuartile"> Diagonal Quartiles </b-dropdown-item>
                             <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item> 
@@ -32,6 +33,12 @@
                             <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
                             <b-dropdown-item @click="toggleDiagonalQuartile"> Diagonal Quartiles </b-dropdown-item>
 >>>>>>> 38cf049 (Add Loader test)
+=======
+                            <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
+                            <b-dropdown-item @click="toggleDiagonalQuartile"> Diagonal Quartiles </b-dropdown-item>
+                            <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item> 
+
+>>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
                         </b-dropdown>
 
                         <!-- Reset View / optimal view -->
@@ -762,8 +769,12 @@ const updatePlotOnSelection = (traceIndex) => {
 =======
         const layout = {
             shapes: showShapesKmeans.value ? shapes : [],
+<<<<<<< HEAD
             annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans)
 >>>>>>> 671690b (Add: Tool column linked to the chart legend)
+=======
+            annotations: getOptimizationArrow(data.value.visualization.optimization).concat(annotationKmeans)
+>>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
         };
         Plotly.update('scatter-plot', newTraces, layout, 1);
     }
@@ -1219,6 +1230,7 @@ const annotationSquareQuartile = (better) => {
                     yref: 'paper',
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                     x: 0.01,
                     xanchor: 'left',
                     y: 1,
@@ -1233,6 +1245,12 @@ const annotationSquareQuartile = (better) => {
                     y: 0.97,
                     yanchor: 'bottom',
 >>>>>>> 831deb3 (change Square Quartile labels)
+=======
+                    x: 0.01,
+                    xanchor: 'left',
+                    y: 1,
+                    yanchor: 'top',
+>>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
                     text: numCuartil,
                     showarrow: false,
                     font: {
@@ -1246,6 +1264,7 @@ const annotationSquareQuartile = (better) => {
                     xref: 'paper',
                     yref: 'paper',
 <<<<<<< HEAD
+<<<<<<< HEAD
                     x: 0.91,
                     xanchor: 'left',
                     y: 0.05,
@@ -1256,6 +1275,12 @@ const annotationSquareQuartile = (better) => {
                     y: 0.05,
                     yanchor: 'top',
 >>>>>>> 831deb3 (change Square Quartile labels)
+=======
+                    x: 0.91,
+                    xanchor: 'left',
+                    y: 0.05,
+                    yanchor: 'bottom',
+>>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
                     text: numCuartil,
                     showarrow: false,
                     font: {
@@ -1268,13 +1293,17 @@ const annotationSquareQuartile = (better) => {
                 annotation = {
                     xref: 'paper',
                     yref: 'paper',
-                    x: 0.00,
+                    x: 0.01,
                     xanchor: 'left',
+<<<<<<< HEAD
 <<<<<<< HEAD
                     y: 0.10,
 =======
                     y: 0.05,
 >>>>>>> 831deb3 (change Square Quartile labels)
+=======
+                    y: 0.10,
+>>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
                     yanchor: 'top',
                     text: numCuartil,
                     showarrow: false,
@@ -1291,10 +1320,14 @@ const annotationSquareQuartile = (better) => {
                     x: 0.90,
                     xanchor: 'left',
 <<<<<<< HEAD
+<<<<<<< HEAD
                     y: 0.98,
 =======
                     y: 1.03,
 >>>>>>> 831deb3 (change Square Quartile labels)
+=======
+                    y: 0.98,
+>>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
                     yanchor: 'top',
                     text: numCuartil,
                     showarrow: false,
@@ -1451,6 +1484,7 @@ const getDiagonalQuartile = (x_values, y_values) =>{
     const layout = {
         shapes: showShapesDiagonal.value ? shapes : [],
         annotations: getOptimizationArrow(data.value.visualization.optimization).concat(annotationDiagonal),
+<<<<<<< HEAD
     };
 
     const Plotly = require('plotly.js-dist');
@@ -1685,6 +1719,8 @@ const getDiagonalQuartile = (x_values, y_values) =>{
     const layout = {
         shapes: showShapesDiagonal.value ? shapes : [],
         annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationDiagonal),
+=======
+>>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
     };
 
     const Plotly = require('plotly.js-dist');
@@ -2239,6 +2275,7 @@ function getOptimizationArrow(optimization) {
         case 'top-left':
             arrowX = 0;
 <<<<<<< HEAD
+<<<<<<< HEAD
             arrowY = 0.98;
             axAdjustment = 35;
             ayAdjustment = 30;
@@ -2247,10 +2284,16 @@ function getOptimizationArrow(optimization) {
             axAdjustment = 25;
             ayAdjustment = 20;
 >>>>>>> 1853387 (Fix Details)
+=======
+            arrowY = 0.98;
+            axAdjustment = 35;
+            ayAdjustment = 30;
+>>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
             break;
 
         case 'top-right':
             arrowX = 0.98;
+<<<<<<< HEAD
 <<<<<<< HEAD
             arrowY = 0.98;
             axAdjustment = -30;
@@ -2266,14 +2309,24 @@ function getOptimizationArrow(optimization) {
             arrowY = 0.99;
             axAdjustment = -20;
             ayAdjustment = 25;
+=======
+            arrowY = 0.98;
+            axAdjustment = -30;
+            ayAdjustment = 35;
+>>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
             break;
 
         case 'bottom-right':
-            arrowX = 0.99
+            arrowX = 1
             arrowY = 0;
+<<<<<<< HEAD
             axAdjustment = -20;
             ayAdjustment = -25;
 >>>>>>> 1853387 (Fix Details)
+=======
+            axAdjustment = -30;
+            ayAdjustment = -30;
+>>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
             break;
 
         default:
@@ -2281,12 +2334,17 @@ function getOptimizationArrow(optimization) {
             arrowX = 0;
             arrowY = 0;
 <<<<<<< HEAD
+<<<<<<< HEAD
             axAdjustment = 30;
             ayAdjustment = -35;
 =======
             axAdjustment = 20;
             ayAdjustment = -25;
 >>>>>>> 1853387 (Fix Details)
+=======
+            axAdjustment = 30;
+            ayAdjustment = -35;
+>>>>>>> 09c1cc2 (Change position arrow and label of square quartile)
 
     }
 
