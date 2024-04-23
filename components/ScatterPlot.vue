@@ -3,22 +3,9 @@
 
         <b-row>
             <b-col cols="8">
-                <!-- ID AND DATE TABLE -->
-                <div v-if="datasetId && modificationDate">
-                    <b-table-simple bordered small caption-top responsive id='idDateTable'>
-                        <b-tbody>
-                            <b-tr>
-                                <b-th variant="secondary" class="text-center">Dataset ID</b-th>
-                                <b-td class="text-center">{{ datasetId }}</b-td>
-                                <b-th variant="secondary" class="text-center">Last Update</b-th>
-                                <b-td class="text-center">{{ modificationDate }}</b-td>
-                            </b-tr>
-                        </b-tbody>
-                    </b-table-simple>
-                </div>
 
                 <!-- Buttons -->
-                <div v-if="data" class="butns mr-2 mt-5">
+                <div v-if="data" class="butns">
                     <b-button-group class="ml-auto">
                         <!-- Classification -->
                         <b-dropdown :text="classificationButtonText" variant="outline-secondary"
@@ -26,9 +13,10 @@
                             <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
                                     method:</strong></b-dropdown-text>
                             <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
-                            <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item> 
                             <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
                             <b-dropdown-item @click="toggleDiagonalQuartile"> Diagonal Quartiles </b-dropdown-item>
+                            <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item> 
+
                         </b-dropdown>
 
                         <!-- Reset View / optimal view -->
@@ -251,11 +239,20 @@ onMounted(async () => {
                 type: 'data',
                 array: [participant.stderr_x],
                 visible: true,
+                color: '#000000',
+                width: 2,
+                thickness: 0.3
+                
             },
             error_y: {
                 type: 'data',
                 array: [participant.stderr_y],
                 visible: true,
+                color: '#000000',
+                width: 2,
+                thickness: 0.3
+
+
             },
         };
         traces.push(trace);
@@ -265,7 +262,7 @@ onMounted(async () => {
     const layout = {
         autosize: true,
         height: 700,
-        annotations: getOptimizationArrow(visualization.optimization, paretoPoints.value),
+        annotations: getOptimizationArrow(visualization.optimization),
         xaxis: {
             title: {
                 text: visualization.x_axis,
@@ -310,6 +307,8 @@ onMounted(async () => {
         hovermode: false
     }
 
+
+    
     // ----------------------------------------------------------------
     // CREATE SCATTER PLOT
     const scatterPlot = Plotly.newPlot('scatter-plot', traces, layout, config);
@@ -323,7 +322,9 @@ onMounted(async () => {
         optimalYaxis.value = layoutObj.yaxis.range;
     });
 
+
     // Capture legend event
+    // ----------------------------------------------------------------
     scatterPlot.then((gd) => {
         gd.on('plotly_legendclick', (event) => {
             let traceIndex = event.curveNumber;
@@ -440,8 +441,12 @@ const updatePlotOnSelection = (traceIndex) => {
     // Update the trace of the Pareto frontier
     const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
 
-    // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
+
+
+    // Update Kmeans Clustering
+    // ----------------------------------------------------------------
     if (viewKmeans.value === true) {
+        // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
 
         // Create a list of visible tools with their hiding status
         const visibleTools = toolID.value.map((tool, index) => ({
@@ -456,15 +461,18 @@ const updatePlotOnSelection = (traceIndex) => {
         showShapesKmeans.value = true;
 
 
+        // Create a new layout
         const layout = {
             shapes: showShapesKmeans.value ? shapes : [],
-            annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans)
+            annotations: getOptimizationArrow(data.value.visualization.optimization).concat(annotationKmeans)
         };
         Plotly.update('scatter-plot', newTraces, layout, 1);
     }
 
-    // If the Square view is active, the quartiles are calculated with the visible traces
+    // Update Square Quartiles
+    // ----------------------------------------------------------------
     if (viewSquare.value === true) {
+        // If the Square view is active, the quartiles are calculated with the visible traces
         const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
         const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
 
@@ -481,7 +489,8 @@ const updatePlotOnSelection = (traceIndex) => {
         optimalView()
     }
 
-    // Diagonal Quartiles
+    // Update Diagonal Quartiles
+    // ----------------------------------------------------------------
     if (viewDiagonal.value === true){
         const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
         const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
@@ -494,13 +503,16 @@ const updatePlotOnSelection = (traceIndex) => {
     Plotly.update('scatter-plot', newTraces, {}, 1);
 }
 
+// ----------------------------------------------------------------
 // Scatter Plot Views
 // ----------------------------------------------------------------
+
+// Reset View (Real dimensions)
 const resetView = () => {
     const Plotly = require('plotly.js-dist');
     const layout = {
         xaxis: {
-            range: [0, Math.max(...xValues.value) + 5000],
+            range: [0, Math.max(...xValues.value) + (Math.min(...xValues.value) / 3)],
             title: {
                 text: data.value.visualization.x_axis,
                 font: {
@@ -528,6 +540,7 @@ const resetView = () => {
     viewApplied.value = true;
 };
 
+// Optimal View (Optimal dimensions)
 const optimalView = () => {
     const Plotly = require('plotly.js-dist');
     const layout = {
@@ -560,6 +573,7 @@ const optimalView = () => {
     viewApplied.value = false; // Optimal view is applied
 };
 
+// Toggle Visibility
 const toggleView = () => {
     if (viewApplied.value) {
         optimalView();
@@ -568,10 +582,12 @@ const toggleView = () => {
     }
 };
 
+// Text for the View Button
 const viewButtonText = computed(() => {
     return viewApplied.value ? 'Optimal View' : 'Reset View';
 });
 
+// Text for the Classification Button
 const classificationButtonText = computed(() => {
     if (viewKmeans.value) {
         return 'K-Means Clustering';
@@ -631,7 +647,7 @@ const noClassification = () => {
 
     const layout = {
         shapes: false ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+        annotations: getOptimizationArrow(data.value.visualization.optimization)
     };
     Plotly.update('scatter-plot', newTraces, layout, 1);
     Plotly.restyle('scatter-plot', { visible: visibleArray })
@@ -667,7 +683,7 @@ const toggleQuartilesVisibility = () => {
 
     const layout = {
         shapes: false ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+        annotations: getOptimizationArrow(data.value.visualization.optimization)
     };
 
     const visibleArray = Array(numTraces).fill(true);
@@ -695,7 +711,7 @@ const calculateQuartiles = (xValues, yValues, toolID) => {
             x0: cuartilesX,
             x1: cuartilesX,
             y0: 0,
-            y1: Math.max(cuartilesY) + 10,
+            y1: Math.max(...yValues) + Math.max(cuartilesY),
             line: {
                 color: '#C0D4E8',
                 width: 2,
@@ -707,7 +723,7 @@ const calculateQuartiles = (xValues, yValues, toolID) => {
             y0: cuartilesY,
             y1: cuartilesY,
             x0: 0,
-            x1: Math.max(cuartilesX) + 1500000,
+            x1: Math.max(...xValues) + Math.max(cuartilesX),
             line: {
                 color: '#C0D4E8',
                 width: 2,
@@ -798,10 +814,10 @@ const annotationSquareQuartile = (better) => {
                 annotation = {
                     xref: 'paper',
                     yref: 'paper',
-                    x: 0.12,
-                    xanchor: 'right',
-                    y: 0.97,
-                    yanchor: 'bottom',
+                    x: 0.01,
+                    xanchor: 'left',
+                    y: 1,
+                    yanchor: 'top',
                     text: numCuartil,
                     showarrow: false,
                     font: {
@@ -814,10 +830,10 @@ const annotationSquareQuartile = (better) => {
                 annotation = {
                     xref: 'paper',
                     yref: 'paper',
-                    x: 0.90,
+                    x: 0.91,
                     xanchor: 'left',
                     y: 0.05,
-                    yanchor: 'top',
+                    yanchor: 'bottom',
                     text: numCuartil,
                     showarrow: false,
                     font: {
@@ -830,9 +846,9 @@ const annotationSquareQuartile = (better) => {
                 annotation = {
                     xref: 'paper',
                     yref: 'paper',
-                    x: 0.00,
+                    x: 0.01,
                     xanchor: 'left',
-                    y: 0.05,
+                    y: 0.10,
                     yanchor: 'top',
                     text: numCuartil,
                     showarrow: false,
@@ -848,7 +864,7 @@ const annotationSquareQuartile = (better) => {
                     yref: 'paper',
                     x: 0.90,
                     xanchor: 'left',
-                    y: 1.03,
+                    y: 0.98,
                     yanchor: 'top',
                     text: numCuartil,
                     showarrow: false,
@@ -864,7 +880,7 @@ const annotationSquareQuartile = (better) => {
         return annotation;
     });
 
-    const annotations = getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+    const annotations = getOptimizationArrow(data.value.visualization.optimization)
     const layout = {
         annotations: showAnnotationSquare.value ? annotations.concat(newAnnotation) : [],
     };
@@ -1001,7 +1017,7 @@ const getDiagonalQuartile = (x_values, y_values) =>{
 
     const layout = {
         shapes: showShapesDiagonal.value ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationDiagonal),
+        annotations: getOptimizationArrow(data.value.visualization.optimization).concat(annotationDiagonal),
     };
 
     const Plotly = require('plotly.js-dist');
@@ -1163,7 +1179,7 @@ const toggleKmeansVisibility = () => {
     const visibleArray = Array(numTraces).fill(true);
     const layout = {
         shapes: false ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+        annotations: getOptimizationArrow(data.value.visualization.optimization)
     };
     Plotly.update('scatter-plot', newTraces, layout, 1);
     Plotly.update('scatter-plot', { visible: visibleArray });
@@ -1236,7 +1252,7 @@ const createShapeClustering = (dataPoints, toolIDVisible) => {
     const Plotly = require('plotly.js-dist');
     const layout = {
         shapes: showShapesKmeans.value ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans),
+        annotations: getOptimizationArrow(data.value.visualization.optimization).concat(annotationKmeans),
     };
     Plotly.update('scatter-plot', {}, layout);
 
@@ -1444,6 +1460,7 @@ const downloadChart = async (format) => {
 };
 
 // Image Position
+// ----------------------------------------------------------------
 function getImagePosition(optimization) {
     const ImagePositions = [];
 
@@ -1493,7 +1510,8 @@ function getImagePosition(optimization) {
 }
 
 // This function creates the annotations for the optimization arrow
-function getOptimizationArrow(optimization, paretoPoints) {
+// ----------------------------------------------------------------
+function getOptimizationArrow(optimization) {
     const arrowAnnotations = [];
 
     let arrowX, arrowY;
@@ -1503,43 +1521,32 @@ function getOptimizationArrow(optimization, paretoPoints) {
     // Determine arrow position based on optimization
     switch (optimization) {
         case 'top-left':
-            arrowX = Math.min(...paretoPoints.map(point => point[0]));
-            arrowY = Math.max(...paretoPoints.map(point => point[1]));
-            arrowY = arrowY + 0.01  // margin
-            axAdjustment = 20;
-            ayAdjustment = 20;
+            arrowX = 0;
+            arrowY = 0.98;
+            axAdjustment = 35;
+            ayAdjustment = 30;
             break;
+
         case 'top-right':
-            arrowX = Math.max(...paretoPoints.map(point => point[0]));
-            arrowY = Math.max(...paretoPoints.map(point => point[1]));
-            arrowX = arrowX + 0.009
-            arrowY = arrowY + 0.009
-
-            axAdjustment = -20;
-            ayAdjustment = 20;
+            arrowX = 0.98;
+            arrowY = 0.98;
+            axAdjustment = -30;
+            ayAdjustment = 35;
             break;
-        case 'bottom-left':
-            arrowX = Math.min(...paretoPoints.map(point => point[0]));
-            arrowY = Math.min(...paretoPoints.map(point => point[1]));
-            arrowY = arrowY - 0.03
 
-            axAdjustment = 20;
-            ayAdjustment = -20;
-            break;
         case 'bottom-right':
-            arrowX = Math.max(...paretoPoints.map(point => point[0]));
-            arrowY = Math.min(...paretoPoints.map(point => point[1]));
-            arrowX = arrowX + 0.03;
-            arrowY = arrowY - 0.03
-
-            axAdjustment = -20;
-            ayAdjustment = -20;
+            arrowX = 1
+            arrowY = 0;
+            axAdjustment = -30;
+            ayAdjustment = -30;
             break;
+
         default:
             // By default, place the arrow in the upper left corner
-            arrowX = Math.min(...paretoPoints.map(point => point[0]));
-            arrowY = Math.max(...paretoPoints.map(point => point[1]));
-            arrowY = arrowY + 0.01  // margin
+            arrowX = 0;
+            arrowY = 0;
+            axAdjustment = 30;
+            ayAdjustment = -35;
 
     }
 
@@ -1547,13 +1554,19 @@ function getOptimizationArrow(optimization, paretoPoints) {
     const arrowAnnotation = {
         x: arrowX,
         y: arrowY,
-        xref: 'x',
-        yref: 'y',
+        xref: 'paper',
+        yref: 'paper',
         text: 'Optimal corner',
+        font: {
+            color: '#6C757D'
+        },
         showarrow: true,
         arrowhead: 3,
         ax: axAdjustment,
         ay: ayAdjustment,
+        arrowsize: 1,
+        arrowcolor: '#6C757D'
+
     };
 
     arrowAnnotations.push(arrowAnnotation);
@@ -1582,15 +1595,18 @@ function getSymbol() {
 
 
 <style scoped lang="css">
+html {
+    font-size: 16px; /* Por ejemplo, 16px */
+}
 .butns {
     position: absolute;
     top: 14px;
     margin-top: 10px;
-    z-index: 1
+    z-index: 1;
 }
 
 .button-classification {
-    width: 180px;
+    width: 190px;
 }
 
 .button-resetView {
@@ -1598,7 +1614,7 @@ function getSymbol() {
 }
 
 .button-download {
-    width: 140px;
+    width: 168px;
 }
 
 .text-download {
@@ -1624,14 +1640,16 @@ function getSymbol() {
 .table-container {
     max-height: 700px;
     overflow-y: auto;
+    font-size: 1.1rem;
 }
 .cuartiles-table tbody tr:first-child {
-    margin-top: 40px; /* Ajusta el margen superior del primer elemento de la tabla */
+    margin-top: 40px; 
 }
 
 .cuartiles-table {
     width: 100%;
     table-layout: fixed;
+    border-collapse: collapse;
 }
 
 .cuartiles-table th {
@@ -1641,13 +1659,14 @@ function getSymbol() {
     z-index: 1;
     background-color: #6c757d;
     color: white;
+    white-space: nowrap;
 }
 .toolHeader{
     width: 60%;
 }
 .cuartiles-table td {
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding: 8px;
+    vertical-align: top;
 }
 
 .toolColumn {
@@ -1668,7 +1687,7 @@ function getSymbol() {
 
 .toolColumn span {
     display: inline-block;
-    margin-left: 15px;
+    margin-left: 25px;
     transition: transform 0.3s ease;
 }
 
@@ -1677,7 +1696,15 @@ function getSymbol() {
     font-style: italic;
     color: #0A58A2;
 }
+@media (max-width: 768px) {
+    .toolHeader {
+        width: 30%; /* Ajusta el ancho de la columna de herramientas */
+    }
 
+    .toolColumn span {
+        margin-left: 15px; /* Restaura el margen a su valor original */
+    }
+}
 .quartil-1 {
     background-color: rgb(237, 248, 233);
 }
