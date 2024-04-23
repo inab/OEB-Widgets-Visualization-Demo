@@ -553,12 +553,18 @@ onMounted(async () => {
     });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
     // Capture legend event
     // ----------------------------------------------------------------
 =======
     // Capture legend event
 >>>>>>> 671690b (Add: Tool column linked to the chart legend)
+=======
+
+    // Capture legend event
+    // ----------------------------------------------------------------
+>>>>>>> a49b958 (Add coments)
     scatterPlot.then((gd) => {
         gd.on('plotly_legendclick', (event) => {
             let traceIndex = event.curveNumber;
@@ -737,16 +743,24 @@ const updatePlotOnSelection = (traceIndex) => {
     const newTraces = { x: [newParetoPoints.map((point) => point[0])], y: [newParetoPoints.map((point) => point[1])] }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> a49b958 (Add coments)
 
 
     // Update Kmeans Clustering
     // ----------------------------------------------------------------
+<<<<<<< HEAD
     if (viewKmeans.value === true) {
         // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
 =======
     // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
     if (viewKmeans.value === true) {
 >>>>>>> 671690b (Add: Tool column linked to the chart legend)
+=======
+    if (viewKmeans.value === true) {
+        // If the K-means view is active, K-means Clustering is recalculated, otherwise it is not.
+>>>>>>> a49b958 (Add coments)
 
         // Create a list of visible tools with their hiding status
         const visibleTools = toolID.value.map((tool, index) => ({
@@ -762,6 +776,9 @@ const updatePlotOnSelection = (traceIndex) => {
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> a49b958 (Add coments)
         // Create a new layout
         const layout = {
             shapes: showShapesKmeans.value ? shapes : [],
@@ -781,6 +798,7 @@ const updatePlotOnSelection = (traceIndex) => {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     // Update Square Quartiles
     // ----------------------------------------------------------------
 =======
@@ -791,6 +809,12 @@ const updatePlotOnSelection = (traceIndex) => {
 =======
     if (viewSquare.value === true) {
 >>>>>>> 671690b (Add: Tool column linked to the chart legend)
+=======
+    // Update Square Quartiles
+    // ----------------------------------------------------------------
+    if (viewSquare.value === true) {
+        // If the Square view is active, the quartiles are calculated with the visible traces
+>>>>>>> a49b958 (Add coments)
         const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
         const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
 
@@ -809,11 +833,16 @@ const updatePlotOnSelection = (traceIndex) => {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     // Update Diagonal Quartiles
     // ----------------------------------------------------------------
 =======
     // Diagonal Quartiles
 >>>>>>> 179efde (Create  view for diagonal quartiles)
+=======
+    // Update Diagonal Quartiles
+    // ----------------------------------------------------------------
+>>>>>>> a49b958 (Add coments)
     if (viewDiagonal.value === true){
         const updatedXCoordinates = ref(updatedVisibleTools.map((participant) => participant[0]))
         const updatedYCoordinates = ref(updatedVisibleTools.map((participant) => participant[1]))
@@ -852,9 +881,15 @@ const updatePlotOnSelection = (traceIndex) => {
     Plotly.update('scatter-plot', newTraces, {}, 1);
 }
 
+// ----------------------------------------------------------------
 // Scatter Plot Views
 // ----------------------------------------------------------------
+<<<<<<< HEAD
 >>>>>>> 671690b (Add: Tool column linked to the chart legend)
+=======
+
+// Reset View (Real dimensions)
+>>>>>>> a49b958 (Add coments)
 const resetView = () => {
     const Plotly = require('plotly.js-dist');
     const layout = {
@@ -943,6 +978,7 @@ const viewButtonText = computed(() => {
 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // Text for the Classification Button
 const classificationButtonText = computed(() => {
     if (viewKmeans.value) {
@@ -956,6 +992,9 @@ const classificationButtonText = computed(() => {
     }
 });
 =======
+=======
+// Text for the Classification Button
+>>>>>>> a49b958 (Add coments)
 const classificationButtonText = computed(() => {
     if (viewKmeans.value) {
         return 'K-Means Clustering';
