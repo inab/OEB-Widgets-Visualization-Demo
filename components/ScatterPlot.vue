@@ -13,9 +13,10 @@
                             <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
                                     method:</strong></b-dropdown-text>
                             <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
-                            <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item> 
                             <b-dropdown-item @click="toggleQuartilesVisibility"> Square Quartiles </b-dropdown-item>
                             <b-dropdown-item @click="toggleDiagonalQuartile"> Diagonal Quartiles </b-dropdown-item>
+                            <b-dropdown-item @click="toggleKmeansVisibility"> K-Means Clustering </b-dropdown-item> 
+
                         </b-dropdown>
 
                         <!-- Reset View / optimal view -->
@@ -261,7 +262,7 @@ onMounted(async () => {
     const layout = {
         autosize: true,
         height: 700,
-        annotations: getOptimizationArrow(visualization.optimization, paretoPoints.value),
+        annotations: getOptimizationArrow(visualization.optimization),
         xaxis: {
             title: {
                 text: visualization.x_axis,
@@ -454,7 +455,7 @@ const updatePlotOnSelection = (traceIndex) => {
 
         const layout = {
             shapes: showShapesKmeans.value ? shapes : [],
-            annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans)
+            annotations: getOptimizationArrow(data.value.visualization.optimization).concat(annotationKmeans)
         };
         Plotly.update('scatter-plot', newTraces, layout, 1);
     }
@@ -627,7 +628,7 @@ const noClassification = () => {
 
     const layout = {
         shapes: false ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+        annotations: getOptimizationArrow(data.value.visualization.optimization)
     };
     Plotly.update('scatter-plot', newTraces, layout, 1);
     Plotly.restyle('scatter-plot', { visible: visibleArray })
@@ -663,7 +664,7 @@ const toggleQuartilesVisibility = () => {
 
     const layout = {
         shapes: false ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+        annotations: getOptimizationArrow(data.value.visualization.optimization)
     };
 
     const visibleArray = Array(numTraces).fill(true);
@@ -794,10 +795,10 @@ const annotationSquareQuartile = (better) => {
                 annotation = {
                     xref: 'paper',
                     yref: 'paper',
-                    x: 0.0,
+                    x: 0.01,
                     xanchor: 'left',
-                    y: 0.97,
-                    yanchor: 'bottom',
+                    y: 1,
+                    yanchor: 'top',
                     text: numCuartil,
                     showarrow: false,
                     font: {
@@ -810,10 +811,10 @@ const annotationSquareQuartile = (better) => {
                 annotation = {
                     xref: 'paper',
                     yref: 'paper',
-                    x: 0.90,
+                    x: 0.91,
                     xanchor: 'left',
                     y: 0.05,
-                    yanchor: 'top',
+                    yanchor: 'bottom',
                     text: numCuartil,
                     showarrow: false,
                     font: {
@@ -826,9 +827,9 @@ const annotationSquareQuartile = (better) => {
                 annotation = {
                     xref: 'paper',
                     yref: 'paper',
-                    x: 0.00,
+                    x: 0.01,
                     xanchor: 'left',
-                    y: 0.05,
+                    y: 0.10,
                     yanchor: 'top',
                     text: numCuartil,
                     showarrow: false,
@@ -844,7 +845,7 @@ const annotationSquareQuartile = (better) => {
                     yref: 'paper',
                     x: 0.90,
                     xanchor: 'left',
-                    y: 1.03,
+                    y: 0.98,
                     yanchor: 'top',
                     text: numCuartil,
                     showarrow: false,
@@ -860,7 +861,7 @@ const annotationSquareQuartile = (better) => {
         return annotation;
     });
 
-    const annotations = getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+    const annotations = getOptimizationArrow(data.value.visualization.optimization)
     const layout = {
         annotations: showAnnotationSquare.value ? annotations.concat(newAnnotation) : [],
     };
@@ -997,7 +998,7 @@ const getDiagonalQuartile = (x_values, y_values) =>{
 
     const layout = {
         shapes: showShapesDiagonal.value ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationDiagonal),
+        annotations: getOptimizationArrow(data.value.visualization.optimization).concat(annotationDiagonal),
     };
 
     const Plotly = require('plotly.js-dist');
@@ -1159,7 +1160,7 @@ const toggleKmeansVisibility = () => {
     const visibleArray = Array(numTraces).fill(true);
     const layout = {
         shapes: false ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value)
+        annotations: getOptimizationArrow(data.value.visualization.optimization)
     };
     Plotly.update('scatter-plot', newTraces, layout, 1);
     Plotly.update('scatter-plot', { visible: visibleArray });
@@ -1232,7 +1233,7 @@ const createShapeClustering = (dataPoints, toolIDVisible) => {
     const Plotly = require('plotly.js-dist');
     const layout = {
         shapes: showShapesKmeans.value ? shapes : [],
-        annotations: getOptimizationArrow(data.value.visualization.optimization, paretoPoints.value).concat(annotationKmeans),
+        annotations: getOptimizationArrow(data.value.visualization.optimization).concat(annotationKmeans),
     };
     Plotly.update('scatter-plot', {}, layout);
 
@@ -1440,6 +1441,7 @@ const downloadChart = async (format) => {
 };
 
 // Image Position
+// ----------------------------------------------------------------
 function getImagePosition(optimization) {
     const ImagePositions = [];
 
@@ -1489,7 +1491,8 @@ function getImagePosition(optimization) {
 }
 
 // This function creates the annotations for the optimization arrow
-function getOptimizationArrow(optimization, paretoPoints) {
+// ----------------------------------------------------------------
+function getOptimizationArrow(optimization) {
     const arrowAnnotations = [];
 
     let arrowX, arrowY;
@@ -1500,31 +1503,31 @@ function getOptimizationArrow(optimization, paretoPoints) {
     switch (optimization) {
         case 'top-left':
             arrowX = 0;
-            arrowY = 0.99;
-            axAdjustment = 25;
-            ayAdjustment = 20;
+            arrowY = 0.98;
+            axAdjustment = 35;
+            ayAdjustment = 30;
             break;
 
         case 'top-right':
             arrowX = 0.98;
-            arrowY = 0.99;
-            axAdjustment = -20;
-            ayAdjustment = 25;
+            arrowY = 0.98;
+            axAdjustment = -30;
+            ayAdjustment = 35;
             break;
 
         case 'bottom-right':
-            arrowX = 0.99
+            arrowX = 1
             arrowY = 0;
-            axAdjustment = -20;
-            ayAdjustment = -25;
+            axAdjustment = -30;
+            ayAdjustment = -30;
             break;
 
         default:
             // By default, place the arrow in the upper left corner
             arrowX = 0;
             arrowY = 0;
-            axAdjustment = 20;
-            ayAdjustment = -25;
+            axAdjustment = 30;
+            ayAdjustment = -35;
 
     }
 
