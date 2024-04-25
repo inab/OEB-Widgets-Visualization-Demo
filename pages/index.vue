@@ -26,10 +26,15 @@
       <!-- Scatter plot -->
       <b-col cols="12" sm="10" md="12">
         <transition name="fade">
+          <!--  -->
           <ScatterPlot v-if="isScatterPlotType" :inline_data="inline_data" :datasetId="datasetId" />
           <BarPlot v-if="isBarPlotType" :jsonData="fetchedData" />
         </transition>
       </b-col>
+
+    </b-row>
+    <b-row>
+      <TestStore></TestStore>
 
     </b-row>
     <br>
@@ -49,6 +54,8 @@ Vue.use(IconsPlugin)
 
 import BarPlot from '~/components/BarPlot.vue';
 import ScatterPlot from '~/components/ScatterPlot.vue';
+import TestStore from '~/components/TestStore.vue';
+
 
 export default {
   name: 'IndexPage',
