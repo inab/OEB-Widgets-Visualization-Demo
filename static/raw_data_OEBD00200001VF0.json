@@ -1,0 +1,518 @@
+{
+  "_id": "OEBD00200001VF",
+  "name": "Summary dataset for challenge: G_STD2_Fungi. Metrics: NR_COMPLETED_TREE_SAMPLINGS - FRAC_INCORRECT_TREES",
+  "description": "Summary dataset that aggregates all results from participants in challenge: G_STD2_Fungi. Metrics: NR_COMPLETED_TREE_SAMPLINGS - FRAC_INCORRECT_TREES",
+  "type": "aggregation",
+  "orig_id": "QfO:2020-11-04_G_STD2_Fungi_agg_NR_COMPLETED_TREE_SAMPLINGS+FRAC_INCORRECT_TREES",
+  "community_ids": [
+    "OEBC002"
+  ],
+  "datalink": {
+    "inline_data": {
+      "challenge_participants": [
+        {
+          "tool_id": "OrthoMCL",
+          "metric_x": 14887,
+          "stderr_x": 200.40504,
+          "metric_y": 0.745,
+          "stderr_y": 0.015605705
+        },
+        {
+          "tool_id": "OrthoFinder_MSA_v2.5.2",
+          "metric_x": 14411,
+          "stderr_x": 198.50709,
+          "metric_y": 0.69051404,
+          "stderr_y": 0.020876745
+        },
+        {
+          "tool_id": "Hieranoid_2",
+          "metric_x": 10821,
+          "stderr_x": 180.48098,
+          "metric_y": 0.65833333,
+          "stderr_y": 0.016980849
+        },
+        {
+          "tool_id": "InParanoid_Xenfix",
+          "metric_x": 9870,
+          "stderr_x": 174.44729,
+          "metric_y": 0.671,
+          "stderr_y": 0.016822649
+        },
+        {
+          "tool_id": "Domainoid+",
+          "metric_x": 11604,
+          "stderr_x": 185.01968,
+          "metric_y": 0.68266667,
+          "stderr_y": 0.016664695
+        },
+        {
+          "tool_id": "OMA_Groups",
+          "metric_x": 3957,
+          "stderr_x": 118.31394,
+          "metric_y": 0.60633333,
+          "stderr_y": 0.017492634
+        },
+        {
+          "tool_id": "OMA_Pairs",
+          "metric_x": 6474,
+          "stderr_x": 147.14035,
+          "metric_y": 0.638,
+          "stderr_y": 0.017206787
+        },
+        {
+          "tool_id": "sonicparanoid-sens",
+          "metric_x": 11882,
+          "stderr_x": 186.54383,
+          "metric_y": 0.66366667,
+          "stderr_y": 0.016915901
+        },
+        {
+          "tool_id": "PANTHER_16_all",
+          "metric_x": 13687,
+          "stderr_x": 195.41427,
+          "metric_y": 0.72033333,
+          "stderr_y": 0.016070237
+        },
+        {
+          "tool_id": "sonicparanoid-fast",
+          "metric_x": 8842,
+          "stderr_x": 167.21432,
+          "metric_y": 0.66,
+          "stderr_y": 0.01696081
+        },
+        {
+          "tool_id": "PANTHER__16__LDO__only",
+          "metric_x": 11844,
+          "stderr_x": 186.33811,
+          "metric_y": 0.69466667,
+          "stderr_y": 0.016489615
+        },
+        {
+          "tool_id": "sonicparanoid-mostsensitive",
+          "metric_x": 12532,
+          "stderr_x": 189.93785,
+          "metric_y": 0.68533333,
+          "stderr_y": 0.016626907
+        },
+        {
+          "tool_id": "sonicparanoid",
+          "metric_x": 10424,
+          "stderr_x": 178.03452,
+          "metric_y": 0.69,
+          "stderr_y": 0.016559246
+        },
+        {
+          "tool_id": "OrthoInspector 3",
+          "metric_x": 12608,
+          "stderr_x": 190.3196,
+          "metric_y": 0.667,
+          "stderr_y": 0.016874084
+        },
+        {
+          "tool_id": "Ensembl_Compara",
+          "metric_x": 12357,
+          "stderr_x": 189.04696,
+          "metric_y": 0.70633333,
+          "stderr_y": 0.016306748
+        },
+        {
+          "tool_id": "OMA_GETHOGs",
+          "metric_x": 6616,
+          "stderr_x": 148.50245,
+          "metric_y": 0.63,
+          "stderr_y": 0.01728647
+        },
+        {
+          "tool_id": "RSD",
+          "metric_x": 10248,
+          "stderr_x": 176.91723,
+          "metric_y": 0.667,
+          "stderr_y": 0.016874084
+        },
+        {
+          "tool_id": "BBH",
+          "metric_x": 11405,
+          "stderr_x": 183.90106,
+          "metric_y": 0.673,
+          "stderr_y": 0.016796414
+        },
+        {
+          "tool_id": "MetaPhOrs_v.2.5",
+          "metric_x": 11846,
+          "stderr_x": 186.34896,
+          "metric_y": 0.704,
+          "stderr_y": 0.016344339
+        },
+        {
+          "tool_id": "phylomedb_v5",
+          "metric_x": 10825,
+          "stderr_x": 180.50512,
+          "metric_y": 0.685,
+          "stderr_y": 0.016631665
+        },
+        {
+          "tool_id": "SonicParanoid2-g",
+          "metric_x": 11992,
+          "stderr_x": 187.13473,
+          "metric_y": 0.67666667,
+          "stderr_y": 0.016747416
+        },
+        {
+          "tool_id": "SonicParanoid2",
+          "metric_x": 13347,
+          "stderr_x": 193.87315,
+          "metric_y": 0.69866667,
+          "stderr_y": 0.016428343
+        },
+        {
+          "tool_id": "SonicParanoid2-sens",
+          "metric_x": 13573,
+          "stderr_x": 194.90398,
+          "metric_y": 0.70133333,
+          "stderr_y": 0.016386673
+        },
+        {
+          "tool_id": "SonicParanoid2-fast-g",
+          "metric_x": 10865,
+          "stderr_x": 180.74596,
+          "metric_y": 0.666,
+          "stderr_y": 0.016886728
+        },
+        {
+          "tool_id": "SonicParanoid2-fast",
+          "metric_x": 12159,
+          "stderr_x": 188.01881,
+          "metric_y": 0.698,
+          "stderr_y": 0.016438658
+        },
+        {
+          "tool_id": "SonicParanoid2-sens-g",
+          "metric_x": 12285,
+          "stderr_x": 188.67559,
+          "metric_y": 0.67866667,
+          "stderr_y": 0.016720194
+        },
+        {
+          "tool_id": "Proteinortho_v5.16b",
+          "metric_x": 4689,
+          "stderr_x": 127.76533,
+          "metric_y": 0.62833333,
+          "stderr_y": 0.017302427
+        },
+        {
+          "tool_id": "Proteinortho_v6.3.0_pseudo_default",
+          "metric_x": 6634,
+          "stderr_x": 148.67347,
+          "metric_y": 0.635,
+          "stderr_y": 0.017237269
+        }
+      ],
+      "visualization": {
+        "type": "2D-plot",
+        "x_axis": "NR_COMPLETED_TREE_SAMPLINGS",
+        "y_axis": "FRAC_INCORRECT_TREES",
+        "optimization": "bottom-right"
+      },
+      "labels": [
+        {
+          "label": "OrthoMCL",
+          "dataset_orig_id": "QfO:2020-11-04_OrthoMCL_P"
+        },
+        {
+          "label": "OrthoFinder_MSA_v2.5.2",
+          "dataset_orig_id": "QfO:2020-11-04_OrthoFinder_MSA_v2.5.2_P"
+        },
+        {
+          "label": "Hieranoid_2",
+          "dataset_orig_id": "QfO:2020-11-04_Hieranoid_2_P"
+        },
+        {
+          "label": "InParanoid_Xenfix",
+          "dataset_orig_id": "QfO:2020-11-04_InParanoid_Xenfix_P"
+        },
+        {
+          "label": "Domainoid+",
+          "dataset_orig_id": "QfO:2020-11-04_Domainoid+_P"
+        },
+        {
+          "label": "OMA_Groups",
+          "dataset_orig_id": "QfO:2020-11-04_OMA_Groups_P"
+        },
+        {
+          "label": "OMA_Pairs",
+          "dataset_orig_id": "QfO:2020-11-04_OMA_Pairs_P"
+        },
+        {
+          "label": "sonicparanoid-sens",
+          "dataset_orig_id": "QfO:2020-11-04_sonicparanoid-sens_P"
+        },
+        {
+          "label": "PANTHER_16_all",
+          "dataset_orig_id": "QfO:2020-11-04_PANTHER_16_all_P"
+        },
+        {
+          "label": "sonicparanoid-fast",
+          "dataset_orig_id": "QfO:2020-11-04_sonicparanoid-fast_P"
+        },
+        {
+          "label": "PANTHER__16__LDO__only",
+          "dataset_orig_id": "QfO:2020-11-04_PANTHER__16__LDO__only_P"
+        },
+        {
+          "label": "sonicparanoid-mostsensitive",
+          "dataset_orig_id": "QfO:2020-11-04_sonicparanoid-mostsensitive_P"
+        },
+        {
+          "label": "sonicparanoid",
+          "dataset_orig_id": "QfO:2020-11-04_sonicparanoid_P"
+        },
+        {
+          "label": "OrthoInspector 3",
+          "dataset_orig_id": "QfO:2020-11-04_OrthoInspectorQFO2020_P"
+        },
+        {
+          "label": "Ensembl_Compara",
+          "dataset_orig_id": "QfO:2020-11-04_Ensembl_Compara_P"
+        },
+        {
+          "label": "OMA_GETHOGs",
+          "dataset_orig_id": "QfO:2020-11-04_OMA_GETHOGs_P"
+        },
+        {
+          "label": "RSD",
+          "dataset_orig_id": "QfO:2020-11-04_RSD_P"
+        },
+        {
+          "label": "BBH",
+          "dataset_orig_id": "QfO:2020-11-04_BBH_P"
+        },
+        {
+          "label": "MetaPhOrs_v.2.5",
+          "dataset_orig_id": "QfO:2020-11-04_MetaPhOrs_v.2.5_P"
+        },
+        {
+          "label": "phylomedb_v5",
+          "dataset_orig_id": "QfO:2020-11-04_phylomedb_v5_P"
+        },
+        {
+          "label": "SonicParanoid2-g",
+          "dataset_orig_id": "QfO:2020-11-04_SonicParanoid2-g_P"
+        },
+        {
+          "label": "SonicParanoid2",
+          "dataset_orig_id": "QfO:2020-11-04_SonicParanoid2_P"
+        },
+        {
+          "label": "SonicParanoid2-sens",
+          "dataset_orig_id": "QfO:2020-11-04_SonicParanoid2-sens_P"
+        },
+        {
+          "label": "SonicParanoid2-fast-g",
+          "dataset_orig_id": "QfO:2020-11-04_SonicParanoid2-fast-g_P"
+        },
+        {
+          "label": "SonicParanoid2-fast",
+          "dataset_orig_id": "QfO:2020-11-04_SonicParanoid2-fast_P"
+        },
+        {
+          "label": "SonicParanoid2-sens-g",
+          "dataset_orig_id": "QfO:2020-11-04_SonicParanoid2-sens-g_P"
+        },
+        {
+          "label": "Proteinortho_v5.16b",
+          "dataset_orig_id": "QfO:2020-11-04_Proteinortho_v5.16b_P"
+        },
+        {
+          "label": "Proteinortho_v6.3.0_pseudo_default",
+          "dataset_orig_id": "QfO:2020-11-04_Proteinortho_v6.3.0_pseudo_default_P"
+        }
+      ]
+    }
+  },
+  "challenge_ids": [
+    "OEBX002000000S"
+  ],
+  "dataset_contact_ids": [
+    "Christophe.Dessimoz",
+    "Adrian.Altenhoff"
+  ],
+  "dates": {
+    "creation": "2021-04-26T16:29:12Z",
+    "modification": "2023-08-09T09:24:14Z",
+    "public": null
+  },
+  "depends_on": {
+    "metrics_id": "OEBM0020000000",
+    "tool_id": "OEBT0020000002",
+    "rel_dataset_ids": [
+      {
+        "dataset_id": "OEBD00200001R6"
+      },
+      {
+        "dataset_id": "OEBD00200001SD"
+      },
+      {
+        "dataset_id": "OEBD00200001US"
+      },
+      {
+        "dataset_id": "OEBD00200001X1"
+      },
+      {
+        "dataset_id": "OEBD00200001YB"
+      },
+      {
+        "dataset_id": "OEBD0020000219"
+      },
+      {
+        "dataset_id": "OEBD002000020P"
+      },
+      {
+        "dataset_id": "OEBD002000026J"
+      },
+      {
+        "dataset_id": "OEBD002000026L"
+      },
+      {
+        "dataset_id": "OEBD002000026H"
+      },
+      {
+        "dataset_id": "OEBD002000026K"
+      },
+      {
+        "dataset_id": "OEBD002000026I"
+      },
+      {
+        "dataset_id": "OEBD002000024X"
+      },
+      {
+        "dataset_id": "OEBD00200002CD"
+      },
+      {
+        "dataset_id": "OEBD00200002D8"
+      },
+      {
+        "dataset_id": "OEBD00200002F7"
+      },
+      {
+        "dataset_id": "OEBD00200002HC"
+      },
+      {
+        "dataset_id": "OEBD00200002GK"
+      },
+      {
+        "dataset_id": "OEBD00200002IK"
+      },
+      {
+        "dataset_id": "OEBD00200002JY"
+      },
+      {
+        "dataset_id": "OEBD00200002MP"
+      },
+      {
+        "dataset_id": "OEBD00200002NP"
+      },
+      {
+        "dataset_id": "OEBD00200002OJ"
+      },
+      {
+        "dataset_id": "OEBD00200002Q4"
+      },
+      {
+        "dataset_id": "OEBD00200002RG"
+      },
+      {
+        "dataset_id": "OEBD00200002SE"
+      },
+      {
+        "dataset_id": "OEBD002000031C"
+      },
+      {
+        "dataset_id": "OEBD002000032E"
+      },
+      {
+        "dataset_id": "OEBD00200001R8"
+      },
+      {
+        "dataset_id": "OEBD00200001SF"
+      },
+      {
+        "dataset_id": "OEBD00200001UU"
+      },
+      {
+        "dataset_id": "OEBD00200001X3"
+      },
+      {
+        "dataset_id": "OEBD00200001YA"
+      },
+      {
+        "dataset_id": "OEBD0020000218"
+      },
+      {
+        "dataset_id": "OEBD002000020R"
+      },
+      {
+        "dataset_id": "OEBD002000026G"
+      },
+      {
+        "dataset_id": "OEBD0020000268"
+      },
+      {
+        "dataset_id": "OEBD002000024Z"
+      },
+      {
+        "dataset_id": "OEBD002000026A"
+      },
+      {
+        "dataset_id": "OEBD002000026C"
+      },
+      {
+        "dataset_id": "OEBD002000026E"
+      },
+      {
+        "dataset_id": "OEBD00200002CF"
+      },
+      {
+        "dataset_id": "OEBD00200002DA"
+      },
+      {
+        "dataset_id": "OEBD00200002F6"
+      },
+      {
+        "dataset_id": "OEBD00200002GM"
+      },
+      {
+        "dataset_id": "OEBD00200002HB"
+      },
+      {
+        "dataset_id": "OEBD00200002IM"
+      },
+      {
+        "dataset_id": "OEBD00200002K0"
+      },
+      {
+        "dataset_id": "OEBD00200002MR"
+      },
+      {
+        "dataset_id": "OEBD00200002NR"
+      },
+      {
+        "dataset_id": "OEBD00200002OL"
+      },
+      {
+        "dataset_id": "OEBD00200002Q6"
+      },
+      {
+        "dataset_id": "OEBD00200002RI"
+      },
+      {
+        "dataset_id": "OEBD00200002SG"
+      },
+      {
+        "dataset_id": "OEBD002000031E"
+      },
+      {
+        "dataset_id": "OEBD002000032G"
+      }
+    ]
+  }
+}
