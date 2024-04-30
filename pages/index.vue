@@ -27,7 +27,7 @@
       <b-col cols="12" sm="10" md="12">
         <transition name="fade">
           <!--  -->
-          <ScatterPlot v-if="isScatterPlotType" :inline_data="inline_data" :datasetId="datasetId" />
+          <!-- <ScatterPlot v-if="isScatterPlotType" :inline_data="inline_data" :datasetId="datasetId" /> -->
           <BarPlot v-if="isBarPlotType" :jsonData="fetchedData" />
         </transition>
       </b-col>
@@ -35,6 +35,7 @@
     </b-row>
     <b-row>
       <TestStore></TestStore>
+      <TestAxios></TestAxios>
 
     </b-row>
     <br>
@@ -55,6 +56,7 @@ Vue.use(IconsPlugin)
 import BarPlot from '~/components/BarPlot.vue';
 import ScatterPlot from '~/components/ScatterPlot.vue';
 import TestStore from '~/components/TestStore.vue';
+import TestAxios from '~/components/TestAxios.vue';
 
 
 export default {
@@ -80,7 +82,7 @@ export default {
     }, 1000);
 
     // Fetch your data
-    const response = await fetch('/raw_data_OEBD00200002V20.json'); //endpoint to db rest to cofigure
+    const response = await fetch('/raw_data_OEBD00200001VF0.json'); //endpoint to db rest to cofigure
     this.fetchedData = await response.json();
     this.inline_data = this.fetchedData.datalink.inline_data
     this.datasetId = this.fetchedData._id
