@@ -4,26 +4,32 @@ import axios from 'axios';
 export default () => {
   return new Vuex.Store({
     state: () => ({
-      count: 0,
-      datasets: [],
+      metrics: [], // Agregamos un nuevo array para almacenar las métricas
     }),
     mutations: {
-      increment(state) {
-        state.count++;
-      },
-      setDatasets(state, datasets) {
-        state.datasets = datasets;
+      setMetrics(state, metrics) { // Mutación para actualizar las métricas
+        state.metrics = metrics;
       },
     },
     actions: {
-      async fetchDatasets({ commit }) {
+      async fetchMetrics({ commit }) {
         try {
-          // Realizar una solicitud GET a la API para obtener datasets
-          const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
-          // Actualizar el estado con los datos obtenidos
-          commit('setDatasets', response.data);
+          const response = await axios.post('https://openebench.bsc.es/sciapi/graphql', {
+            query: `
+              query getMetrics {
+                getMetrics {
+                  _id
+                  title
+                  _metadata
+                  representation_hints
+                }
+              }
+            `
+          });
+          // Actualizamos el estado con las métricas obtenidas
+          commit('setMetrics', response.data.data.getMetrics);
         } catch (error) {
-          console.error('Error al obtener datasets:', error);
+          console.error('Error to get metrics:', error);
         }
       },
     },
