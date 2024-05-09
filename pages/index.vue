@@ -2,24 +2,6 @@
   <b-container fluid class="pl-5 pr-5">
     <b-row>
       <b-col cols="12" sm="10" md="12">
-        <h1 class="mt-3">
-          OEB Widgets Development
-        </h1>
-      </b-col>
-
-      <b-col cols="12" sm="10" md="12">
-        <b-alert show variant="light" class="border-alert"> 🚧 Widgets under construction 🚧</b-alert>
-      </b-col>
-    </b-row>
-
-    <b-row>
-      <b-col cols="12" sm="10" md="12">
-        <h3>Component Visualization &#8594; {{ visualizationType }}</h3>
-      </b-col>
-    </b-row>
-
-    <b-row>
-      <b-col cols="12" sm="10" md="12">
         <transition name="fade" v-if="!loading">
           <component :is="currentPlotComponent" v-if="currentPlotComponent" :preparedData="preparedData"/>
         </transition>
@@ -59,16 +41,7 @@ export default {
       preparedData: null,
       visualizationType: null, 
       metrics: [],
-      fetchedData: null, // Eliminar al finalizar las pruebas
     }
-  },
-  // Mounted solo esta para probar la funcion fetchDataAndRender.
-  async mounted() {
-    // Obtén tus datos de prueba
-    const response = await fetch('/raw_data_OEBD00200002UK0.json');
-    // const response = await fetch('/OEBD00700000NI.json');
-    this.fetchedData = await response.json();
-    this.loadWidgetVisualization(this.fetchedData)
   },
   methods: {
     // loadWidgetVisualization
