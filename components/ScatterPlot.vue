@@ -25,11 +25,11 @@
             <b-dropdown text="Download" variant="outline-secondary" class=" button-download">
               <b-dropdown-text class="font-weight-bold text-download"><strong>Select a
                       format:</strong></b-dropdown-text>
-              <b-dropdown-item @click="downloadChart('png')"> PNG </b-dropdown-item>
-              <b-dropdown-item @click="downloadChart('pdf')"> PDF </b-dropdown-item>
-              <b-dropdown-item @click="downloadChart('svg')"> SVG (only plot) </b-dropdown-item>
+              <b-dropdown-item @click="downloadChart('png', datasetId)"> PNG </b-dropdown-item>
+              <b-dropdown-item @click="downloadChart('pdf', datasetId)"> PDF </b-dropdown-item>
+              <b-dropdown-item @click="downloadChart('svg', datasetId)"> SVG (only plot) </b-dropdown-item>
               <b-dropdown-divider></b-dropdown-divider>
-              <b-dropdown-item @click="downloadChart('json')"> JSON (raw data)</b-dropdown-item>
+              <b-dropdown-item @click="downloadChart('json', datasetId)"> JSON (raw data)</b-dropdown-item>
             </b-dropdown>
 
           </b-button-group>
@@ -100,6 +100,8 @@
 import { defineProps } from 'vue';
 import { onMounted, ref, computed } from 'vue';
 import * as statistics from 'simple-statistics';
+
+// REQUIREMENTS
 var clusterMaker = require('clusters');
 const pf = require('pareto-frontier');
 const html2canvas = require('html2canvas');
@@ -107,19 +109,17 @@ const { jsPDF } = require('jspdf');
 
 // PROPS
 const props = defineProps({
-  inline_data: {
+  preparedData: {
   type: Object,
   required: true
 },
-datasetId: {
-  type: String,
-  required: true
-}
 });
 
 // GLOBAL CONSTANTES
 // ----------------------------------------------------------------
 const data = ref(null);
+const datasetId = ref(null);
+
 const dataPoints = ref([]);
 const paretoPoints = ref([]);
 const optimalXaxis = ref(null);
@@ -161,7 +161,8 @@ const viewDiagonal = ref(false);
 
 onMounted(async () => {
   const Plotly = require('plotly.js-dist');
-  data.value = props.inline_data
+  data.value = props.preparedData.inline_data
+  datasetId.value = data.value._id
   const visualization = data.value.visualization
 
 
@@ -1352,7 +1353,7 @@ const sortByKey = (array, key) => {
 
 // DOWNLOAD
 // ----------------------------------------------------------------
-const downloadChart = async (format) => {
+const downloadChart = async (format, datasetId) => {
   const Plotly = require('plotly.js-dist');
   const chart = document.getElementById('scatter-plot');
   chart.layout.images[0].opacity = 0.5;
@@ -1371,7 +1372,7 @@ const downloadChart = async (format) => {
 
         const link = document.createElement('a');
         link.href = downloadImage;
-        link.download = `benchmarking_chart_${props.datasetId}.${format}`;
+        link.download = `benchmarking_chart_${datasetId}.${format}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -1381,7 +1382,7 @@ const downloadChart = async (format) => {
         .then((url) => {
           const link = document.createElement('a');
           link.href = url;
-          link.download = `benchmarking_chart_${props.datasetId}.${format}`;
+          link.download = `benchmarking_chart_${datasetId}.${format}`;
           link.click();
         })
         .catch((error) => {
@@ -1395,7 +1396,7 @@ const downloadChart = async (format) => {
       .then((url) => {
         const link = document.createElement('a');
         link.href = url;
-        link.download = `benchmarking_chart_${props.datasetId}.${format}`;
+        link.download = `benchmarking_chart_${datasetId}.${format}`;
         link.click();
       })
       .catch((error) => {
@@ -1432,7 +1433,7 @@ const downloadChart = async (format) => {
     }
 
     // Save the PDF
-    pdf.save(`benchmarking_chart_${props.datasetId}.${format}`);
+    pdf.save(`benchmarking_chart_${datasetId}.${format}`);
 
   } else if (format === 'json') {
     // Descargar como JSON
@@ -1442,7 +1443,7 @@ const downloadChart = async (format) => {
 
     const link = document.createElement('a');
     link.href = `data:text/json;charset=utf-8,${encodeURIComponent(jsonData)}`;
-    link.download = `${props.datasetId}.json`;
+    link.download = `${datasetId}.json`;
     link.click();
   } else {
     console.error('Error downloading chart:', error);
@@ -1629,7 +1630,7 @@ html {
 }
 
 .table-container {
-  max-height: 700px;
+  max-height: 850px; /* Height layout of Scatter */
   overflow-y: auto;
   font-size: 1.1rem;
 }

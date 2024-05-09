@@ -91,17 +91,26 @@
 </template>
 
 <script setup>
+// IMPORTS 
 import { onBeforeMount, ref, watch } from 'vue';
 import { computed } from 'vue';
+import 'jspdf-autotable';
 
-
+// REQUIREMENTS
 const html2canvas = require('html2canvas');
 const { jsPDF } = require('jspdf');
 
-import 'jspdf-autotable';
 
 // DATA RETRIEVE
-const props = defineProps(['jsonData'])
+const props = defineProps({
+  preparedData: {
+  type: Object,
+  required: true
+},
+});
+
+// const data = ref(null);
+const dates = ref(null);
 
 const layout = ref(null)
 const loading = ref(false);
@@ -132,13 +141,15 @@ onBeforeMount(async () => {
   loading.value = true;
 
   // Dataset values
-  dataset.value = await props.jsonData
-  const data = dataset.value.datalink.inline_data;
+  // dataset.value = await props.jsonData
+  // const data = dataset.value.datalink.inline_data;
+  const data = props.preparedData.inline_data
+  datasetId.value = await props.preparedData._id
+  dates.value = await props.preparedData.dates
 
   const visualization = data.visualization
-  datasetId.value = dataset.value._id;
-  datasetDate.value = dataset.value.dates.modification;
-  datasetPolarity.value = dataset.value.datalink.inline_data.visualization.better;
+  datasetDate.value = dates.value.modification;
+  datasetPolarity.value = data.visualization.better;
   formattedDate.value = formatDateString(datasetDate.value); // Format the date
 
   // Save original data for future use
