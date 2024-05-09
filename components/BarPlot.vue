@@ -6,23 +6,27 @@
           <!-- Buttons -->
           <b-button-group class="ml-auto">
             <!-- Button Sort -->
-            <b-button squared variant="outline-secondary" v-if="sortOrder === 'raw'" @click="toggleSortOrder"
-              :disabled="loading">
+            <b-button variant="outline-secondary" v-if="sortOrder === 'raw'" @click="toggleSortOrder"
+              :disabled="loading" class="fontSizeBtn button-classify">
               Sort & Classify Data
             </b-button>
-            <b-button squared variant="outline-secondary" v-else @click="toggleSortOrder" :disabled="loading">
+            <b-button squared variant="outline-secondary" v-else @click="toggleSortOrder" :disabled="loading" 
+            class="fontSizeBtn button-classify">
               Return To Raw Results
             </b-button>
             <!-- Button Optimal -->
             <b-button squared variant="outline-secondary" v-if="optimal === 'no'" :disabled="loading"
-              @click="optimalView">
+              @click="optimalView" class="fontSizeBtn button-resetView">
               Optimal View
             </b-button>
-            <b-button squared variant="outline-secondary" v-else :disabled="loading" @click="optimalView">
+            <b-button squared variant="outline-secondary" v-else :disabled="loading" @click="optimalView" class="fontSizeBtn button-resetView">
               Reset View
             </b-button>
             <!-- Button Download -->
-            <b-dropdown variant="outline-secondary" right text="Download" :disabled="loading">
+            <b-dropdown variant="outline-secondary" right :disabled="loading" class="button-download">
+              <template #button-content >
+                <span class="fontSizeBtn">Download</span>
+              </template>
               <b-dropdown-header id="dropdown-header-label">Select a format</b-dropdown-header>
               <b-dropdown-item @click="downloadChart('png')">PNG</b-dropdown-item>
               <b-dropdown-item @click="downloadChart('svg')">SVG (only plot)</b-dropdown-item>
@@ -180,7 +184,7 @@ onBeforeMount(async () => {
     height: 800,
     xaxis: {
       title: {
-        text: 'TOOLS',
+        text: 'Participants',
         standoff: 30,
         font: {
           family: 'Arial, sans-serif',
@@ -897,6 +901,21 @@ function formatDateString(dateString) {
   z-index: 1
 }
 
+.fontSizeBtn{
+  font-size: 18px;
+}
+
+.button-classify {
+  width: 210px;
+}
+
+.button-resetView {
+  width: 140px;
+}
+
+.button-download {
+  width: 168px;
+}
 .plot-container {
   position: relative;
   margin-bottom: 20px;

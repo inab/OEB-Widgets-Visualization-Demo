@@ -6,8 +6,10 @@
         <div v-if="data" class="butns">
           <b-button-group class="ml-auto">
             <!-- Classification -->
-            <b-dropdown :text="classificationButtonText" variant="outline-secondary"
-              class="button-classification">
+            <b-dropdown variant="outline-secondary" class="button-classification">
+              <template #button-content >
+                <span class="fontSizeBtn">{{classificationButtonText}}</span>
+              </template>
               <b-dropdown-text class="font-weight-bold text-classifi"><strong>Select a Classification
                       method:</strong></b-dropdown-text>
               <b-dropdown-item @click="noClassification"> No Classification </b-dropdown-item>
@@ -17,12 +19,15 @@
             </b-dropdown>
 
             <!-- Reset View / optimal view -->
-            <b-button @click="toggleView" variant="outline-secondary" right class=" button-resetView">
+            <b-button @click="toggleView" variant="outline-secondary" right class="button-resetView fontSizeBtn">
               {{ viewButtonText }}
             </b-button>
 
             <!-- Button Dowloand -->
-            <b-dropdown text="Download" variant="outline-secondary" class=" button-download">
+            <b-dropdown variant="outline-secondary" class="button-download">
+              <template #button-content >
+                <span class="fontSizeBtn">Download</span>
+              </template>
               <b-dropdown-text class="font-weight-bold text-download"><strong>Select a
                       format:</strong></b-dropdown-text>
               <b-dropdown-item @click="downloadChart('png', datasetId)"> PNG </b-dropdown-item>
@@ -263,7 +268,7 @@ onMounted(async () => {
         text: visualization.x_axis,
         font: {
           family: 'Arial, sans-serif',
-          size: 16,
+          size: 18,
           color: 'black',
           weight: 'bold',
         },
@@ -274,13 +279,13 @@ onMounted(async () => {
         text: visualization.y_axis,
         font: {
           family: 'Arial, sans-serif',
-          size: 16,
+          size: 18,
           color: 'black',
           weight: 'bold',
         },
       },
     },
-    margin: { l: 50, r: 50, t: 80, b: 20, pad: 4 },
+    margin: { l: 60, r: 50, t: 80, b: 20, pad: 4 },
     legend: {
       orientation: 'h',
       x: 0,
@@ -1588,7 +1593,7 @@ function getSymbol() {
 
 <style scoped lang="css">
 html {
-  font-size: 16px; /* Por ejemplo, 16px */
+  font-size: 18px; /* Por ejemplo, 16px */
 }
 .butns {
   position: absolute;
@@ -1597,8 +1602,12 @@ html {
   z-index: 1;
 }
 
+.fontSizeBtn{
+  font-size: 18px;
+}
+
 .button-classification {
-  width: 190px;
+  width: 210px;
 }
 
 .button-resetView {

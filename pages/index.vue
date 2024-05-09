@@ -65,13 +65,14 @@ export default {
   // Mounted solo esta para probar la funcion fetchDataAndRender.
   async mounted() {
     // Obtén tus datos de prueba
-    const response = await fetch('/raw_data_OEBD00200001VF0.json');
+    const response = await fetch('/raw_data_OEBD00200002UK0.json');
     // const response = await fetch('/OEBD00700000NI.json');
     this.fetchedData = await response.json();
-    this.fetchDataAndRender(this.fetchedData)
+    this.loadWidgetVisualization(this.fetchedData)
   },
   methods: {
-    async fetchDataAndRender(data) {
+    // loadWidgetVisualization
+    async loadWidgetVisualization(data) {
       // Sets charging status based on data presence
       this.loading = !data;
       let visualization = data.datalink.inline_data.visualization
@@ -132,7 +133,6 @@ export default {
         return null;
       }
 
-      
       // Check the display type and set the corresponding status
       if (visualization && type) {
         this.visualizationType = type;
