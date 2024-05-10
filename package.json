@@ -10,9 +10,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/inab/OEB-Widgets-Visualization-Demo/tree/OEB-Widgets"
+    "url": "git+https://github.com/inab/OEB-Widgets-Visualization-Demo.git#OEB-Widgets"
   },
-  "keywords": ["nuxt", "OEB"],
+  "keywords": [
+    "nuxt",
+    "OEB"
+  ],
   "author": "Ani Valle & Andrea Morales",
   "license": "ISC",
   "dependencies": {
