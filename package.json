@@ -1,7 +1,7 @@
 {
   "name": "oeb-widgets",
   "version": "1.0.0",
-  "main": "widgetUtils.js",
+  "main": "utils/widgetUtils.js",
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build",
