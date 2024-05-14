@@ -4,6 +4,7 @@
       <b-col cols="12" sm="10" md="12">
         <transition name="fade" v-if="!loading">
           <component :is="currentPlotComponent" v-if="currentPlotComponent" :preparedData="preparedData"/>
+          <ScatterPlot v-if="type" :preparedData="preparedData"></ScatterPlot>
         </transition>
         <div v-else class="spinner-container">
           <b-spinner type="grow" label="Loading..." style="width: 3rem; height: 3rem; color: #0b579f;"></b-spinner>
@@ -22,7 +23,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import Vue from 'vue';
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
-import { loadWidgetVisualization, getMetricsNames } from '~/utils/widgetUtils'; // Importa las funciones necesarias
+import { loadWidgetVisualization, test, greet, widgetUtils } from '~/src/widgetUtils'; // Importa las funciones necesarias
 
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
@@ -41,18 +42,18 @@ export default {
       preparedData: null,
       visualizationType: null, 
       metrics: [],
+      type: null
     };
   },
   methods: {
-    // loadWidgetVisualization permanece aquí
-    async loadWidgetVisualization(data) {
-      await loadWidgetVisualization.call(this, data); // Utiliza la función desde widgetUtils.js
+    loadWidgetData(data) {
+      this.type = loadWidgetVisualization.call(this, data);
+      console.log('loadedWidgetVisualization')
     },
-    // getMetricsNames permanece aquí
-    async getMetricsNames(metric_x, metric_y) {
-      return await getMetricsNames.call(this, metric_x, metric_y); // Utiliza la función desde widgetUtils.js
-    },
-    // Otros métodos
+  },
+  mounted (){
+    greet()
+    // this.loadWidgetData(data);
   },
   computed: {
     // Calcula el componente de visualización a mostrar
