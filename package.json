@@ -1,13 +1,13 @@
 {
-  "name": "scatterplot-visualization",
-  "version": "1.0.4",
+  "name": "oeb-chart-visualizer",
+  "version": "1.0.1",
   "main": "dist/index.js",
   "scripts": {
     "build": "webpack"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/inab/OEB-Widgets-Visualization-Demo/tree/ScatterPlot-Visualizer"
+    "url": "git+https://github.com/inab/OEB-Widgets-Visualization-Demo/tree/oeb-chart-visualizer"
   },
   "keywords": [
     "nuxt",

@@ -6,6 +6,7 @@ module.exports = {
     entry: {
         index: './src/widgetUtils.js',
         ScatterPlot: './components/ScatterPlot.vue',
+        BarPlot: './components/BarPlot.vue',
         test: './components/test.vue',
 
     },
@@ -14,7 +15,7 @@ module.exports = {
         filename: '[name].js',
         libraryTarget: 'umd',
         globalObject: 'this',
-        library: 'oeb-Widgets',
+        library: 'oeb-chart-visualizer',
     },
     module: {
       rules: [

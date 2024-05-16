@@ -1,4 +1,5 @@
-# test-widget
+# OpenEBench Chart Visualizer
+---
 
 ## Build Setup
 
