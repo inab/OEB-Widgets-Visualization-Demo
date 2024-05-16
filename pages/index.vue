@@ -3,7 +3,6 @@
     <b-row>
       <b-col cols="12" sm="10" md="12">
         <transition name="fade" v-if="!loading">
-          <component :is="currentPlotComponent" v-if="currentPlotComponent" :preparedData="preparedData"/>
           <ScatterPlot v-if="type" :preparedData="preparedData"></ScatterPlot>
         </transition>
         <div v-else class="spinner-container">
@@ -23,51 +22,36 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import Vue from 'vue';
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
-import { loadWidgetVisualization, test, greet, widgetUtils } from '~/src/widgetUtils'; // Importa las funciones necesarias
-
+import { loadWidgetVisualization, test, greet } from '~/src/widgetUtils';
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
 
-import BarPlot from '~/components/BarPlot.vue';
-import ScatterPlot from '~/components/ScatterPlot.vue';
+import ScatterPlot from './components/ScatterPlot.vue';
 
 export default {
   name: 'IndexPage',
   components: {
-    BarPlot, ScatterPlot
+    ScatterPlot
   },
   data() {
     return {
       loading: true,
       preparedData: null,
-      visualizationType: null, 
-      metrics: [],
       type: null
     };
   },
   methods: {
     loadWidgetData(data) {
-      this.type = loadWidgetVisualization.call(this, data);
-      console.log('loadedWidgetVisualization')
+      this.type, this.preparedData = loadWidgetVisualization.call(this, data);
+      console.log('loadedWidgetVisualization');
+      console.log('loadedWidgetVisualization '+ this.type);
+
     },
   },
   mounted (){
     greet()
-    // this.loadWidgetData(data);
+    this.loadWidgetData(data);
   },
-  computed: {
-    // Calcula el componente de visualización a mostrar
-    currentPlotComponent() {
-      if (this.visualizationType === 'bar-plot') {
-        return BarPlot;
-      } else if (this.visualizationType === '2D-plot') {
-        return ScatterPlot;
-      } else {
-        // Puedes agregar más tipos de visualización aquí si es necesario
-        return null;
-      }
-    }
-  }
 }
 </script>
 

@@ -1591,7 +1591,7 @@ function getSymbol() {
 </script>
 
 
-<style scoped lang="css">
+<style scoped>
 html {
   font-size: 18px; /* Por ejemplo, 16px */
 }
