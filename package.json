@@ -1,34 +1,18 @@
 {
-  "name": "oeb-widgets",
-  "version": "1.0.0",
+  "name": "widget-vue3",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "nuxt",
-    "build": "nuxt build",
-    "start": "nuxt start",
-    "generate": "nuxt generate"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.36",
-    "bootstrap": "^4.6.2",
-    "bootstrap-vue": "^2.22.0",
-    "clusters": "^0.0.4",
-    "core-js": "^3.25.3",
-    "html2canvas": "^1.4.1",
-    "jspdf": "^2.5.1",
-    "jspdf-autotable": "^3.8.2",
-    "lodash": "^4.17.21",
-    "nuxt": "^2.15.8",
-    "pareto-frontier": "^1.1.1",
-    "plotly.js-dist": "^2.27.1",
-    "simple-statistics": "^7.8.3",
-    "vue": "^2.7.10",
-    "vue-server-renderer": "^2.7.10",
-    "vue-template-compiler": "^2.7.10"
+    "vue": "^3.4.29"
   },
   "devDependencies": {
-    "@fortawesome/free-brands-svg-icons": "^6.5.1",
-    "@fortawesome/free-solid-svg-icons": "^6.5.1",
-    "@nuxtjs/fontawesome": "^1.1.2"
+    "@vitejs/plugin-vue": "^5.0.5",
+    "vite": "^5.3.1"
   }
 }
